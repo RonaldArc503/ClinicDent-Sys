@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.11.35431.28
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClinicDent", "ClinicDent\ClinicDent.csproj", "{C69DEE33-72FB-4888-BF3A-EBEC60171730}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClinicDent.Tests", "ClinicDent.Tests\ClinicDent.Tests.csproj", "{970C9C1E-04B9-407C-A57E-35D552A16401}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C69DEE33-72FB-4888-BF3A-EBEC60171730}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C69DEE33-72FB-4888-BF3A-EBEC60171730}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C69DEE33-72FB-4888-BF3A-EBEC60171730}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C69DEE33-72FB-4888-BF3A-EBEC60171730}.Release|Any CPU.Build.0 = Release|Any CPU
+		{970C9C1E-04B9-407C-A57E-35D552A16401}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{970C9C1E-04B9-407C-A57E-35D552A16401}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{970C9C1E-04B9-407C-A57E-35D552A16401}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{970C9C1E-04B9-407C-A57E-35D552A16401}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {1D81E395-4885-441D-B3AB-0CB5CE5B0586}
+	EndGlobalSection
+EndGlobal
