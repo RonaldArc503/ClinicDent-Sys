@@ -24,11 +24,9 @@ namespace ClinicDent.Models
         public int id_paciente { get; set; }
         public string nombre { get; set; }
         public string apellido { get; set; }
-        public System.DateTime fecha_nacimiento { get; set; }
         public string telefono { get; set; }
         public string correo { get; set; }
         public string direccion { get; set; }
-        public string alergias { get; set; }
         public bool activo { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]

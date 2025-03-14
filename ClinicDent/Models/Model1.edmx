@@ -9,7 +9,7 @@
           <Key>
             <PropertyRef Name="id_cita" />
           </Key>
-          <Property Name="id_cita" Type="int" Nullable="false" />
+          <Property Name="id_cita" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="id_paciente" Type="int" Nullable="false" />
           <Property Name="id_dentista" Type="int" Nullable="false" />
           <Property Name="fecha_hora" Type="datetime" Nullable="false" />
@@ -27,7 +27,7 @@
           <Key>
             <PropertyRef Name="id_consulta" />
           </Key>
-          <Property Name="id_consulta" Type="int" Nullable="false" />
+          <Property Name="id_consulta" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="id_cita" Type="int" Nullable="false" />
           <Property Name="id_dentista" Type="int" Nullable="false" />
           <Property Name="id_paciente" Type="int" Nullable="false" />
@@ -39,7 +39,7 @@
           <Key>
             <PropertyRef Name="id_dentista" />
           </Key>
-          <Property Name="id_dentista" Type="int" Nullable="false" />
+          <Property Name="id_dentista" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="nombre" Type="varchar" MaxLength="100" Nullable="false" />
           <Property Name="apellido" Type="varchar" MaxLength="100" Nullable="false" />
           <Property Name="telefono" Type="varchar" MaxLength="15" Nullable="false" />
@@ -51,7 +51,7 @@
           <Key>
             <PropertyRef Name="id_historial" />
           </Key>
-          <Property Name="id_historial" Type="int" Nullable="false" />
+          <Property Name="id_historial" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="id_consulta" Type="int" Nullable="false" />
           <Property Name="fecha_registro" Type="datetime" Nullable="false" />
           <Property Name="tipo" Type="varchar" MaxLength="20" Nullable="false" />
@@ -60,7 +60,7 @@
           <Key>
             <PropertyRef Name="id_historial_pago" />
           </Key>
-          <Property Name="id_historial_pago" Type="int" Nullable="false" />
+          <Property Name="id_historial_pago" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="id_pago" Type="int" Nullable="false" />
           <Property Name="estado" Type="varchar" MaxLength="20" Nullable="false" />
         </EntityType>
@@ -68,7 +68,7 @@
           <Key>
             <PropertyRef Name="id_inventario" />
           </Key>
-          <Property Name="id_inventario" Type="int" Nullable="false" />
+          <Property Name="id_inventario" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="id_material" Type="int" Nullable="false" />
           <Property Name="fecha_actualizacion" Type="date" Nullable="false" />
         </EntityType>
@@ -76,7 +76,7 @@
           <Key>
             <PropertyRef Name="id_material" />
           </Key>
-          <Property Name="id_material" Type="int" Nullable="false" />
+          <Property Name="id_material" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="nombre" Type="varchar" MaxLength="100" Nullable="false" />
           <Property Name="cantidad" Type="int" Nullable="false" />
           <Property Name="proveedor" Type="varchar" MaxLength="100" />
@@ -89,21 +89,19 @@
           <Key>
             <PropertyRef Name="id_paciente" />
           </Key>
-          <Property Name="id_paciente" Type="int" Nullable="false" />
+          <Property Name="id_paciente" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="nombre" Type="varchar" MaxLength="100" Nullable="false" />
           <Property Name="apellido" Type="varchar" MaxLength="100" Nullable="false" />
-          <Property Name="fecha_nacimiento" Type="date" Nullable="false" />
           <Property Name="telefono" Type="varchar" MaxLength="15" Nullable="false" />
           <Property Name="correo" Type="varchar" MaxLength="100" Nullable="false" />
           <Property Name="direccion" Type="text" Nullable="false" />
-          <Property Name="alergias" Type="nvarchar" MaxLength="255" Nullable="false" />
           <Property Name="activo" Type="bit" Nullable="false" />
         </EntityType>
         <EntityType Name="Pagos">
           <Key>
             <PropertyRef Name="id_pago" />
           </Key>
-          <Property Name="id_pago" Type="int" Nullable="false" />
+          <Property Name="id_pago" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="id_cita" Type="int" Nullable="false" />
           <Property Name="fecha_pago" Type="datetime" Nullable="false" />
           <Property Name="monto" Type="decimal" Precision="10" Scale="2" Nullable="false" />
@@ -113,14 +111,14 @@
           <Key>
             <PropertyRef Name="id_rol" />
           </Key>
-          <Property Name="id_rol" Type="int" Nullable="false" />
+          <Property Name="id_rol" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="rol" Type="varchar" MaxLength="100" Nullable="false" />
         </EntityType>
         <EntityType Name="Tratamientos">
           <Key>
             <PropertyRef Name="id_tratamiento" />
           </Key>
-          <Property Name="id_tratamiento" Type="int" Nullable="false" />
+          <Property Name="id_tratamiento" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="nombre" Type="varchar" MaxLength="100" Nullable="false" />
           <Property Name="descripcion" Type="text" Nullable="false" />
           <Property Name="costo" Type="decimal" Precision="10" Scale="2" Nullable="false" />
@@ -131,7 +129,7 @@
           <Key>
             <PropertyRef Name="id_usuario" />
           </Key>
-          <Property Name="id_usuario" Type="int" Nullable="false" />
+          <Property Name="id_usuario" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="nombre" Type="varchar" MaxLength="100" Nullable="false" />
           <Property Name="apellido" Type="varchar" MaxLength="100" Nullable="false" />
           <Property Name="correo" Type="varchar" MaxLength="100" Nullable="false" />
@@ -355,7 +353,7 @@
           <Key>
             <PropertyRef Name="id_cita" />
           </Key>
-          <Property Name="id_cita" Type="Int32" Nullable="false" />
+          <Property Name="id_cita" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="id_paciente" Type="Int32" Nullable="false" />
           <Property Name="id_dentista" Type="Int32" Nullable="false" />
           <Property Name="fecha_hora" Type="DateTime" Nullable="false" Precision="3" />
@@ -370,7 +368,7 @@
           <Key>
             <PropertyRef Name="id_consulta" />
           </Key>
-          <Property Name="id_consulta" Type="Int32" Nullable="false" />
+          <Property Name="id_consulta" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="id_cita" Type="Int32" Nullable="false" />
           <Property Name="id_dentista" Type="Int32" Nullable="false" />
           <Property Name="id_paciente" Type="Int32" Nullable="false" />
@@ -386,7 +384,7 @@
           <Key>
             <PropertyRef Name="id_dentista" />
           </Key>
-          <Property Name="id_dentista" Type="Int32" Nullable="false" />
+          <Property Name="id_dentista" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="nombre" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="apellido" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="telefono" Type="String" MaxLength="15" FixedLength="false" Unicode="false" Nullable="false" />
@@ -400,7 +398,7 @@
           <Key>
             <PropertyRef Name="id_historial" />
           </Key>
-          <Property Name="id_historial" Type="Int32" Nullable="false" />
+          <Property Name="id_historial" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="id_consulta" Type="Int32" Nullable="false" />
           <Property Name="fecha_registro" Type="DateTime" Nullable="false" Precision="3" />
           <Property Name="tipo" Type="String" MaxLength="20" FixedLength="false" Unicode="false" Nullable="false" />
@@ -410,7 +408,7 @@
           <Key>
             <PropertyRef Name="id_historial_pago" />
           </Key>
-          <Property Name="id_historial_pago" Type="Int32" Nullable="false" />
+          <Property Name="id_historial_pago" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="id_pago" Type="Int32" Nullable="false" />
           <Property Name="estado" Type="String" MaxLength="20" FixedLength="false" Unicode="false" Nullable="false" />
           <NavigationProperty Name="Pagos" Relationship="Self.FK__Historial__id_pa__52593CB8" FromRole="Historial_Pagos" ToRole="Pagos" />
@@ -419,7 +417,7 @@
           <Key>
             <PropertyRef Name="id_inventario" />
           </Key>
-          <Property Name="id_inventario" Type="Int32" Nullable="false" />
+          <Property Name="id_inventario" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="id_material" Type="Int32" Nullable="false" />
           <Property Name="fecha_actualizacion" Type="DateTime" Nullable="false" Precision="0" />
           <NavigationProperty Name="Materiales" Relationship="Self.FK__Inventari__id_ma__6477ECF3" FromRole="Inventario" ToRole="Materiales" />
@@ -428,7 +426,7 @@
           <Key>
             <PropertyRef Name="id_material" />
           </Key>
-          <Property Name="id_material" Type="Int32" Nullable="false" />
+          <Property Name="id_material" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="nombre" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="cantidad" Type="Int32" Nullable="false" />
           <Property Name="proveedor" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
@@ -442,14 +440,12 @@
           <Key>
             <PropertyRef Name="id_paciente" />
           </Key>
-          <Property Name="id_paciente" Type="Int32" Nullable="false" />
+          <Property Name="id_paciente" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="nombre" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="apellido" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="fecha_nacimiento" Type="DateTime" Nullable="false" Precision="0" />
           <Property Name="telefono" Type="String" MaxLength="15" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="correo" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="direccion" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="alergias" Type="String" MaxLength="255" FixedLength="false" Unicode="true" Nullable="false" />
           <Property Name="activo" Type="Boolean" Nullable="false" />
           <NavigationProperty Name="Citas" Relationship="Self.FK__Citas__id_pacien__412EB0B6" FromRole="Pacientes" ToRole="Citas" />
           <NavigationProperty Name="Consulta" Relationship="Self.FK__Consulta__id_pac__571DF1D5" FromRole="Pacientes" ToRole="Consulta" />
@@ -458,7 +454,7 @@
           <Key>
             <PropertyRef Name="id_pago" />
           </Key>
-          <Property Name="id_pago" Type="Int32" Nullable="false" />
+          <Property Name="id_pago" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="id_cita" Type="Int32" Nullable="false" />
           <Property Name="fecha_pago" Type="DateTime" Nullable="false" Precision="3" />
           <Property Name="monto" Type="Decimal" Precision="10" Scale="2" Nullable="false" />
@@ -470,7 +466,7 @@
           <Key>
             <PropertyRef Name="id_rol" />
           </Key>
-          <Property Name="id_rol" Type="Int32" Nullable="false" />
+          <Property Name="id_rol" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="rol" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
           <NavigationProperty Name="Usuarios" Relationship="Self.FK__Usuarios__id_rol__6A30C649" FromRole="Roles" ToRole="Usuarios" />
         </EntityType>
@@ -478,7 +474,7 @@
           <Key>
             <PropertyRef Name="id_tratamiento" />
           </Key>
-          <Property Name="id_tratamiento" Type="Int32" Nullable="false" />
+          <Property Name="id_tratamiento" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="nombre" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="descripcion" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="costo" Type="Decimal" Precision="10" Scale="2" Nullable="false" />
@@ -490,7 +486,7 @@
           <Key>
             <PropertyRef Name="id_usuario" />
           </Key>
-          <Property Name="id_usuario" Type="Int32" Nullable="false" />
+          <Property Name="id_usuario" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="nombre" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="apellido" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="correo" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
@@ -623,7 +619,7 @@
           <End Role="Citas" Type="Self.Citas" Multiplicity="*" />
           <End Role="Tratamientos" Type="Self.Tratamientos" Multiplicity="*" />
         </Association>
-        <EntityContainer Name="ClinicDentEntities" annotation:LazyLoadingEnabled="true">
+        <EntityContainer Name="ClinicaDentalEntities" annotation:LazyLoadingEnabled="true">
           <EntitySet Name="Citas" EntityType="Self.Citas" />
           <EntitySet Name="Consulta" EntityType="Self.Consulta" />
           <EntitySet Name="Dentistas" EntityType="Self.Dentistas" />
@@ -686,7 +682,7 @@
     <!-- C-S mapping content -->
     <edmx:Mappings>
       <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
-        <EntityContainerMapping StorageEntityContainer="ClinicaDentalModelStoreContainer" CdmEntityContainer="ClinicDentEntities">
+        <EntityContainerMapping StorageEntityContainer="ClinicaDentalModelStoreContainer" CdmEntityContainer="ClinicaDentalEntities">
           <EntitySetMapping Name="Citas">
             <EntityTypeMapping TypeName="ClinicaDentalModel.Citas">
               <MappingFragment StoreEntitySet="Citas">
@@ -772,11 +768,9 @@
                 <ScalarProperty Name="id_paciente" ColumnName="id_paciente" />
                 <ScalarProperty Name="nombre" ColumnName="nombre" />
                 <ScalarProperty Name="apellido" ColumnName="apellido" />
-                <ScalarProperty Name="fecha_nacimiento" ColumnName="fecha_nacimiento" />
                 <ScalarProperty Name="telefono" ColumnName="telefono" />
                 <ScalarProperty Name="correo" ColumnName="correo" />
                 <ScalarProperty Name="direccion" ColumnName="direccion" />
-                <ScalarProperty Name="alergias" ColumnName="alergias" />
                 <ScalarProperty Name="activo" ColumnName="activo" />
               </MappingFragment>
             </EntityTypeMapping>

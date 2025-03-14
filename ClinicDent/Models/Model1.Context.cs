@@ -13,10 +13,10 @@ namespace ClinicDent.Models
     using System.Data.Entity;
     using System.Data.Entity.Infrastructure;
     
-    public partial class ClinicDentEntities : DbContext
+    public partial class ClinicaDentalEntities : DbContext
     {
-        public ClinicDentEntities()
-            : base("name=ClinicDentEntities")
+        public ClinicaDentalEntities()
+            : base("name=ClinicaDentalEntities")
         {
         }
     

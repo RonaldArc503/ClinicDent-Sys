@@ -1,75 +1,61 @@
 ﻿@model IEnumerable<ClinicDent.Models.Pacientes>
 
 @{
-    ViewBag.Title = "Index";
+    ViewBag.Title = "Pacientes";
 }
 
-<h2>Index</h2>
+<h2 class="mb-4">Lista de Pacientes</h2>
 
 <p>
-    @Html.ActionLink("Create New", "Create")
+    @Html.ActionLink("Agregar Paciente", "Create", null, new { @class = "btn btn-success" })
 </p>
-<table class="table">
-    <tr>
-        <th>
-            @Html.DisplayNameFor(model => model.nombre)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.apellido)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.fecha_nacimiento)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.telefono)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.correo)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.direccion)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.alergias)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.activo)
-        </th>
-        <th></th>
-    </tr>
 
-@foreach (var item in Model) {
-    <tr>
-        <td>
-            @Html.DisplayFor(modelItem => item.nombre)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.apellido)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.fecha_nacimiento)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.telefono)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.correo)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.direccion)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.alergias)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.activo)
-        </td>
-        <td>
-            @Html.ActionLink("Edit", "Edit", new { id=item.id_paciente }) |
-            @Html.ActionLink("Details", "Details", new { id=item.id_paciente }) |
-            @Html.ActionLink("Delete", "Delete", new { id=item.id_paciente })
-        </td>
-    </tr>
-}
+<div class="table-responsive">
+    <table class="table table-striped table-hover">
+        <thead class="table-dark ">
+            <tr>
+                <th>Nombre</th>
+                <th>Apellido</th>
+             
+                <th>Telefono</th>
+                <th>Correo</th>
+                <th>Direccion</th>
+               
+                <th>Estado</th>
+                <th class="text-center">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@Html.DisplayFor(modelItem => item.nombre)</td>
+                    <td>@Html.DisplayFor(modelItem => item.apellido)</td>
+                
 
-</table>
+                    <td>@Html.DisplayFor(modelItem => item.telefono)</td>
+                    <td>@Html.DisplayFor(modelItem => item.correo)</td>
+                    <td>@Html.DisplayFor(modelItem => item.direccion)</td>
+                    
+                    <td>
+                        @if (item.activo)
+                        {
+                            <span class="badge bg-success">Activo</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger">Inactivo</span>
+                        }
+                    </td>
+                    <td class="text-center">
+                        <div class="btn-group d-flex flex-column">
+                            @Html.ActionLink("Editar", "Edit", new { id = item.id_paciente }, new { @class = "btn btn-primary btn-sm w-100 mb-1" })
+                            @Html.ActionLink("Detalles", "Details", new { id = item.id_paciente }, new { @class = "btn btn-info btn-sm w-100 mb-1" })
+                            @Html.ActionLink("Eliminar", "Delete", new { id = item.id_paciente }, new { @class = "btn btn-danger btn-sm w-100" })
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

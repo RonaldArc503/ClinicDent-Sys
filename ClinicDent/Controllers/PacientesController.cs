@@ -12,7 +12,7 @@ namespace ClinicDent.Controllers
 {
     public class PacientesController : Controller
     {
-        private ClinicDentEntities db = new ClinicDentEntities();
+        private ClinicaDentalEntities db = new ClinicaDentalEntities();
 
         // GET: Pacientes
         public ActionResult Index()
@@ -46,7 +46,7 @@ namespace ClinicDent.Controllers
         // más detalles, vea https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "id_paciente,nombre,apellido,fecha_nacimiento,telefono,correo,direccion,alergias,activo")] Pacientes pacientes)
+        public ActionResult Create([Bind(Include = "nombre,apellido,telefono,correo,direccion,activo")] Pacientes pacientes)
         {
             if (ModelState.IsValid)
             {
@@ -78,7 +78,7 @@ namespace ClinicDent.Controllers
         // más detalles, vea https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "id_paciente,nombre,apellido,fecha_nacimiento,telefono,correo,direccion,alergias,activo")] Pacientes pacientes)
+        public ActionResult Edit([Bind(Include = "nombre,apellido,telefono,correo,direccion,activo")] Pacientes pacientes)
         {
             if (ModelState.IsValid)
             {
