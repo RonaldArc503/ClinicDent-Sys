@@ -1,0 +1,109 @@
+﻿@model ClinicDent.Models.Citas
+
+@{
+    ViewBag.Title = "Create";
+}
+
+<h2>Create</h2>
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+<div class="form-horizontal">
+    <h4>Citas</h4>
+    <hr />
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.id_paciente, "Paciente", htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.DropDownList("id_paciente", null, htmlAttributes: new { @class = "form-control" })
+            @Html.ValidationMessageFor(model => model.id_paciente, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.id_dentista, "Dentista", htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.DropDownList("id_dentista", null, htmlAttributes: new { @class = "form-control" })
+            @Html.ValidationMessageFor(model => model.id_dentista, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.fecha_hora, "Fecha y Hora", htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            <div class="input-group date" id="datetimepicker1" data-target-input="nearest">
+                @Html.TextBoxFor(model => model.fecha_hora, new { @class = "form-control datetimepicker-input", data_target = "#datetimepicker1" })
+                <div class="input-group-append" data-target="#datetimepicker1" data-toggle="datetimepicker">
+                    <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                </div>
+            </div>
+            @Html.ValidationMessageFor(model => model.fecha_hora, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.estado, "Estado", htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.DropDownListFor(model => model.estado, ViewBag.Estados as SelectList, new { @class = "form-control" })
+            @Html.ValidationMessageFor(model => model.estado, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+
+    <div class="form-group">
+        <div class="col-md-offset-2 col-md-10">
+            <input type="submit" value="Create" class="btn btn-primary" />
+        </div>
+    </div>
+</div>
+}
+
+<div>
+    @Html.ActionLink("Back to List", "Index")
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+
+    <!-- Asegurarse de que jQuery no se esté cargando dos veces -->
+    <script>
+        if (typeof jQuery == 'undefined') {
+            document.write('<script src="https://code.jquery.com/jquery-3.6.0.min.js"><\/script>');
+        }
+    </script>
+
+    <!-- Popper.js y Bootstrap (para Bootstrap 4) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.11.6/umd/popper.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.0/js/bootstrap.min.js"></script>
+
+    <!-- Moment.js (Necesario para Tempus Dominus) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+
+    <!-- Tempus Dominus Bootstrap 4 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.39.0/js/tempusdominus-bootstrap-4.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.39.0/css/tempusdominus-bootstrap-4.min.css" />
+
+    <!-- Inicialización del DateTimePicker -->
+    <script>
+        $(document).ready(function () {
+            console.log("jQuery version:", $.fn.jquery); // Para verificar la versión de jQuery
+            $('#datetimepicker1').datetimepicker({
+                format: 'YYYY-MM-DD HH:mm',
+                icons: {
+                    time: 'fa fa-clock',
+                    date: 'fa fa-calendar',
+                    up: 'fa fa-chevron-up',
+                    down: 'fa fa-chevron-down',
+                    previous: 'fa fa-chevron-left',
+                    next: 'fa fa-chevron-right',
+                    today: 'fa fa-sun',
+                    clear: 'fa fa-trash',
+                    close: 'fa fa-times'
+                }
+            });
+        });
+    </script>
+}

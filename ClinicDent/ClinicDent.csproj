@@ -126,6 +126,7 @@
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
+    <Compile Include="Controllers\CitasController.cs" />
     <Compile Include="Controllers\DentistasController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\PacientesController.cs" />
@@ -295,6 +296,11 @@
     <Content Include="Views\Dentistas\Details.cshtml" />
     <Content Include="Views\Dentistas\Edit.cshtml" />
     <Content Include="Views\Dentistas\Index.cshtml" />
+    <Content Include="Views\Citas\Create.cshtml" />
+    <Content Include="Views\Citas\Delete.cshtml" />
+    <Content Include="Views\Citas\Details.cshtml" />
+    <Content Include="Views\Citas\Edit.cshtml" />
+    <Content Include="Views\Citas\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
