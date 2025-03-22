@@ -12,26 +12,18 @@ namespace ClinicDent.Models
     using System;
     using System.Collections.Generic;
     
-    public partial class Pagos
+    public partial class Tipo_Cobro
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
-        public Pagos()
+        public Tipo_Cobro()
         {
-            this.Historial_Pagos = new HashSet<Historial_Pagos>();
-            this.Pagos_Cuotas = new HashSet<Pagos_Cuotas>();
+            this.Tratamientos = new HashSet<Tratamientos>();
         }
     
-        public int id_pago { get; set; }
-        public Nullable<int> id_consulta { get; set; }
-        public System.DateTime fecha_pago { get; set; }
-        public decimal monto_total { get; set; }
-        public string metodo_pago { get; set; }
-        public string tipo_pago { get; set; }
+        public int id_tipo_cobro { get; set; }
+        public string nombre { get; set; }
     
-        public virtual Consulta Consulta { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Historial_Pagos> Historial_Pagos { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Pagos_Cuotas> Pagos_Cuotas { get; set; }
+        public virtual ICollection<Tratamientos> Tratamientos { get; set; }
     }
 }

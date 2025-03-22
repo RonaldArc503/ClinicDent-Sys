@@ -15,9 +15,11 @@ namespace ClinicDent.Models
     public partial class Historial_Pagos
     {
         public int id_historial_pago { get; set; }
+        public Nullable<int> id_cuota { get; set; }
         public int id_pago { get; set; }
         public string estado { get; set; }
     
+        public virtual Pagos_Cuotas Pagos_Cuotas { get; set; }
         public virtual Pagos Pagos { get; set; }
     }
 }

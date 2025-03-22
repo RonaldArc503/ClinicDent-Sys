@@ -16,6 +16,7 @@ namespace ClinicDent.Models
     {
         public int id_inventario { get; set; }
         public int id_material { get; set; }
+        public int cantidad { get; set; }
         public System.DateTime fecha_actualizacion { get; set; }
     
         public virtual Materiales Materiales { get; set; }

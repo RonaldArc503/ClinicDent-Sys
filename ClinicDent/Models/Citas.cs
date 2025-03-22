@@ -18,8 +18,6 @@ namespace ClinicDent.Models
         public Citas()
         {
             this.Consulta = new HashSet<Consulta>();
-            this.Pagos = new HashSet<Pagos>();
-            this.Tratamientos = new HashSet<Tratamientos>();
         }
     
         public int id_cita { get; set; }
@@ -32,9 +30,5 @@ namespace ClinicDent.Models
         public virtual Pacientes Pacientes { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Consulta> Consulta { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Pagos> Pagos { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Tratamientos> Tratamientos { get; set; }
     }
 }

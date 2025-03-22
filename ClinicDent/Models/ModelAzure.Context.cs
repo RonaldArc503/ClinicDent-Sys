@@ -13,10 +13,10 @@ namespace ClinicDent.Models
     using System.Data.Entity;
     using System.Data.Entity.Infrastructure;
     
-    public partial class ClinicDentDBEntities : DbContext
+    public partial class ClinicaDentalAzure : DbContext
     {
-        public ClinicDentDBEntities()
-            : base("name=ClinicDentDBEntities")
+        public ClinicaDentalAzure()
+            : base("name=ClinicaDentalAzure")
         {
         }
     
@@ -27,6 +27,7 @@ namespace ClinicDent.Models
     
         public virtual DbSet<Citas> Citas { get; set; }
         public virtual DbSet<Consulta> Consulta { get; set; }
+        public virtual DbSet<Consultas_Tratamientos> Consultas_Tratamientos { get; set; }
         public virtual DbSet<Dentistas> Dentistas { get; set; }
         public virtual DbSet<Historial_Clinico> Historial_Clinico { get; set; }
         public virtual DbSet<Historial_Pagos> Historial_Pagos { get; set; }
@@ -34,7 +35,9 @@ namespace ClinicDent.Models
         public virtual DbSet<Materiales> Materiales { get; set; }
         public virtual DbSet<Pacientes> Pacientes { get; set; }
         public virtual DbSet<Pagos> Pagos { get; set; }
+        public virtual DbSet<Pagos_Cuotas> Pagos_Cuotas { get; set; }
         public virtual DbSet<Roles> Roles { get; set; }
+        public virtual DbSet<Tipo_Cobro> Tipo_Cobro { get; set; }
         public virtual DbSet<Tratamientos> Tratamientos { get; set; }
         public virtual DbSet<Usuarios> Usuarios { get; set; }
     }

@@ -15,10 +15,10 @@ namespace ClinicDent.Models
     public partial class Historial_Clinico
     {
         public int id_historial { get; set; }
-        public int id_consulta { get; set; }
+        public Nullable<int> id_consulta_tratamiento { get; set; }
         public System.DateTime fecha_registro { get; set; }
         public string tipo { get; set; }
     
-        public virtual Consulta Consulta { get; set; }
+        public virtual Consultas_Tratamientos Consultas_Tratamientos { get; set; }
     }
 }

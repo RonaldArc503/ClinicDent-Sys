@@ -1,4 +1,4 @@
-﻿// La generación de código T4 está habilitada para el modelo 'C:\Users\efsf1\source\repos\RonaldArc503\ClinicDent-Sys\ClinicDent\Models\Model2.edmx'. 
+﻿// La generación de código T4 está habilitada para el modelo 'C:\Users\Win10\Desktop\ClinicDent\ClinicDent\Models\ModelAzure.edmx'. 
 // Para habilitar la generación de código heredada, cambie el valor de la propiedad del diseñador 'Estrategia de generación de código'
 // por 'ObjectContext heredado'. Esta propiedad está disponible en la ventana Propiedades cuando se abre
 // el modelo en el diseñador.

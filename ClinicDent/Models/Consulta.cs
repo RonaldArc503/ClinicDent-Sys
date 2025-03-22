@@ -17,7 +17,8 @@ namespace ClinicDent.Models
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
         public Consulta()
         {
-            this.Historial_Clinico = new HashSet<Historial_Clinico>();
+            this.Consultas_Tratamientos = new HashSet<Consultas_Tratamientos>();
+            this.Pagos = new HashSet<Pagos>();
         }
     
         public int id_consulta { get; set; }
@@ -27,11 +28,15 @@ namespace ClinicDent.Models
         public System.DateTime fecha_consulta { get; set; }
         public string diagnostico { get; set; }
         public string observaciones { get; set; }
+        public string recomendaciones { get; set; }
+        public bool requiere_tratamiento { get; set; }
     
         public virtual Citas Citas { get; set; }
         public virtual Dentistas Dentistas { get; set; }
         public virtual Pacientes Pacientes { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Historial_Clinico> Historial_Clinico { get; set; }
+        public virtual ICollection<Consultas_Tratamientos> Consultas_Tratamientos { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Pagos> Pagos { get; set; }
     }
 }
