@@ -127,32 +127,33 @@
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="Controllers\HomeController.cs" />
+    <Compile Include="Controllers\PacientesController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\Citas.cs">
-      <DependentUpon>ModelAzure.tt</DependentUpon>
+      <DependentUpon>ModelLocal.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\Consulta.cs">
-      <DependentUpon>ModelAzure.tt</DependentUpon>
+      <DependentUpon>ModelLocal.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\Consultas_Tratamientos.cs">
-      <DependentUpon>ModelAzure.tt</DependentUpon>
+      <DependentUpon>ModelLocal.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\Dentistas.cs">
-      <DependentUpon>ModelAzure.tt</DependentUpon>
+      <DependentUpon>ModelLocal.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\Historial_Clinico.cs">
-      <DependentUpon>ModelAzure.tt</DependentUpon>
+      <DependentUpon>ModelLocal.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\Historial_Pagos.cs">
-      <DependentUpon>ModelAzure.tt</DependentUpon>
+      <DependentUpon>ModelLocal.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\Inventario.cs">
-      <DependentUpon>ModelAzure.tt</DependentUpon>
+      <DependentUpon>ModelLocal.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\Materiales.cs">
-      <DependentUpon>ModelAzure.tt</DependentUpon>
+      <DependentUpon>ModelLocal.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\ModelAzure.Context.cs">
       <AutoGen>True</AutoGen>
@@ -169,26 +170,41 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>ModelAzure.edmx</DependentUpon>
     </Compile>
+    <Compile Include="Models\ModelLocal.Context.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ModelLocal.Context.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\ModelLocal.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ModelLocal.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\ModelLocal.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ModelLocal.edmx</DependentUpon>
+    </Compile>
     <Compile Include="Models\Pacientes.cs">
-      <DependentUpon>ModelAzure.tt</DependentUpon>
+      <DependentUpon>ModelLocal.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\Pagos.cs">
-      <DependentUpon>ModelAzure.tt</DependentUpon>
+      <DependentUpon>ModelLocal.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\Pagos_Cuotas.cs">
-      <DependentUpon>ModelAzure.tt</DependentUpon>
+      <DependentUpon>ModelLocal.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\Roles.cs">
-      <DependentUpon>ModelAzure.tt</DependentUpon>
+      <DependentUpon>ModelLocal.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\Tipo_Cobro.cs">
-      <DependentUpon>ModelAzure.tt</DependentUpon>
+      <DependentUpon>ModelLocal.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\Tratamientos.cs">
-      <DependentUpon>ModelAzure.tt</DependentUpon>
+      <DependentUpon>ModelLocal.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\Usuarios.cs">
-      <DependentUpon>ModelAzure.tt</DependentUpon>
+      <DependentUpon>ModelLocal.tt</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -222,6 +238,16 @@
       <DependentUpon>ModelAzure.edmx</DependentUpon>
       <LastGenOutput>ModelAzure.cs</LastGenOutput>
     </Content>
+    <Content Include="Models\ModelLocal.Context.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <DependentUpon>ModelLocal.edmx</DependentUpon>
+      <LastGenOutput>ModelLocal.Context.cs</LastGenOutput>
+    </Content>
+    <Content Include="Models\ModelLocal.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <DependentUpon>ModelLocal.edmx</DependentUpon>
+      <LastGenOutput>ModelLocal.cs</LastGenOutput>
+    </Content>
     <Content Include="Scripts\bootstrap.bundle.js" />
     <Content Include="Scripts\bootstrap.bundle.min.js" />
     <Content Include="Scripts\bootstrap.esm.js" />
@@ -234,6 +260,13 @@
     </EntityDeploy>
     <Content Include="Models\ModelAzure.edmx.diagram">
       <DependentUpon>ModelAzure.edmx</DependentUpon>
+    </Content>
+    <EntityDeploy Include="Models\ModelLocal.edmx">
+      <Generator>EntityModelCodeGenerator</Generator>
+      <LastGenOutput>ModelLocal.Designer.cs</LastGenOutput>
+    </EntityDeploy>
+    <Content Include="Models\ModelLocal.edmx.diagram">
+      <DependentUpon>ModelLocal.edmx</DependentUpon>
     </Content>
     <None Include="Scripts\jquery-3.7.0.intellisense.js" />
     <Content Include="Scripts\jquery-3.7.0.js" />
@@ -260,6 +293,11 @@
     <Content Include="Views\Home\About.cshtml" />
     <Content Include="Views\Home\Contact.cshtml" />
     <Content Include="Views\Home\Index.cshtml" />
+    <Content Include="Views\Pacientes\Create.cshtml" />
+    <Content Include="Views\Pacientes\Delete.cshtml" />
+    <Content Include="Views\Pacientes\Details.cshtml" />
+    <Content Include="Views\Pacientes\Edit.cshtml" />
+    <Content Include="Views\Pacientes\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
