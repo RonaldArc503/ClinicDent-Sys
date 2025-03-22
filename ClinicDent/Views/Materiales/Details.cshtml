@@ -1,0 +1,74 @@
+﻿@model ClinicDent.Models.Materiales
+
+@{
+    ViewBag.Title = "Details";
+}
+
+<h2>Details</h2>
+
+<div>
+    <h4>Materiales</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.nombre)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.nombre)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.cantidad)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.cantidad)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.proveedor)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.proveedor)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.fecha_caducidad)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.fecha_caducidad)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.minimo_stock)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.minimo_stock)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.descripcion)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.descripcion)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.estado)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.estado)
+        </dd>
+
+    </dl>
+</div>
+<p>
+    @Html.ActionLink("Edit", "Edit", new { id = Model.id_material }) |
+    @Html.ActionLink("Back to List", "Index")
+</p>

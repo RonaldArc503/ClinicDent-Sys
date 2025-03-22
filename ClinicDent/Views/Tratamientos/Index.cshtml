@@ -1,0 +1,63 @@
+﻿@model IEnumerable<ClinicDent.Models.Tratamientos>
+
+@{
+    ViewBag.Title = "Index";
+}
+
+<h2>Index</h2>
+
+<p>
+    @Html.ActionLink("Create New", "Create")
+</p>
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.fecha_inicio)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.odontograma)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.costo)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.duracion_estimada)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.seguimiento)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Tipo_Cobro.nombre)
+        </th>
+        <th></th>
+    </tr>
+
+@foreach (var item in Model) {
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => item.fecha_inicio)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.odontograma)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.costo)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.duracion_estimada)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.seguimiento)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Tipo_Cobro.nombre)
+        </td>
+        <td>
+            @Html.ActionLink("Edit", "Edit", new { id=item.id_tratamiento }) |
+            @Html.ActionLink("Details", "Details", new { id=item.id_tratamiento }) |
+            @Html.ActionLink("Delete", "Delete", new { id=item.id_tratamiento })
+        </td>
+    </tr>
+}
+
+</table>

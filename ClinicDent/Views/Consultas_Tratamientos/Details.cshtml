@@ -1,0 +1,50 @@
+﻿@model ClinicDent.Models.Consultas_Tratamientos
+
+@{
+    ViewBag.Title = "Details";
+}
+
+<h2>Details</h2>
+
+<div>
+    <h4>Consultas_Tratamientos</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.cantidad)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.cantidad)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.total)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.total)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Consulta.diagnostico)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Consulta.diagnostico)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Tratamientos.odontograma)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Tratamientos.odontograma)
+        </dd>
+
+    </dl>
+</div>
+<p>
+    @Html.ActionLink("Edit", "Edit", new { id = Model.id_consulta_tratamiento }) |
+    @Html.ActionLink("Back to List", "Index")
+</p>

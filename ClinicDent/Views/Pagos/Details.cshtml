@@ -1,0 +1,58 @@
+﻿@model ClinicDent.Models.Pagos
+
+@{
+    ViewBag.Title = "Details";
+}
+
+<h2>Details</h2>
+
+<div>
+    <h4>Pagos</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.fecha_pago)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.fecha_pago)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.monto_total)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.monto_total)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.metodo_pago)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.metodo_pago)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.tipo_pago)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.tipo_pago)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Consulta.diagnostico)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Consulta.diagnostico)
+        </dd>
+
+    </dl>
+</div>
+<p>
+    @Html.ActionLink("Edit", "Edit", new { id = Model.id_pago }) |
+    @Html.ActionLink("Back to List", "Index")
+</p>

@@ -7,6 +7,8 @@
     @Styles.Render("~/Content/css")
     @Scripts.Render("~/bundles/modernizr")
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"> <!-- FontAwesome -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.11.6/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 
     <style>
         .sidebar {
@@ -32,10 +34,10 @@
                 display: block;
                 padding: 12px 40px;
                 text-align: left;
-                margin-top:2px;
+                margin-top: 2px;
             }
 
-      
+
 
         .content {
             flex-grow: 1;
@@ -46,7 +48,26 @@
             margin-right: 8px;
         }
 
-        
+        /* Estilo del menú desplegable */
+        #citasDropdown + .dropdown-menu {
+            min-width: 250px;
+            background-color: #116AEF;
+            color: white;
+            border: none; /* Opcional: elimina el borde del dropdown */
+        }
+
+            /* Estilo de los elementos dentro del dropdown */
+            #citasDropdown + .dropdown-menu .dropdown-item {
+                color: white;
+                background-color: #116AEF;
+            }
+
+                /* Estilo cuando pasas el mouse */
+                #citasDropdown + .dropdown-menu .dropdown-item:hover {
+                    background-color: #0d7bcc;
+                    color: white;
+                    border-radius: 5px;
+                }
 
 
 
@@ -55,42 +76,48 @@
 <body>
     <div class="d-flex">
         <!-- Barra de navegación a la izquierda -->
-        <nav class="sidebar d-flex flex-column ">
+        <nav class="sidebar d-flex flex-column">
             <h5 class="text-center"><i class="fa-solid fa-tooth mt-5"></i> CLINICA DENTAL</h5>
             <ul class="nav flex-column mt-5">
                 <li class="nav-item">
-                    <a href="@Url.Action("Index", "Home")" class="nav-link ">
+                    <a href="@Url.Action("Index", "Home")" class="nav-link">
                         <i class="fa-solid fa-house icon"></i> Inicio
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="@Url.Action("Index", "Pacientes")" class="nav-link ">
+                    <a href="@Url.Action("Index", "Pacientes")" class="nav-link">
                         <i class="fa-solid fa-user icon"></i> Pacientes
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="@Url.Action("Index", "Dentistas")" class="nav-link ">
+                    <a href="@Url.Action("Index", "Dentistas")" class="nav-link">
                         <i class="fa-solid fa-tooth icon"></i> Dentistas
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a href="@Url.Action("Index", "Citas")" class="nav-link ">
-                  
-                        <i class="fa-solid fa-calendar icon"></i> Citas
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="citasDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fa-solid fa-calendar-day icon"></i> Citas
                     </a>
+                    <ul class="dropdown-menu" aria-labelledby="citasDropdown">
+                        <li>
+                            <a class="dropdown-item" href="@Url.Action("Index", "Citas")"><i class="fa-solid fa-calendar-check icon"></i> Citas</a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="@Url.Action("Calendario", "Citas")"><i class="fa-solid fa-calendar-alt icon"></i> Calendario</a>
+                        </li>
+                    </ul>
                 </li>
                 <li class="nav-item">
-                    <a href="@Url.Action("Index", "Pagos")" class="nav-link ">
+                    <a href="@Url.Action("Index", "Pagos")" class="nav-link">
                         <i class="fa-solid fa-credit-card icon"></i> Pagos e Historial
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="@Url.Action("Contact", "Home")" class="nav-link ">
+                    <a href="@Url.Action("Contact", "Home")" class="nav-link">
                         <i class="fa-solid fa-envelope icon"></i> Contacto
                     </a>
                 </li>
             </ul>
-
         </nav>
 
         <!-- Contenido principal -->

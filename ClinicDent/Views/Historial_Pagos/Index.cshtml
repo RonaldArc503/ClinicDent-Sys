@@ -1,0 +1,45 @@
+﻿@model IEnumerable<ClinicDent.Models.Historial_Pagos>
+
+@{
+    ViewBag.Title = "Index";
+}
+
+<h2>Index</h2>
+
+<p>
+    @Html.ActionLink("Create New", "Create")
+</p>
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.estado)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Pagos_Cuotas.estado)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Pagos.metodo_pago)
+        </th>
+        <th></th>
+    </tr>
+
+@foreach (var item in Model) {
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => item.estado)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Pagos_Cuotas.estado)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Pagos.metodo_pago)
+        </td>
+        <td>
+            @Html.ActionLink("Edit", "Edit", new { id=item.id_historial_pago }) |
+            @Html.ActionLink("Details", "Details", new { id=item.id_historial_pago }) |
+            @Html.ActionLink("Delete", "Delete", new { id=item.id_historial_pago })
+        </td>
+    </tr>
+}
+
+</table>

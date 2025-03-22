@@ -1,0 +1,48 @@
+﻿@model ClinicDent.Models.Historial_Clinico
+
+@{
+    ViewBag.Title = "Delete";
+}
+
+<h2>Delete</h2>
+
+<h3>Are you sure you want to delete this?</h3>
+<div>
+    <h4>Historial_Clinico</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.fecha_registro)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.fecha_registro)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.tipo)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.tipo)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Consultas_Tratamientos.id_consulta_tratamiento)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Consultas_Tratamientos.id_consulta_tratamiento)
+        </dd>
+
+    </dl>
+
+    @using (Html.BeginForm()) {
+        @Html.AntiForgeryToken()
+
+        <div class="form-actions no-color">
+            <input type="submit" value="Delete" class="btn btn-default" /> |
+            @Html.ActionLink("Back to List", "Index")
+        </div>
+    }
+</div>

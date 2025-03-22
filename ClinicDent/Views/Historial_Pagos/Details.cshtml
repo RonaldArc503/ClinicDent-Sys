@@ -1,0 +1,42 @@
+﻿@model ClinicDent.Models.Historial_Pagos
+
+@{
+    ViewBag.Title = "Details";
+}
+
+<h2>Details</h2>
+
+<div>
+    <h4>Historial_Pagos</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.estado)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.estado)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Pagos_Cuotas.estado)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Pagos_Cuotas.estado)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Pagos.metodo_pago)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Pagos.metodo_pago)
+        </dd>
+
+    </dl>
+</div>
+<p>
+    @Html.ActionLink("Edit", "Edit", new { id = Model.id_historial_pago }) |
+    @Html.ActionLink("Back to List", "Index")
+</p>

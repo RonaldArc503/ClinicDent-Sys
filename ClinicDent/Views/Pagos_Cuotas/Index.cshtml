@@ -1,0 +1,51 @@
+﻿@model IEnumerable<ClinicDent.Models.Pagos_Cuotas>
+
+@{
+    ViewBag.Title = "Index";
+}
+
+<h2>Index</h2>
+
+<p>
+    @Html.ActionLink("Create New", "Create")
+</p>
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.fecha_pago)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.monto)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.estado)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Pagos.metodo_pago)
+        </th>
+        <th></th>
+    </tr>
+
+@foreach (var item in Model) {
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => item.fecha_pago)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.monto)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.estado)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Pagos.metodo_pago)
+        </td>
+        <td>
+            @Html.ActionLink("Edit", "Edit", new { id=item.id_cuota }) |
+            @Html.ActionLink("Details", "Details", new { id=item.id_cuota }) |
+            @Html.ActionLink("Delete", "Delete", new { id=item.id_cuota })
+        </td>
+    </tr>
+}
+
+</table>

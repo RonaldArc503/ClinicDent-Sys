@@ -1,0 +1,42 @@
+﻿@model ClinicDent.Models.Inventario
+
+@{
+    ViewBag.Title = "Details";
+}
+
+<h2>Details</h2>
+
+<div>
+    <h4>Inventario</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.cantidad)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.cantidad)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.fecha_actualizacion)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.fecha_actualizacion)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Materiales.nombre)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Materiales.nombre)
+        </dd>
+
+    </dl>
+</div>
+<p>
+    @Html.ActionLink("Edit", "Edit", new { id = Model.id_inventario }) |
+    @Html.ActionLink("Back to List", "Index")
+</p>

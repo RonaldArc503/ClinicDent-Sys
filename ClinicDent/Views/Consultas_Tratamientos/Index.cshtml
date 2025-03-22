@@ -1,0 +1,51 @@
+﻿@model IEnumerable<ClinicDent.Models.Consultas_Tratamientos>
+
+@{
+    ViewBag.Title = "Index";
+}
+
+<h2>Index</h2>
+
+<p>
+    @Html.ActionLink("Create New", "Create")
+</p>
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.cantidad)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.total)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Consulta.diagnostico)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Tratamientos.odontograma)
+        </th>
+        <th></th>
+    </tr>
+
+@foreach (var item in Model) {
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => item.cantidad)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.total)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Consulta.diagnostico)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Tratamientos.odontograma)
+        </td>
+        <td>
+            @Html.ActionLink("Edit", "Edit", new { id=item.id_consulta_tratamiento }) |
+            @Html.ActionLink("Details", "Details", new { id=item.id_consulta_tratamiento }) |
+            @Html.ActionLink("Delete", "Delete", new { id=item.id_consulta_tratamiento })
+        </td>
+    </tr>
+}
+
+</table>
