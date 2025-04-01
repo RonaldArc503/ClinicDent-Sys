@@ -1,64 +1,85 @@
 ﻿@model ClinicDent.Models.Citas
 
 @{
-    ViewBag.Title = "Create";
+    ViewBag.Title = "Crear Cita";
 }
 
-<h2>Create</h2>
+<h2>Crear Cita</h2>
 
-
-@using (Html.BeginForm()) 
+@using (Html.BeginForm())
 {
     @Html.AntiForgeryToken()
-    
+
     <div class="form-horizontal">
         <h4>Citas</h4>
         <hr />
         @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
         <div class="form-group">
-            @Html.LabelFor(model => model.id_paciente, "id_paciente", htmlAttributes: new { @class = "control-label col-md-2" })
+            @Html.LabelFor(model => model.id_paciente, "Paciente", htmlAttributes: new { @class = "control-label col-md-2" })
             <div class="col-md-10">
-                @Html.DropDownList("id_paciente", null, htmlAttributes: new { @class = "form-control" })
+                @Html.DropDownList("id_paciente", null, new { @class = "form-control" })
                 @Html.ValidationMessageFor(model => model.id_paciente, "", new { @class = "text-danger" })
             </div>
         </div>
 
         <div class="form-group">
-            @Html.LabelFor(model => model.id_dentista, "id_dentista", htmlAttributes: new { @class = "control-label col-md-2" })
+            @Html.LabelFor(model => model.id_dentista, "Dentista", htmlAttributes: new { @class = "control-label col-md-2" })
             <div class="col-md-10">
-                @Html.DropDownList("id_dentista", null, htmlAttributes: new { @class = "form-control" })
+                @Html.DropDownList("id_dentista", null, new { @class = "form-control" })
                 @Html.ValidationMessageFor(model => model.id_dentista, "", new { @class = "text-danger" })
             </div>
         </div>
 
         <div class="form-group">
-            @Html.LabelFor(model => model.fecha_hora, htmlAttributes: new { @class = "control-label col-md-2" })
+            @Html.LabelFor(model => model.fecha_hora, "Fecha y Hora", htmlAttributes: new { @class = "control-label col-md-2" })
             <div class="col-md-10">
-                @Html.EditorFor(model => model.fecha_hora, new { htmlAttributes = new { @class = "form-control" } })
+                <input type="datetime-local" id="fecha_hora" name="fecha_hora" class="form-control" required>
                 @Html.ValidationMessageFor(model => model.fecha_hora, "", new { @class = "text-danger" })
             </div>
         </div>
 
         <div class="form-group">
-            @Html.LabelFor(model => model.estado, htmlAttributes: new { @class = "control-label col-md-2" })
+            @Html.LabelFor(model => model.estado, "Estado", htmlAttributes: new { @class = "control-label col-md-2" })
             <div class="col-md-10">
-                @Html.EditorFor(model => model.estado, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.DropDownListFor(model => model.estado, new List<SelectListItem>
+                {
+                    new SelectListItem { Text = "Pendiente", Value = "Pendiente" },
+                    new SelectListItem { Text = "Confirmada", Value = "Confirmada" },
+                    new SelectListItem { Text = "Cancelada", Value = "Cancelada" }
+                }, new { @class = "form-control" })
                 @Html.ValidationMessageFor(model => model.estado, "", new { @class = "text-danger" })
             </div>
         </div>
 
         <div class="form-group">
             <div class="col-md-offset-2 col-md-10">
-                <input type="submit" value="Create" class="btn btn-default" />
+                <button type="submit" class="btn btn-primary">Guardar Cita</button>
+                <a href="@Url.Action("Index")" class="btn btn-secondary">Cancelar</a>
             </div>
         </div>
     </div>
 }
 
-<div>
-    @Html.ActionLink("Back to List", "Index")
-</div>
-
 @section Scripts {
-    @Scripts.Render("~/bundles/jqueryval")
+    <script>
+        $(document).ready(function() {
+            $('#fecha_hora').change(function() {
+                var fechaHora = $(this).val();
+                var idDentista = $('#id_dentista').val();
+
+                $.ajax({
+                    url: '@Url.Action("ValidarDisponibilidad", "Citas")',
+                    type: 'GET',
+                    data: { id_dentista: idDentista, fecha_hora: fechaHora },
+                    success: function(response) {
+                        if (!response.disponible) {
+                            alert("El dentista ya tiene una cita a esta hora. Elija otra.");
+                            $('#fecha_hora').val('');
+                        }
+                    }
+                });
+            });
+        });
+    </script>
 }
