@@ -51,6 +51,18 @@ namespace ClinicDent.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Create([Bind(Include = "id_cita,id_paciente,id_dentista,fecha_hora,estado")] Citas citas)
         {
+            // Validación: ¿Ya existe una cita con el mismo dentista a la misma fecha y hora?
+            bool citaExiste = db.Citas.Any(c =>
+                c.id_dentista == citas.id_dentista &&
+                DbFunctions.TruncateTime(c.fecha_hora) == citas.fecha_hora.Date &&
+                c.fecha_hora.Hour == citas.fecha_hora.Hour 
+            );
+
+            if (citaExiste)
+            {
+                ModelState.AddModelError("", "Ya existe una cita con este dentista a la misma fecha y hora.");
+            }
+
             if (ModelState.IsValid)
             {
                 db.Citas.Add(citas);
@@ -62,6 +74,7 @@ namespace ClinicDent.Controllers
             ViewBag.id_paciente = new SelectList(db.Pacientes, "id_paciente", "nombres", citas.id_paciente);
             return View(citas);
         }
+
 
         // GET: Citas/Edit/5
         public ActionResult Edit(int? id)
@@ -87,16 +100,32 @@ namespace ClinicDent.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Edit([Bind(Include = "id_cita,id_paciente,id_dentista,fecha_hora,estado")] Citas citas)
         {
+            // Validación: Evitar doble cita para el mismo dentista a la misma fecha y hora (excepto la misma cita)
+            bool citaOcupada = db.Citas.Any(c =>
+                c.id_cita != citas.id_cita &&
+                c.id_dentista == citas.id_dentista &&
+                DbFunctions.TruncateTime(c.fecha_hora) == citas.fecha_hora.Date &&
+                c.fecha_hora.Hour == citas.fecha_hora.Hour &&
+                c.fecha_hora.Minute == citas.fecha_hora.Minute
+            );
+
+            if (citaOcupada)
+            {
+                ModelState.AddModelError("", "Ya existe otra cita con este dentista a la misma fecha y hora.");
+            }
+
             if (ModelState.IsValid)
             {
                 db.Entry(citas).State = EntityState.Modified;
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
+
             ViewBag.id_dentista = new SelectList(db.Dentistas, "id_dentista", "nombre", citas.id_dentista);
             ViewBag.id_paciente = new SelectList(db.Pacientes, "id_paciente", "nombres", citas.id_paciente);
             return View(citas);
         }
+
 
         // GET: Citas/Delete/5
         public ActionResult Delete(int? id)

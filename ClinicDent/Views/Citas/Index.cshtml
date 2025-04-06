@@ -79,9 +79,10 @@
                 <a href="@Url.Action("Edit", new { id = item.id_cita })" title="Editar" class="btn btn-sm btn-primary">
                     <i class="fas fa-edit"></i>
                 </a>
-                <a href="@Url.Action("Details", new { id = item.id_cita })" title="Detalles" class="btn btn-sm btn-info">
-                    <i class="fas fa-eye"></i>
+                <a href="@Url.Action("Calendario", "Citas")" title="Ver Calendario" class="btn btn-sm btn-info">
+                    <i class="fas fa-calendar-alt"></i>
                 </a>
+
                 <a href="@Url.Action("Delete", new { id = item.id_cita })" title="Eliminar" class="btn btn-sm btn-danger">
                     <i class="fas fa-trash"></i>
                 </a>
