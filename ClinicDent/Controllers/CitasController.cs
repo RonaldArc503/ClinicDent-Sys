@@ -176,25 +176,26 @@ namespace ClinicDent.Controllers
             return View("Index", citas.ToList());
         }
 
+
         [HttpGet]
         public JsonResult ObtenerEventos()
         {
             var citas = db.Citas
-      .Include(c => c.Pacientes)
-      .Include(c => c.Dentistas)
-      .ToList();
+                .Include(c => c.Pacientes)
+                .Include(c => c.Dentistas)
+                .ToList();
 
             var eventos = citas.Select(c => new
             {
                 id = c.id_cita,
-                title = c.Pacientes.nombres + " - " + c.Dentistas.nombre,
-                start = c.fecha_hora.ToString("s"), // formato ISO 8601
-               
-                estado = c.estado
-            });
+                title = c.Pacientes.nombres + " - " + c.Dentistas.nombre + " - "+ c.estado,
+                start = c.fecha_hora.ToString("yyyy-MM-ddTHH:mm:ss"),
+                estado = c.estado // Aquí puedes agregar el estado de la cita
+            }).ToList();
+
+            Console.WriteLine("Eventos obtenidos: " + eventos.Count);  // Log en el servidor
 
             return Json(eventos, JsonRequestBehavior.AllowGet);
-
         }
 
 

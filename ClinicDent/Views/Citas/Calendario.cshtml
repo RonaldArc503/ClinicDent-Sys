@@ -37,38 +37,6 @@
         transition: box-shadow 0.3s ease;
     }
 
-    /* Redondear celdas y contenedores */
-    .fc-daygrid-day-frame,
-    .fc-daygrid-day,
-    .fc-timegrid-slot,
-    .fc-scrollgrid,
-    .fc-scrollgrid-section,
-    .fc-view-harness {
-        border-radius: 20px !important;
-    }
-
-    /* Redondeo fuerte de la estructura */
-    .fc .fc-scrollgrid,
-    .fc .fc-view-harness {
-        border-radius: 20px !important;
-        overflow: hidden;
-    }
-
-    /* Redondear cabeceras de los días */
-    .fc-col-header-cell {
-        border-radius: 15px !important;
-        text-transform: capitalize;
-        background-color: #f1f3f5;
-    }
-
-    /* Números del día más grandes */
-    .fc .fc-daygrid-day-number {
-        font-size: 1rem;
-        font-weight: 500;
-       
-    }
-
-    /* Redondeo para los eventos */
     .fc-event {
         border-radius: 14px;
         padding: 4px 8px;
@@ -78,7 +46,6 @@
         border: none;
     }
 
-    /* Botones */
     .fc .fc-button {
         border-radius: 50px;
         background-color: #0d6efd !important;
@@ -91,38 +58,43 @@
         background-color: #0b5ed7 !important;
     }
 
-    /* Título del mes */
     .fc .fc-toolbar-title {
         font-size: 1.4rem;
         font-weight: 600;
         color: #212529;
     }
 
-    /* Bordes más visibles entre las celdas */
-    .fc .fc-daygrid-day,
     .fc .fc-daygrid-day-frame,
-    .fc .fc-scrollgrid,
-    .fc .fc-scrollgrid td {
-        border: 1.5px solid #dee2e6 !important;
+    .fc .fc-timegrid-slot {
+        border-radius: 20px !important;
     }
 
-    /* Bordes internos en vistas de semana/día */
-    .fc .fc-timegrid-slot,
-    .fc .fc-timegrid-slot-label,
-    .fc .fc-timegrid-axis {
-        border-top: 1.5px solid #dee2e6 !important;
+    .fc .fc-daygrid-day-number {
+        font-size: 1rem;
+        font-weight: 500;
     }
 
-    /* Encabezados de los días */
-    .fc .fc-col-header-cell-cushion {
-        border-bottom: 1.5px solid #dee2e6;
-        padding-bottom: 6px;
-        display: inline-block;
+    .fc .fc-col-header-cell {
+        border-radius: 15px !important;
+        text-transform: capitalize;
+        background-color: #f1f3f5;
     }
 
-    /* Resaltar día actual opcional (puedes quitar si no lo quieres) */
+    /* Resaltar día actual opcional */
     .fc .fc-day-today {
         background-color: #eaf4ff !important;
+    }
+
+    .resena-flotante {
+        background-color: #fff3cd;
+        border: 1px solid #ffeeba;
+        padding: 10px;
+        margin-top: 5px;
+        border-radius: 12px;
+        font-size: 0.85rem;
+        color: #856404;
+        max-width: 250px;
+        box-shadow: 0 0 8px rgba(0,0,0,0.1);
     }
 </style>
 
@@ -145,20 +117,43 @@
                 day: 'Día'
             },
             events: '/Citas/ObtenerEventos',
-
             eventClick: function (info) {
+                console.log(info);  // Verifica que la información del evento está disponible
                 info.jsEvent.preventDefault();
-                calendar.changeView('timeGridDay', info.event.start);
+
+                // Cambiar a la vista de día
+                var startDate = new Date(info.event.start);
+                calendar.changeView('timeGridDay', startDate);
+
+                // Mostrar la reseña inmediatamente sin esperar
+                mostrarResena(info);
             },
+
 
             eventDidMount: function (info) {
                 var hora = new Date(info.event.start);
                 var opciones = { hour: '2-digit', minute: '2-digit', hour12: true };
                 var horaFormateada = hora.toLocaleTimeString('es-ES', opciones);
-                info.el.setAttribute("title", info.event.title + " - " + horaFormateada);
+
+                // Agregar el estado al evento
+                var estado = info.event.extendedProps.estado; // El estado recibido
+                info.el.setAttribute("title", info.event.title + " - " + horaFormateada + " - Estado: " + estado);
+
+                // Opcional: Cambiar el color del evento según el estado
+                if (estado === "confirmada") {
+                    info.el.style.backgroundColor = "#28a745";  // Verde para confirmada
+                } else if (estado === "pendiente") {
+                    info.el.style.backgroundColor = "#ffc107";  // Amarillo para pendiente
+                } else {
+                    info.el.style.backgroundColor = "#dc3545";  // Rojo para cancelada
+                }
             }
+
         });
+
+      
 
         calendar.render();
     });
 </script>
+
