@@ -12,7 +12,7 @@ namespace ClinicDent.Controllers
 {
     public class CitasController : Controller
     {
-        private ClinicaDentalAzure db = new ClinicaDentalAzure();
+        private ClinicaDentalLocal db = new ClinicaDentalLocal();
 
         // GET: Citas
         public ActionResult Index()
@@ -138,5 +138,44 @@ namespace ClinicDent.Controllers
         {
             return View();
         }
+
+
+        // GET: Citas/Search
+        public ActionResult Search(string searchTerm, string fechaHora, bool today = false, bool all = false)
+        {
+            var citas = db.Citas.Include(c => c.Dentistas).Include(c => c.Pacientes).AsQueryable();
+
+            if (all)
+            {
+                // Solo mostramos todas las citas sin filtros
+                return View("Index", citas.ToList());
+            }
+            // Search both patient and dentist names with single term
+            if (!string.IsNullOrEmpty(searchTerm))
+            {
+                searchTerm = searchTerm.ToLower();
+                citas = citas.Where(c =>
+                    c.Pacientes.nombres.ToLower().Contains(searchTerm) ||
+                    c.Dentistas.nombre.ToLower().Contains(searchTerm));
+            }
+
+            // Handle date filtering
+            if (today)
+            {
+                citas = citas.Where(c => DbFunctions.TruncateTime(c.fecha_hora) == DbFunctions.TruncateTime(DateTime.Today));
+            }
+
+            else if (!string.IsNullOrEmpty(fechaHora))
+            {
+                if (DateTime.TryParse(fechaHora, out DateTime fecha))
+                {
+                    citas = citas.Where(c => DbFunctions.TruncateTime(c.fecha_hora) == DbFunctions.TruncateTime(fecha));
+                }
+            }
+
+            return View("Index", citas.ToList());
+        }
+
     }
+
 }
