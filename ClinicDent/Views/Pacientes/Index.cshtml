@@ -1,69 +1,98 @@
 ﻿@model IEnumerable<ClinicDent.Models.Pacientes>
 
 @{
-    ViewBag.Title = "Index";
+    ViewBag.Title = "Pacientes";
 }
 
-<h2>Index</h2>
+<style>
+    .small-checkbox {
+        width: 1.2rem; /* Tamaño más pequeño del checkbox */
+        height: 1rem; /* Tamaño más pequeño del checkbox */
+    }
+
+    .small-checkbox-label {
+        font-size: 0.8rem; /* Reduce el tamaño de la fuente */
+        line-height: 0.8rem; /* Ajusta la altura de la línea para reducir la altura */
+    }
+</style>
+
+<h2>Pacientes</h2>
 
 <p>
-    @Html.ActionLink("Create New", "Create")
+    @Html.ActionLink("Registrar Paciente", "Create", null, new { @class = "btn btn-primary" })
 </p>
+
 <table class="table">
     <tr>
         <th>
-            @Html.DisplayNameFor(model => model.nombres)
+            Nombres
         </th>
         <th>
-            @Html.DisplayNameFor(model => model.apellidos)
+            Apellidos
         </th>
         <th>
-            @Html.DisplayNameFor(model => model.fecha_nacimiento)
+            Edad
         </th>
         <th>
-            @Html.DisplayNameFor(model => model.telefono)
+            Telefono
         </th>
         <th>
-            @Html.DisplayNameFor(model => model.genero)
+            Genero
         </th>
         <th>
-            @Html.DisplayNameFor(model => model.alergias)
+            Alerjias
         </th>
         <th>
-            @Html.DisplayNameFor(model => model.activo)
+            Estado
         </th>
         <th></th>
     </tr>
 
-@foreach (var item in Model) {
-    <tr>
-        <td>
-            @Html.DisplayFor(modelItem => item.nombres)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.apellidos)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.fecha_nacimiento)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.telefono)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.genero)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.alergias)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.activo)
-        </td>
-        <td>
-            @Html.ActionLink("Edit", "Edit", new { id=item.id_paciente }) |
-            @Html.ActionLink("Details", "Details", new { id=item.id_paciente }) |
-            @Html.ActionLink("Delete", "Delete", new { id=item.id_paciente })
-        </td>
-    </tr>
-}
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.nombres)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.apellidos)
+            </td>
+            <td>@item.Edad @((item.Edad == 1) ? "año" : "años")</td>
+
+
+
+
+
+
+            <td>
+                @Html.DisplayFor(modelItem => item.telefono)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.genero)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.alergias)
+            </td>
+            <td>
+                @if (item.activo)
+                {
+                    <input type="checkbox" class="btn-check small-checkbox" checked disabled id="activo-@item.id_paciente">
+                    <label class="btn btn-success small-checkbox-label" for="activo-@item.id_paciente">Activo</label>
+                }
+                else
+                {
+                    <input type="checkbox" class="btn-check small-checkbox" disabled id="inactivo-@item.id_paciente">
+                    <label class="btn btn-danger small-checkbox-label" for="inactivo-@item.id_paciente">Inactivo</label>
+                }
+            </td>
+
+
+            <td>
+                @Html.ActionLink("Editar", "Edit", new { id = item.id_paciente }, new { @class = "btn btn-warning btn-sm" }) |
+                @Html.ActionLink("Expediente", "Details", new { id = item.id_paciente }, new { @class = "btn btn-info btn-sm" }) |
+                @Html.ActionLink("Eliminar", "Delete", new { id = item.id_paciente }, new { @class = "btn btn-danger btn-sm" })
+            </td>
+        </tr>
+    }
 
 </table>
