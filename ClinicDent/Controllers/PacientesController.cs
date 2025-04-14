@@ -15,9 +15,53 @@ namespace ClinicDent.Controllers
         private ClinicaDentalLocal db = new ClinicaDentalLocal();
 
         // GET: Pacientes
-        public ActionResult Index()
+        public ActionResult Index(string searchString = null, string filterBy = null, string estadoFilter = null)
         {
-            return View(db.Pacientes.ToList());
+            var pacientes = db.Pacientes.AsQueryable();
+
+            // Filtro por texto de búsqueda
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                searchString = searchString.ToLower();
+
+                switch (filterBy)
+                {
+                    case "nombres":
+                        pacientes = pacientes.Where(p => p.nombres.ToLower().Contains(searchString));
+                        break;
+                    case "apellidos":
+                        pacientes = pacientes.Where(p => p.apellidos.ToLower().Contains(searchString));
+                        break;
+                    case "telefono":
+                        pacientes = pacientes.Where(p => p.telefono.Contains(searchString));
+                        break;
+                    case "ambos":
+                        pacientes = pacientes.Where(p =>
+                            p.nombres.ToLower().Contains(searchString) ||
+                            p.apellidos.ToLower().Contains(searchString));
+                        break;
+                    default:
+                        pacientes = pacientes.Where(p =>
+                            p.nombres.ToLower().Contains(searchString) ||
+                            p.apellidos.ToLower().Contains(searchString) ||
+                            p.telefono.Contains(searchString));
+                        break;
+                }
+            }
+
+            // Filtro por estado (activo/inactivo)
+            if (!String.IsNullOrEmpty(estadoFilter) && estadoFilter != "Todos")
+            {
+                bool estado = estadoFilter == "Activos";
+                pacientes = pacientes.Where(p => p.activo == estado);
+            }
+
+            // Pasar parámetros de búsqueda a la vista
+            ViewBag.CurrentFilter = searchString;
+            ViewBag.FilterBy = filterBy;
+            ViewBag.EstadoFilter = estadoFilter;
+
+            return View(pacientes.OrderBy(p => p.apellidos).ThenBy(p => p.nombres).ToList());
         }
 
         // GET: Pacientes/Details/5
@@ -27,12 +71,22 @@ namespace ClinicDent.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Pacientes pacientes = db.Pacientes.Find(id);
-            if (pacientes == null)
+            Pacientes paciente = db.Pacientes.Find(id);
+            if (paciente == null)
             {
                 return HttpNotFound();
             }
-            return View(pacientes);
+
+            // Obtener las próximas citas del paciente (desde hoy en adelante)
+            var proximasCitas = db.Citas
+                .Include(c => c.Dentistas)
+                .Where(c => c.id_paciente == id && c.fecha_hora >= DateTime.Now)
+                .OrderBy(c => c.fecha_hora)
+                .ToList();
+
+            ViewBag.ProximasCitas = proximasCitas;
+
+            return View(paciente);
         }
 
         // GET: Pacientes/Create
@@ -42,20 +96,18 @@ namespace ClinicDent.Controllers
         }
 
         // POST: Pacientes/Create
-        // Para protegerse de ataques de publicación excesiva, habilite las propiedades específicas a las que quiere enlazarse. Para obtener 
-        // más detalles, vea https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "id_paciente,nombres,apellidos,fecha_nacimiento,telefono,genero,alergias,activo")] Pacientes pacientes)
+        public ActionResult Create([Bind(Include = "id_paciente,nombres,apellidos,fecha_nacimiento,genero,telefono,alergias,activo")] Pacientes paciente)
         {
             if (ModelState.IsValid)
             {
-                db.Pacientes.Add(pacientes);
+                db.Pacientes.Add(paciente);
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
 
-            return View(pacientes);
+            return View(paciente);
         }
 
         // GET: Pacientes/Edit/5
@@ -65,28 +117,26 @@ namespace ClinicDent.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Pacientes pacientes = db.Pacientes.Find(id);
-            if (pacientes == null)
+            Pacientes paciente = db.Pacientes.Find(id);
+            if (paciente == null)
             {
                 return HttpNotFound();
             }
-            return View(pacientes);
+            return View(paciente);
         }
 
         // POST: Pacientes/Edit/5
-        // Para protegerse de ataques de publicación excesiva, habilite las propiedades específicas a las que quiere enlazarse. Para obtener 
-        // más detalles, vea https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "id_paciente,nombres,apellidos,fecha_nacimiento,telefono,genero,alergias,activo")] Pacientes pacientes)
+        public ActionResult Edit([Bind(Include = "id_paciente,nombres,apellidos,fecha_nacimiento,genero,telefono,alergias,activo")] Pacientes paciente)
         {
             if (ModelState.IsValid)
             {
-                db.Entry(pacientes).State = EntityState.Modified;
+                db.Entry(paciente).State = EntityState.Modified;
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
-            return View(pacientes);
+            return View(paciente);
         }
 
         // GET: Pacientes/Delete/5
@@ -96,12 +146,12 @@ namespace ClinicDent.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Pacientes pacientes = db.Pacientes.Find(id);
-            if (pacientes == null)
+            Pacientes paciente = db.Pacientes.Find(id);
+            if (paciente == null)
             {
                 return HttpNotFound();
             }
-            return View(pacientes);
+            return View(paciente);
         }
 
         // POST: Pacientes/Delete/5
@@ -109,8 +159,8 @@ namespace ClinicDent.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(int id)
         {
-            Pacientes pacientes = db.Pacientes.Find(id);
-            db.Pacientes.Remove(pacientes);
+            Pacientes paciente = db.Pacientes.Find(id);
+            db.Pacientes.Remove(paciente);
             db.SaveChanges();
             return RedirectToAction("Index");
         }

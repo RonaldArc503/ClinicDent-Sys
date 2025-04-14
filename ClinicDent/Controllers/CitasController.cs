@@ -15,10 +15,78 @@ namespace ClinicDent.Controllers
         private ClinicaDentalLocal db = new ClinicaDentalLocal();
 
         // GET: Citas
-        public ActionResult Index()
+        public ActionResult Index(string searchString, string filterBy, string estadoFilter, string fechaFilter)
         {
-            var citas = db.Citas.Include(c => c.Dentistas).Include(c => c.Pacientes);
-            return View(citas.ToList());
+            var citas = db.Citas.Include(c => c.Dentistas).Include(c => c.Pacientes).AsQueryable();
+
+            // Filtro por texto de búsqueda
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                searchString = searchString.ToLower();
+
+                switch (filterBy)
+                {
+                    case "paciente":
+                        citas = citas.Where(c => c.Pacientes.nombres.ToLower().Contains(searchString));
+                        break;
+                    case "dentista":
+                        citas = citas.Where(c => c.Dentistas.nombre.ToLower().Contains(searchString));
+                        break;
+                    case "ambos":
+                        citas = citas.Where(c =>
+                            c.Pacientes.nombres.ToLower().Contains(searchString) ||
+                            c.Dentistas.nombre.ToLower().Contains(searchString));
+                        break;
+                    default:
+                        citas = citas.Where(c =>
+                            c.Pacientes.nombres.ToLower().Contains(searchString) ||
+                            c.Dentistas.nombre.ToLower().Contains(searchString) ||
+                            c.estado.ToLower().Contains(searchString));
+                        break;
+                }
+            }
+
+            // Filtro por estado
+            if (!String.IsNullOrEmpty(estadoFilter) && estadoFilter != "Todos")
+            {
+                citas = citas.Where(c => c.estado == estadoFilter);
+            }
+
+            // Filtro por fecha
+            if (!String.IsNullOrEmpty(fechaFilter))
+            {
+                switch (fechaFilter)
+                {
+                    case "hoy":
+                        citas = citas.Where(c => DbFunctions.TruncateTime(c.fecha_hora) == DbFunctions.TruncateTime(DateTime.Today));
+                        break;
+                    case "semana":
+                        var startOfWeek = DateTime.Today.AddDays(-(int)DateTime.Today.DayOfWeek);
+                        var endOfWeek = startOfWeek.AddDays(7);
+                        citas = citas.Where(c => c.fecha_hora >= startOfWeek && c.fecha_hora < endOfWeek);
+                        break;
+                    case "mes":
+                        var startOfMonth = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
+                        var endOfMonth = startOfMonth.AddMonths(1);
+                        citas = citas.Where(c => c.fecha_hora >= startOfMonth && c.fecha_hora < endOfMonth);
+                        break;
+                    case "pasadas":
+                        citas = citas.Where(c => DbFunctions.TruncateTime(c.fecha_hora) < DbFunctions.TruncateTime(DateTime.Today));
+                        break;
+                    case "futuras":
+                        citas = citas.Where(c => DbFunctions.TruncateTime(c.fecha_hora) >= DbFunctions.TruncateTime(DateTime.Today));
+                        break;
+                }
+            }
+
+            ViewBag.CurrentFilter = searchString;
+            ViewBag.FilterBy = filterBy;
+            ViewBag.EstadoFilter = estadoFilter;
+            ViewBag.FechaFilter = fechaFilter;
+
+            ViewBag.Estados = new List<string> { "Confirmada", "Pendiente", "Cancelada", "Completada" };
+
+            return View(citas.OrderBy(c => c.fecha_hora).ToList());
         }
 
         // GET: Citas/Details/5
@@ -45,17 +113,15 @@ namespace ClinicDent.Controllers
         }
 
         // POST: Citas/Create
-        // Para protegerse de ataques de publicación excesiva, habilite las propiedades específicas a las que quiere enlazarse. Para obtener 
-        // más detalles, vea https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Create([Bind(Include = "id_cita,id_paciente,id_dentista,fecha_hora,estado")] Citas citas)
         {
-            // Validación: ¿Ya existe una cita con el mismo dentista a la misma fecha y hora?
             bool citaExiste = db.Citas.Any(c =>
                 c.id_dentista == citas.id_dentista &&
                 DbFunctions.TruncateTime(c.fecha_hora) == citas.fecha_hora.Date &&
-                c.fecha_hora.Hour == citas.fecha_hora.Hour 
+                c.fecha_hora.Hour == citas.fecha_hora.Hour &&
+                c.fecha_hora.Minute == citas.fecha_hora.Minute
             );
 
             if (citaExiste)
@@ -75,7 +141,6 @@ namespace ClinicDent.Controllers
             return View(citas);
         }
 
-
         // GET: Citas/Edit/5
         public ActionResult Edit(int? id)
         {
@@ -94,13 +159,10 @@ namespace ClinicDent.Controllers
         }
 
         // POST: Citas/Edit/5
-        // Para protegerse de ataques de publicación excesiva, habilite las propiedades específicas a las que quiere enlazarse. Para obtener 
-        // más detalles, vea https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Edit([Bind(Include = "id_cita,id_paciente,id_dentista,fecha_hora,estado")] Citas citas)
         {
-            // Validación: Evitar doble cita para el mismo dentista a la misma fecha y hora (excepto la misma cita)
             bool citaOcupada = db.Citas.Any(c =>
                 c.id_cita != citas.id_cita &&
                 c.id_dentista == citas.id_dentista &&
@@ -125,7 +187,6 @@ namespace ClinicDent.Controllers
             ViewBag.id_paciente = new SelectList(db.Pacientes, "id_paciente", "nombres", citas.id_paciente);
             return View(citas);
         }
-
 
         // GET: Citas/Delete/5
         public ActionResult Delete(int? id)
@@ -153,6 +214,67 @@ namespace ClinicDent.Controllers
             return RedirectToAction("Index");
         }
 
+        public ActionResult Calendario()
+        {
+            return View();
+        }
+
+        // En CitasController.cs
+
+        [HttpGet]
+        public JsonResult ObtenerEventos()
+        {
+            try
+            {
+                var citas = db.Citas
+                    .Include(c => c.Pacientes)
+                    .Include(c => c.Dentistas)
+                    .Where(c => c.fecha_hora != null)
+                    .ToList();
+
+                var eventos = citas.Select(c => new
+                {
+                    id = c.id_cita,
+                    title = $"{c.Pacientes?.nombres ?? "Sin paciente"} - {c.Dentistas?.nombre ?? "Sin dentista"} - {c.estado}",
+                    start = c.fecha_hora.ToString("yyyy-MM-ddTHH:mm:ss"),
+                    end = c.fecha_hora.AddHours(1).ToString("yyyy-MM-ddTHH:mm:ss"), // Duración de 1 hora
+                    estado = c.estado
+                }).ToList();
+
+                return Json(eventos, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                // Log del error
+                System.Diagnostics.Debug.WriteLine($"Error en ObtenerEventos: {ex.Message}");
+                return Json(new { error = "Error al obtener las citas" }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        private string GetClaseEventoCalendario(string estado)
+        {
+            switch (estado?.ToLower())
+            {
+                case "confirmada": return "fc-event-confirmada";
+                case "pendiente": return "fc-event-pendiente";
+                case "cancelada": return "fc-event-cancelada";
+                case "completada": return "fc-event-completada";
+                default: return "";
+            }
+        }
+
+        private string GetClaseEvento(string estado)
+        {
+            switch (estado?.ToLower())
+            {
+                case "confirmada": return "evento-confirmado";
+                case "pendiente": return "evento-pendiente";
+                case "cancelada": return "evento-cancelado";
+                case "completada": return "evento-completado";
+                default: return "evento-default";
+            }
+        }
+
         protected override void Dispose(bool disposing)
         {
             if (disposing)
@@ -162,72 +284,6 @@ namespace ClinicDent.Controllers
             base.Dispose(disposing);
         }
 
-        // Acción para mostrar el calendario
-        public ActionResult Calendario()
-        {
-            return View();
-        }
-
-
-        // GET: Citas/Search
-        public ActionResult Search(string searchTerm, string fechaHora, bool today = false, bool all = false)
-        {
-            var citas = db.Citas.Include(c => c.Dentistas).Include(c => c.Pacientes).AsQueryable();
-
-            if (all)
-            {
-                // Solo mostramos todas las citas sin filtros
-                return View("Index", citas.ToList());
-            }
-            // Search both patient and dentist names with single term
-            if (!string.IsNullOrEmpty(searchTerm))
-            {
-                searchTerm = searchTerm.ToLower();
-                citas = citas.Where(c =>
-                    c.Pacientes.nombres.ToLower().Contains(searchTerm) ||
-                    c.Dentistas.nombre.ToLower().Contains(searchTerm));
-            }
-
-            // Handle date filtering
-            if (today)
-            {
-                citas = citas.Where(c => DbFunctions.TruncateTime(c.fecha_hora) == DbFunctions.TruncateTime(DateTime.Today));
-            }
-
-            else if (!string.IsNullOrEmpty(fechaHora))
-            {
-                if (DateTime.TryParse(fechaHora, out DateTime fecha))
-                {
-                    citas = citas.Where(c => DbFunctions.TruncateTime(c.fecha_hora) == DbFunctions.TruncateTime(fecha));
-                }
-            }
-
-            return View("Index", citas.ToList());
-        }
-
-
-        [HttpGet]
-        public JsonResult ObtenerEventos()
-        {
-            var citas = db.Citas
-                .Include(c => c.Pacientes)
-                .Include(c => c.Dentistas)
-                .ToList();
-
-            var eventos = citas.Select(c => new
-            {
-                id = c.id_cita,
-                title = c.Pacientes.nombres + " - " + c.Dentistas.nombre + " - "+ c.estado,
-                start = c.fecha_hora.ToString("yyyy-MM-ddTHH:mm:ss"),
-                estado = c.estado // Aquí puedes agregar el estado de la cita
-            }).ToList();
-
-            Console.WriteLine("Eventos obtenidos: " + eventos.Count);  // Log en el servidor
-
-            return Json(eventos, JsonRequestBehavior.AllowGet);
-        }
-
 
     }
-
 }

@@ -1,98 +1,241 @@
 ﻿@model IEnumerable<ClinicDent.Models.Pacientes>
 
 @{
-    ViewBag.Title = "Pacientes";
+    ViewBag.Title = "Gestión de Pacientes";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
+<div class="container-fluid py-4">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <div class="d-flex justify-content-between align-items-center">
+                <h3 class="mb-0">
+                    <i class="fas fa-user-injured me-2"></i>@ViewBag.Title
+                </h3>
+                <a href="@Url.Action("Create")" class="btn btn-light">
+                    <i class="fas fa-plus-circle me-1"></i> Nuevo Paciente
+                </a>
+            </div>
+        </div>
+
+        <div class="card-body">
+            <!-- Barra de búsqueda mejorada -->
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    @using (Html.BeginForm("Index", "Pacientes", FormMethod.Get))
+                    {
+                        <div class="row g-3 align-items-end">
+                            <!-- Cambiado a align-items-end para alinear la parte inferior -->
+                            <!-- Búsqueda por texto -->
+                            <div class="col-md-5">
+                                <label class="form-label mb-1">Buscar paciente</label>
+                                <div class="input-group">
+                                    <select name="filterBy" class="form-select" style="width: 160px;">
+                                        <option value="ambos" @(ViewBag.FilterBy == "ambos" ? "selected" : "")>Nombres/Apellidos</option>
+                                        <option value="nombres" @(ViewBag.FilterBy == "nombres" ? "selected" : "")>Solo Nombres</option>
+                                        <option value="apellidos" @(ViewBag.FilterBy == "apellidos" ? "selected" : "")>Solo Apellidos</option>
+                                        <option value="telefono" @(ViewBag.FilterBy == "telefono" ? "selected" : "")>Teléfono</option>
+                                    </select>
+                                    <input type="text" name="searchString" class="form-control"
+                                           placeholder="Ingrese términos de búsqueda..." value="@ViewBag.CurrentFilter">
+                                </div>
+                            </div>
+
+                            <!-- Filtro por estado -->
+                            <div class="col-md-3">
+                                <label class="form-label mb-1">Filtrar por estado</label>
+                                <select name="estadoFilter" class="form-select">
+                                    <option value="">Todos los pacientes</option>
+                                    <option value="Activos" @(ViewBag.EstadoFilter == "Activos" ? "selected" : "")>Activos</option>
+                                    <option value="Inactivos" @(ViewBag.EstadoFilter == "Inactivos" ? "selected" : "")>Inactivos</option>
+                                </select>
+                            </div>
+
+                            <!-- Botones alineados en la parte inferior -->
+                            <div class="col-md-4 d-flex align-items-end">
+                                <div class="d-flex gap-2" style="height: 38px;">
+                                    <button type="submit" class="btn btn-primary" style="height: 100%;">
+                                        <i class="fas fa-search me-1"></i> Buscar
+                                    </button>
+                                    @if (!string.IsNullOrEmpty(ViewBag.CurrentFilter) || !string.IsNullOrEmpty(ViewBag.EstadoFilter))
+                                    {
+                                        <a href="@Url.Action("Index")" class="btn btn-outline-secondary" style="height: 100%;">
+                                            <i class="fas fa-undo me-1"></i> Limpiar
+                                        </a>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover table-striped">
+                    <thead class="thead-light">
+                        <tr>
+                            <th>Nombres</th>
+                            <th>Apellidos</th>
+                            <th>Edad</th>
+                            <th>Teléfono</th>
+                            <th>Género</th>
+                            <th>Alergias</th>
+                            <th>Estado</th>
+                            <th class="text-end">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Any())
+                        {
+                            foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>@Html.DisplayFor(modelItem => item.nombres)</td>
+                                    <td>@Html.DisplayFor(modelItem => item.apellidos)</td>
+                                    <td>@item.Edad @((item.Edad == 1) ? "año" : "años")</td>
+                                    <td>@Html.DisplayFor(modelItem => item.telefono)</td>
+                                    <td>@Html.DisplayFor(modelItem => item.genero)</td>
+                                    <td>@Html.DisplayFor(modelItem => item.alergias)</td>
+                                    <td>
+                                        @if (item.activo)
+                                        {
+                                            <span class="badge bg-success">Activo</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger">Inactivo</span>
+                                        }
+                                    </td>
+                                    <td class="text-end">
+                                        <div class="btn-group" role="group">
+                                            <a href="@Url.Action("Edit", new { id = item.id_paciente })" class="btn btn-sm btn-outline-primary" title="Editar">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <a href="@Url.Action("Details", new { id = item.id_paciente })" class="btn btn-sm btn-outline-info" title="Expediente">
+                                                Expediente
+                                            </a>
+                                            <a href="@Url.Action("Delete", new { id = item.id_paciente })" class="btn btn-sm btn-outline-danger" title="Eliminar">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="8" class="text-center">
+                                    <div class="alert alert-info">
+                                        No se encontraron pacientes
+                                        @if (!string.IsNullOrEmpty(ViewBag.CurrentFilter) || !string.IsNullOrEmpty(ViewBag.EstadoFilter))
+                                        {
+                                            <span>con los filtros actuales</span>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div> 
+</div> 
+
 <style>
-    .small-checkbox {
-        width: 1.2rem; /* Tamaño más pequeño del checkbox */
-        height: 1rem; /* Tamaño más pequeño del checkbox */
+    .card {
+        border-radius: 10px;
+        overflow: hidden;
+        border: none;
     }
 
-    .small-checkbox-label {
-        font-size: 0.8rem; /* Reduce el tamaño de la fuente */
-        line-height: 0.8rem; /* Ajusta la altura de la línea para reducir la altura */
+    .card-header {
+        padding: 1.25rem 1.5rem;
+    }
+
+    .table th {
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        color: #6c757d;
+        border-top: none;
+    }
+
+    .table td {
+        vertical-align: middle;
+    }
+
+    .badge {
+        font-size: 0.75rem;
+        padding: 0.35em 0.65em;
+        font-weight: 500;
+    }
+
+    .btn-group .btn {
+        border-radius: 4px !important;
+        margin-left: 8px;
+        margin-right: 8px;
+    }
+
+        .btn-group .btn:first-child {
+            margin-left: 0;
+        }
+
+        .btn-group .btn:last-child {
+            margin-right: 0;
+        }
+
+    .table-hover tbody tr:hover {
+        background-color: rgba(13, 110, 253, 0.05);
+    }
+
+    .table-striped tbody tr:nth-of-type(odd) {
+        background-color: rgba(0, 0, 0, 0.02);
+    }
+
+    .btn-outline-info {
+        color: #0dcaf0;
+        border-color: #0dcaf0;
+    }
+
+        .btn-outline-info:hover {
+            color: #fff;
+            background-color: #0dcaf0;
+            border-color: #0dcaf0;
+        }
+
+    .input-group .form-control {
+        flex: 1;
+        min-width: 220px;
+    }
+
+
+    /* Mejoras en la barra de búsqueda */
+    .input-group .form-control,
+    .input-group .form-select {
+        height: 38px;
+    }
+
+    .form-label {
+        font-size: 0.85rem;
+        color: #6c757d;
+        margin-bottom: 0.3rem;
+        font-weight: 500;
+    }
+
+    .alert-info {
+        background-color: #f0f8ff;
+        border-color: #d1e7ff;
+        color: #0c5460;
+    }
+
+    /* Espaciado mejorado */
+    .card-body {
+        padding: 1.5rem;
+    }
+
+    .mb-4 {
+        margin-bottom: 1.8rem !important;
     }
 </style>
-
-<h2>Pacientes</h2>
-
-<p>
-    @Html.ActionLink("Registrar Paciente", "Create", null, new { @class = "btn btn-primary" })
-</p>
-
-<table class="table">
-    <tr>
-        <th>
-            Nombres
-        </th>
-        <th>
-            Apellidos
-        </th>
-        <th>
-            Edad
-        </th>
-        <th>
-            Telefono
-        </th>
-        <th>
-            Genero
-        </th>
-        <th>
-            Alerjias
-        </th>
-        <th>
-            Estado
-        </th>
-        <th></th>
-    </tr>
-
-    @foreach (var item in Model)
-    {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.nombres)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.apellidos)
-            </td>
-            <td>@item.Edad @((item.Edad == 1) ? "año" : "años")</td>
-
-
-
-
-
-
-            <td>
-                @Html.DisplayFor(modelItem => item.telefono)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.genero)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.alergias)
-            </td>
-            <td>
-                @if (item.activo)
-                {
-                    <input type="checkbox" class="btn-check small-checkbox" checked disabled id="activo-@item.id_paciente">
-                    <label class="btn btn-success small-checkbox-label" for="activo-@item.id_paciente">Activo</label>
-                }
-                else
-                {
-                    <input type="checkbox" class="btn-check small-checkbox" disabled id="inactivo-@item.id_paciente">
-                    <label class="btn btn-danger small-checkbox-label" for="inactivo-@item.id_paciente">Inactivo</label>
-                }
-            </td>
-
-
-            <td>
-                @Html.ActionLink("Editar", "Edit", new { id = item.id_paciente }, new { @class = "btn btn-warning btn-sm" }) |
-                @Html.ActionLink("Expediente", "Details", new { id = item.id_paciente }, new { @class = "btn btn-info btn-sm" }) |
-                @Html.ActionLink("Eliminar", "Delete", new { id = item.id_paciente }, new { @class = "btn btn-danger btn-sm" })
-            </td>
-        </tr>
-    }
-
-</table>

@@ -3,30 +3,36 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h2 class="titulo-calendario">Calendario de Citas</h2>
-<a href="@Url.Action("Create")" class="btn btn-success" title="Registrar nueva cita">
-    <i class="fas fa-plus"></i> Registrar nueva cita
-</a>
-<div id="calendar"></div>
+<div class="container-fluid py-4">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <div class="d-flex justify-content-between align-items-center">
+                <h3 class="mb-0">
+                    <i class="fas fa-calendar-alt me-2"></i>@ViewBag.Title
+                </h3>
+                <a href="@Url.Action("Create")" class="btn btn-light">
+                    <i class="fas fa-plus-circle me-1"></i> Nueva Cita
+                </a>
+            </div>
+        </div>
+        <div class="card-body">
+            <div id="calendar"></div>
+        </div>
+    </div>
+</div>
 
-<!-- Estilos de FullCalendar -->
-<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet" />
-
-<!-- Scripts de FullCalendar -->
-<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/locales/es.global.min.js"></script>
+<!-- Usamos FullCalendar v5.10.1 que es estable -->
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/locales/es.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
 <style>
+    /* Mantenemos tus estilos originales */
     body {
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         background-color: #f8f9fa;
-    }
-
-    .titulo-calendario {
-        text-align: center;
-        font-size: 2rem;
-        margin-top: 30px;
-        color: #343a40;
     }
 
     #calendar {
@@ -36,75 +42,71 @@
         border-radius: 30px;
         box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
         background-color: white;
-        transition: box-shadow 0.3s ease;
+        height: 700px;
     }
 
     .fc-event {
         border-radius: 14px;
         padding: 4px 8px;
         font-size: 0.95rem;
-        background-color: #198754 !important;
-        color: white !important;
         border: none;
+        cursor: pointer;
     }
 
-    .fc .fc-button {
-        border-radius: 50px;
+    .fc-event-cancelada {
+        background-color: #dc3545 !important;
+        color: white !important;
+    }
+
+    .fc-event-pendiente {
+        background-color: #ffc107 !important;
+        color: #212529 !important;
+    }
+
+    .fc-event-confirmada {
+        background-color: #28a745 !important;
+        color: white !important;
+    }
+
+    .fc-event-completada {
+        background-color: #17a2b8 !important;
+        color: white !important;
+    }
+
+    .fc-button {
+        border-radius: 50px !important;
         background-color: #0d6efd !important;
-        padding: 8px 16px;
-        font-size: 0.9rem;
-        font-weight: 500;
+        padding: 8px 16px !important;
+        font-size: 0.9rem !important;
+        font-weight: 500 !important;
+        border: none !important;
     }
 
-    .fc .fc-button-primary:not(:disabled):hover {
+    .fc-button:hover {
         background-color: #0b5ed7 !important;
     }
 
-    .fc .fc-toolbar-title {
+    .fc-toolbar-title {
         font-size: 1.4rem;
         font-weight: 600;
         color: #212529;
     }
 
-    .fc .fc-daygrid-day-frame,
-    .fc .fc-timegrid-slot {
-        border-radius: 20px !important;
-    }
-
-    .fc .fc-daygrid-day-number {
-        font-size: 1rem;
-        font-weight: 500;
-    }
-
-    .fc .fc-col-header-cell {
-        border-radius: 15px !important;
-        text-transform: capitalize;
-        background-color: #f1f3f5;
-    }
-
-    /* Resaltar día actual opcional */
-    .fc .fc-day-today {
-        background-color: #eaf4ff !important;
-    }
-
-    .resena-flotante {
-        background-color: #fff3cd;
-        border: 1px solid #ffeeba;
-        padding: 10px;
-        margin-top: 5px;
-        border-radius: 12px;
-        font-size: 0.85rem;
-        color: #856404;
-        max-width: 250px;
-        box-shadow: 0 0 8px rgba(0,0,0,0.1);
+  
     }
 </style>
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        var calendarEl = document.getElementById('calendar');
+        const calendarEl = document.getElementById('calendar');
 
-        var calendar = new FullCalendar.Calendar(calendarEl, {
+        if (!calendarEl) {
+            console.error('No se encontró el elemento del calendario');
+            return;
+        }
+
+        // Configuración del calendario (versión 5)
+        const calendar = new FullCalendar.Calendar(calendarEl, {
             initialView: 'dayGridMonth',
             locale: 'es',
             headerToolbar: {
@@ -118,46 +120,86 @@
                 week: 'Semana',
                 day: 'Día'
             },
-            allDayText: 'Todo el día',
-
-            events: '/Citas/ObtenerEventos',
+            events: {
+                url: '/Citas/ObtenerEventos',
+                method: 'GET',
+                failure: function (error) {
+                    console.error('Error al cargar eventos:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'No se pudieron cargar las citas. Por favor, intente nuevamente.',
+                        confirmButtonColor: '#0d6efd'
+                    });
+                }
+            },
             eventClick: function (info) {
-                console.log(info);  // Verifica que la información del evento está disponible
                 info.jsEvent.preventDefault();
 
-                // Cambiar a la vista de día
-                var startDate = new Date(info.event.start);
-                calendar.changeView('timeGridDay', startDate);
+                const startDate = new Date(info.event.start);
+                const options = {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                };
 
-                // Mostrar la reseña inmediatamente sin esperar
-                mostrarResena(info);
+                Swal.fire({
+                    title: info.event.title.split(' - ')[0] + ' - ' + info.event.title.split(' - ')[1],
+                    html: `
+                        <p><strong>Fecha:</strong> ${startDate.toLocaleDateString('es-ES', options)}</p>
+                        <p><strong>Estado:</strong> ${info.event.extendedProps?.estado || info.event.title.split(' - ')[2]}</p>
+                    `,
+                    icon: 'info',
+                    confirmButtonColor: '#0d6efd',
+                    showCancelButton: true,
+                    confirmButtonText: 'Cerrar',
+                    cancelButtonText: 'Editar',
+                    footer: '<a href="/Citas" class="btn btn-link">Ver todas las citas</a>'
+                }).then((result) => {
+                    if (result.dismiss === Swal.DismissReason.cancel) {
+                        window.location.href = `/Citas/Edit/${info.event.id}`;
+                    }
+                });
             },
-
-
             eventDidMount: function (info) {
-                var hora = new Date(info.event.start);
-                var opciones = { hour: '2-digit', minute: '2-digit', hour12: true };
-                var horaFormateada = hora.toLocaleTimeString('es-ES', opciones);
-
-                // Agregar el estado al evento
-                var estado = info.event.extendedProps.estado; // El estado recibido
-                info.el.setAttribute("title", info.event.title + " - " + horaFormateada + " - Estado: " + estado);
-
-                // Opcional: Cambiar el color del evento según el estado
-                if (estado === "confirmada") {
-                    info.el.style.backgroundColor = "#28a745";  // Verde para confirmada
-                } else if (estado === "pendiente") {
-                    info.el.style.backgroundColor = "#ffc107";  // Amarillo para pendiente
-                } else {
-                    info.el.style.backgroundColor = "#dc3545";  // Rojo para cancelada
+                // Obtener el estado del evento
+                let estado = '';
+                if (info.event.extendedProps?.estado) {
+                    estado = info.event.extendedProps.estado.toLowerCase();
+                } else if (info.event.title.includes(' - ')) {
+                    estado = info.event.title.split(' - ')[2].toLowerCase();
                 }
-            }
 
+                // Aplicar clase según el estado
+                if (estado) {
+                    info.el.classList.add(`fc-event-${estado}`);
+                }
+
+                // Agregar tooltip
+                const hora = new Date(info.event.start);
+                const opciones = { hour: '2-digit', minute: '2-digit', hour12: true };
+                const horaFormateada = hora.toLocaleTimeString('es-ES', opciones);
+
+                info.el.setAttribute("title",
+                    `${info.event.title}\n${horaFormateada}\nEstado: ${estado}`);
+            }
         });
 
-      
-
         calendar.render();
+
+        // Verificación de carga
+        setTimeout(() => {
+            const events = calendar.getEvents();
+            console.log('Eventos cargados:', events.length);
+
+            if (events.length === 0) {
+                console.warn('No se cargaron eventos. Verifica:');
+                console.warn('1. La respuesta de /Citas/ObtenerEventos');
+                console.warn('2. Que existan citas en la base de datos');
+            }
+        }, 2000);
     });
 </script>
-

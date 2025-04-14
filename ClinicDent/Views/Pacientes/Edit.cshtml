@@ -40,7 +40,7 @@
     }
 
     .form-control {
-        border-radius: 4px;
+        border-radius: 20px;
         padding: 10px 12px;
         border: 1px solid #ced4da;
         transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
@@ -150,17 +150,17 @@
     @Html.HiddenFor(model => model.id_paciente)
 
     <div class="form-group">
-        <label class="control-label field-required">
+        <label class="control-label required">
             <i class="fas fa-user"></i> Nombres
         </label>
         <div>
-            @Html.EditorFor(model => model.nombres, new { htmlAttributes = new { @class = "form-control", placeholder = "Ingrese los nombres del paciente", required = "required" } })
+            @Html.EditorFor(model => model.nombres, new { htmlAttributes = new { @class = "form-control", placeholder = "nombres del paciente", required = "required" } })
             @Html.ValidationMessageFor(model => model.nombres, "", new { @class = "text-danger" })
         </div>
     </div>
 
     <div class="form-group">
-        <label class="control-label field-required">
+        <label class="control-label required">
             <i class="fas fa-user"></i> Apellidos
         </label>
         <div>
@@ -169,7 +169,7 @@
         </div>
     </div>
     <div class="form-group">
-        <label class="control-label field-required">
+        <label class="control-label required">
             <i class="fas fa-calendar-alt"></i> Fecha de Nacimiento
         </label>
         <div class="input-icon">
