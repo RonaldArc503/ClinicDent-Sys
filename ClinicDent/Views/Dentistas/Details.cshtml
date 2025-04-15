@@ -1,66 +1,266 @@
 ﻿@model ClinicDent.Models.Dentistas
 
 @{
-    ViewBag.Title = "Details";
+    ViewBag.Title = "Detalles del Dentista";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h2>Details</h2>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
 
-<div>
-    <h4>Dentistas</h4>
-    <hr />
-    <dl class="dl-horizontal">
-        <dt>
-            @Html.DisplayNameFor(model => model.nombre)
-        </dt>
+<style>
+    /* Estilos que no afectan el menú exterior */
+    .details-container {
+        max-width: 800px;
+        margin: 20px 0 20px 20px;
+        padding: 30px;
+        background-color: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        border-left: 5px solid #007bff;
+    }
 
-        <dd>
-            @Html.DisplayFor(model => model.nombre)
-        </dd>
+    .details-title {
+        color: #2c3e50;
+        margin-bottom: 25px;
+        font-size: 26px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        padding-bottom: 15px;
+        border-bottom: 1px solid #e9ecef;
+    }
 
-        <dt>
-            @Html.DisplayNameFor(model => model.apellido)
-        </dt>
+    .details-list {
+        display: grid;
+        grid-template-columns: 220px 1fr;
+        gap: 16px;
+        padding: 5px 0;
+    }
 
-        <dd>
-            @Html.DisplayFor(model => model.apellido)
-        </dd>
+    .detail-label {
+        font-weight: 600;
+        color: #495057;
+        text-align: left;
+        padding: 8px 0;
+        text-transform: capitalize;
+        font-size: 15px;
+        display: flex;
+        align-items: center;
+    }
 
-        <dt>
-            @Html.DisplayNameFor(model => model.telefono)
-        </dt>
+    .detail-value {
+        padding: 8px 0;
+        color: #212529;
+        font-size: 15px;
+        display: flex;
+        align-items: center;
+        min-height: 36px;
+        border-bottom: 1px dashed #e9ecef;
+    }
 
-        <dd>
-            @Html.DisplayFor(model => model.telefono)
-        </dd>
+    .status-active {
+        color: #28a745;
+        font-weight: 500;
+        background-color: rgba(40, 167, 69, 0.1);
+        padding: 4px 12px;
+        border-radius: 12px;
+        display: inline-flex;
+        align-items: center;
+        font-size: 14px;
+    }
 
-        <dt>
-            @Html.DisplayNameFor(model => model.correo)
-        </dt>
+    .status-inactive {
+        color: #dc3545;
+        font-weight: 500;
+        background-color: rgba(220, 53, 69, 0.1);
+        padding: 4px 12px;
+        border-radius: 12px;
+        display: inline-flex;
+        align-items: center;
+        font-size: 14px;
+    }
 
-        <dd>
-            @Html.DisplayFor(model => model.correo)
-        </dd>
+    .action-links {
+        margin-top: 30px;
+        display: flex;
+        gap: 12px;
+        padding-top: 20px;
+        border-top: 1px solid #e9ecef;
+    }
 
-        <dt>
-            @Html.DisplayNameFor(model => model.especialidad)
-        </dt>
+    .btn-edit {
+        background-color: #17a2b8;
+        color: white;
+        padding: 8px 18px;
+        border-radius: 5px;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        border: none;
+        cursor: pointer;
+    }
 
-        <dd>
-            @Html.DisplayFor(model => model.especialidad)
-        </dd>
+        .btn-edit:hover {
+            background-color: #138496;
+            transform: translateY(-1px);
+            text-decoration: none;
+            color: white;
+        }
 
-        <dt>
-            @Html.DisplayNameFor(model => model.activo)
-        </dt>
+    .btn-back {
+        background-color: #6c757d;
+        color: white;
+        padding: 8px 18px;
+        border-radius: 5px;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+    }
 
-        <dd>
-            @Html.DisplayFor(model => model.activo)
-        </dd>
+        .btn-back:hover {
+            background-color: #5a6268;
+            transform: translateY(-1px);
+            text-decoration: none;
+            color: white;
+        }
 
-    </dl>
+    /* Iconos específicos del formulario */
+    .details-container .icon {
+        margin-right: 12px;
+        font-size: 20px;
+        color: #007bff;
+    }
+
+    .details-container .detail-icon {
+        margin-right: 12px;
+        color: #6c757d;
+        min-width: 20px;
+        text-align: center;
+        font-size: 15px;
+    }
+
+    .empty-value {
+        color: #6c757d;
+        font-style: italic;
+        font-size: 14px;
+    }
+
+    .email-link {
+        color: #007bff;
+        text-decoration: none;
+        transition: color 0.2s;
+    }
+
+        .email-link:hover {
+            color: #0056b3;
+            text-decoration: underline;
+        }
+
+    /* Preservar iconos blancos del menú exterior */
+    body .navbar .nav-link i,
+    body .sidebar .nav-link i,
+    body .menu-exterior i {
+        color: white !important;
+    }
+</style>
+
+<div class="details-container">
+    <h2 class="details-title">
+        <i class="fas fa-user-md icon"></i> Detalles del Dentista
+    </h2>
+
+    <div class="details-list">
+        <div class="detail-label">
+            <i class="fas fa-user detail-icon"></i> @(Html.DisplayNameFor(model => model.nombre).ToString().ToLower())
+        </div>
+        <div class="detail-value">
+            @if (!string.IsNullOrEmpty(Model.nombre))
+            {
+                <text>@Model.nombre</text>
+            }
+            else
+            {
+                <span class="empty-value">no especificado</span>
+            }
+        </div>
+
+        <div class="detail-label">
+            <i class="fas fa-user detail-icon"></i> @(Html.DisplayNameFor(model => model.apellido).ToString().ToLower())
+        </div>
+        <div class="detail-value">
+            @if (!string.IsNullOrEmpty(Model.apellido))
+            {
+                <text>@Model.apellido</text>
+            }
+            else
+            {
+                <span class="empty-value">no especificado</span>
+            }
+        </div>
+
+        <div class="detail-label">
+            <i class="fas fa-phone-alt detail-icon"></i> @(Html.DisplayNameFor(model => model.telefono).ToString().ToLower())
+        </div>
+        <div class="detail-value">
+            @if (!string.IsNullOrEmpty(Model.telefono))
+            {
+                <text>@Model.telefono</text>
+            }
+            else
+            {
+                <span class="empty-value">no especificado</span>
+            }
+        </div>
+
+        <div class="detail-label">
+            <i class="fas fa-envelope detail-icon"></i> @(Html.DisplayNameFor(model => model.correo).ToString().ToLower())
+        </div>
+        <div class="detail-value">
+            @if (!string.IsNullOrEmpty(Model.correo))
+            {
+                <a href="mailto:@Model.correo" class="email-link">@Model.correo</a>
+            }
+            else
+            {
+                <span class="empty-value">no especificado</span>
+            }
+        </div>
+
+        <div class="detail-label">
+            <i class="fas fa-teeth detail-icon"></i> @(Html.DisplayNameFor(model => model.especialidad).ToString().ToLower())
+        </div>
+        <div class="detail-value">
+            @if (!string.IsNullOrEmpty(Model.especialidad))
+            {
+                <text>@Model.especialidad</text>
+            }
+            else
+            {
+                <span class="empty-value">no especificado</span>
+            }
+        </div>
+
+        <div class="detail-label">
+            <i class="fas fa-user-check detail-icon"></i> @(Html.DisplayNameFor(model => model.activo).ToString().ToLower())
+        </div>
+        <div class="detail-value">
+            <span class="@(Model.activo ? "status-active" : "status-inactive")">
+                <i class="fas @(Model.activo ? "fa-check-circle" : "fa-times-circle")"></i>
+                @(Model.activo ? "activo" : "inactivo")
+            </span>
+        </div>
+    </div>
+
+    <div class="action-links">
+        <a href="@Url.Action("Edit", new { id = Model.id_dentista })" class="btn-edit">
+            <i class="fas fa-edit"></i> editar información
+        </a>
+        <a href="@Url.Action("Index")" class="btn-back">
+            <i class="fas fa-arrow-left"></i> volver al listado
+        </a>
+    </div>
 </div>
-<p>
-    @Html.ActionLink("Edit", "Edit", new { id = Model.id_dentista }) |
-    @Html.ActionLink("Back to List", "Index")
-</p>

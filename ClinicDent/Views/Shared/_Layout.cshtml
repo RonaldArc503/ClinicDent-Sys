@@ -94,6 +94,7 @@
                         <i class="fa-solid fa-tooth icon"></i> Dentistas
                     </a>
                 </li>
+
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="citasDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="fa-solid fa-calendar-day icon"></i> Citas
@@ -106,6 +107,11 @@
                             <a class="dropdown-item" href="@Url.Action("Calendario", "Citas")"><i class="fa-solid fa-calendar-alt icon"></i> Calendario</a>
                         </li>
                     </ul>
+                </li>
+                <li class="nav-item">
+                    <a href="@Url.Action("Index", "Consultas")" class="nav-link">
+                        <i class="fa-solid fa-tooth icon"></i> Consultas
+                    </a>
                 </li>
                 <li class="nav-item">
                     <a href="@Url.Action("Index", "Pagos")" class="nav-link">
