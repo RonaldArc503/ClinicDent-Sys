@@ -386,6 +386,7 @@
     <Content Include="Views\Usuarios\Edit.cshtml" />
     <Content Include="Views\Usuarios\Index.cshtml" />
     <Content Include="Views\Citas\Calendario.cshtml" />
+    <Content Include="Views\Consultas\Consulta_sin_cita.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

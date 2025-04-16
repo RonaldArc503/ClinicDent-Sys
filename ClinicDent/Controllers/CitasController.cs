@@ -285,5 +285,37 @@ namespace ClinicDent.Controllers
         }
 
 
+        // Generar consulta desde una cita
+       public ActionResult GenerarConsulta(int idCita)
+{
+    var cita = db.Citas.Find(idCita);
+    if (cita == null)
+    {
+        return HttpNotFound();
+    }
+
+    // Verificar si ya existe una consulta para esta cita
+    if (db.Consulta.Any(c => c.id_cita == idCita))
+    {
+        TempData["WarningMessage"] = "Esta cita ya tiene una consulta asociada.";
+        return RedirectToAction("Index");
+    }
+
+    // Formatear la fecha como "16 abr. 2025 15:02"
+    string fechaFormateada = cita.fecha_hora.ToString("dd MMM. yyyy HH:mm", new System.Globalization.CultureInfo("es-ES"));
+
+    // Redirigir al formulario de creación de consultas con los datos precargados
+    return RedirectToAction("Create", "Consultas", new { 
+        idCita = idCita,
+        fechaConsulta = fechaFormateada,
+        idDentista = cita.id_dentista,
+        idPaciente = cita.id_paciente
+    });
+}
+
+       
+        
+
+
     }
 }

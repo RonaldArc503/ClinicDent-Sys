@@ -1,0 +1,182 @@
+﻿@model ClinicDent.Models.Consulta
+
+@{
+    ViewBag.Title = "Crear Consulta sin Cita";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h2 class="mb-0"><i class="fas fa-plus-circle mr-2"></i>Crear Consulta sin Cita</h2>
+        </div>
+
+        <div class="card-body">
+            @using (Html.BeginForm("Consulta_sin_cita", "Consultas", FormMethod.Post, new { id = "consultaForm" }))
+            {
+                @Html.AntiForgeryToken()
+
+                @Html.ValidationSummary(true, "", new { @class = "alert alert-danger" })
+
+                <div class="row">
+                    <!-- Columna Izquierda -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.id_paciente, "Paciente", htmlAttributes: new { @class = "font-weight-bold" })
+                            @Html.DropDownListFor(model => model.id_paciente, (SelectList)ViewBag.id_paciente, "Seleccione un paciente...", htmlAttributes: new { @class = "form-control select2", required = "required" })
+                            @Html.ValidationMessageFor(model => model.id_paciente, "", new { @class = "text-danger small" })
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.id_dentista, "Dentista", htmlAttributes: new { @class = "font-weight-bold" })
+                            @Html.DropDownListFor(model => model.id_dentista, (SelectList)ViewBag.id_dentista, "Seleccione un dentista...", htmlAttributes: new { @class = "form-control select2", required = "required" })
+                            @Html.ValidationMessageFor(model => model.id_dentista, "", new { @class = "text-danger small" })
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.fecha_consulta, "Fecha y Hora de Consulta", htmlAttributes: new { @class = "font-weight-bold" })
+                            <div class="input-group date" id="datetimepicker1">
+                                @Html.HiddenFor(model => model.fecha_consulta, new { id = "fechaHidden" })
+                                <input type="text" class="form-control datetimepicker" id="fechaVisible" readonly required />
+                                <div class="input-group-append">
+                                    <span class="input-group-text"><i class="far fa-calendar-alt"></i></span>
+                                </div>
+                            </div>
+                            @Html.ValidationMessageFor(model => model.fecha_consulta, "", new { @class = "text-danger small" })
+                        </div>
+                    </div>
+
+                    <!-- Columna Derecha -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.diagnostico, "Diagnóstico", htmlAttributes: new { @class = "font-weight-bold" })
+                            @Html.TextAreaFor(model => model.diagnostico, new { @class = "form-control", rows = 3, placeholder = "Ingrese el diagnóstico del paciente..." })
+                            @Html.ValidationMessageFor(model => model.diagnostico, "", new { @class = "text-danger small" })
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.observaciones, "Observaciones", htmlAttributes: new { @class = "font-weight-bold" })
+                            @Html.TextAreaFor(model => model.observaciones, new { @class = "form-control", rows = 3, placeholder = "Ingrese observaciones relevantes..." })
+                            @Html.ValidationMessageFor(model => model.observaciones, "", new { @class = "text-danger small" })
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.recomendaciones, "Recomendaciones", htmlAttributes: new { @class = "font-weight-bold" })
+                            @Html.TextAreaFor(model => model.recomendaciones, new { @class = "form-control", rows = 3, placeholder = "Ingrese recomendaciones para el paciente..." })
+                            @Html.ValidationMessageFor(model => model.recomendaciones, "", new { @class = "text-danger small" })
+                        </div>
+
+                        <div class="form-group form-check">
+                            <label class="form-check-label">
+                                @Html.CheckBoxFor(model => model.requiere_tratamiento, new { @class = "form-check-input" })
+                                <span class="font-weight-bold">Requiere Tratamiento</span>
+                            </label>
+                            @Html.ValidationMessageFor(model => model.requiere_tratamiento, "", new { @class = "text-danger small" })
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group mt-4">
+                    <button type="submit" class="btn btn-primary mr-2">
+                        <i class="fas fa-save mr-1"></i> Guardar Consulta
+                    </button>
+                    <a href="@Url.Action("Index")" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left mr-1"></i> Volver al Listado
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/css/bootstrap-datetimepicker.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet" />
+    <style>
+        .select2-container .select2-selection--single {
+            height: 38px !important;
+        }
+
+        .card {
+            border-radius: 0.5rem;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .input-group-text {
+            cursor: pointer;
+        }
+    </style>
+
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/locale/es.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/js/bootstrap-datetimepicker.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Inicializar Select2 para dropdowns
+            $('.select2').select2({
+                placeholder: $(this).data('placeholder'),
+                allowClear: true
+            });
+
+            // Inicializar datetimepicker en español
+            $('#fechaVisible').datetimepicker({
+                format: 'DD/MM/YYYY HH:mm',
+                sideBySide: true,
+                locale: 'es',
+                defaultDate: '@Model.fecha_consulta.ToString("yyyy-MM-dd HH:mm")',
+                stepping: 15, // Intervalos de 15 minutos
+                icons: {
+                    time: 'far fa-clock',
+                    date: 'far fa-calendar',
+                    up: 'fas fa-arrow-up',
+                    down: 'fas fa-arrow-down',
+                    previous: 'fas fa-chevron-left',
+                    next: 'fas fa-chevron-right',
+                    today: 'fas fa-calendar-check',
+                    clear: 'far fa-trash-alt',
+                    close: 'far fa-times-circle'
+                }
+            }).on('dp.change', function(e) {
+                // Actualizar el campo hidden con el valor en formato ISO
+                $('#fechaHidden').val(e.date.format('YYYY-MM-DDTHH:mm:ss'));
+            });
+
+            // Establecer valor inicial
+            if ('@Model.fecha_consulta.ToString("yyyy-MM-ddTHH:mm:ss")' !== '0001-01-01T00:00:00') {
+                var initialDate = moment('@Model.fecha_consulta.ToString("yyyy-MM-ddTHH:mm:ss")');
+                $('#fechaVisible').data("DateTimePicker").date(initialDate);
+                $('#fechaHidden').val(initialDate.format('YYYY-MM-DDTHH:mm:ss'));
+            } else {
+                var now = moment();
+                $('#fechaVisible').data("DateTimePicker").date(now);
+                $('#fechaHidden').val(now.format('YYYY-MM-DDTHH:mm:ss'));
+            }
+
+            // Validación del formulario
+            $('#consultaForm').submit(function(e) {
+                // Validar que se haya seleccionado paciente y dentista
+                if ($('#id_paciente').val() === '' || $('#id_dentista').val() === '') {
+                    alert('Por favor seleccione tanto el paciente como el dentista');
+                    return false;
+                }
+
+                // Validar que la fecha esté establecida
+                if ($('#fechaHidden').val() === '') {
+                    alert('Por favor seleccione una fecha y hora válida');
+                    return false;
+                }
+
+                return true;
+            });
+        });
+    </script>
+}

@@ -113,9 +113,27 @@
                                             <a href="@Url.Action("Edit", new { id = item.id_cita })" class="btn btn-sm btn-outline-primary acciones-btn" title="Editar">
                                                 <i class="fas fa-edit"></i>
                                             </a>
-                                            <a href="@Url.Action("Details", "Pacientes", new { id = item.id_paciente })" class="btn btn-sm btn-outline-info acciones-btn" title="Expediente">
-                                                Expediente
+                                            <a href="@Url.Action("Details", "Pacientes", new { id = item.id_paciente })" class="btn btn-sm btn-outline-secondary acciones-btn" title="Expediente">
+                                                <i class="fas fa-folder-open"></i>
                                             </a>
+
+                                            @if (item.estado == "Confirmada" || item.estado == "Pendiente")
+                                            {
+                                                <a href="@Url.Action("Create", "Consultas", new { idCita = item.id_cita })"
+                                                   class="btn btn-sm btn-outline-success acciones-btn"
+                                                   title="Crear Consulta">
+                                                    <i class="fas fa-file-medical"></i> Consulta
+                                                </a>
+                                            }
+                                            else if (item.estado == "Completada" && item.Consulta.Any())
+                                            {
+                                                <a href="@Url.Action("Edit", "Consultas", new { id = item.Consulta.FirstOrDefault()?.id_consulta })"
+                                                   class="btn btn-sm btn-outline-info acciones-btn"
+                                                   title="Ver Consulta">
+                                                    <i class="fas fa-eye"></i> Consulta
+                                                </a>
+                                            }
+
                                             <a href="@Url.Action("Delete", new { id = item.id_cita })" class="btn btn-sm btn-outline-danger acciones-btn" title="Eliminar">
                                                 <i class="fas fa-trash-alt"></i>
                                             </a>
@@ -165,9 +183,6 @@
 }
 
 <style>
-    .acciones-btn {
-        margin: 0 5px; /* 5px de margen a izquierda y derecha */
-    }
     .card {
         border-radius: 10px;
         overflow: hidden;
@@ -209,15 +224,65 @@
         background-color: rgba(0, 0, 0, 0.02);
     }
 
-    /* Estilo específico para el botón de Expediente */
+    /* Estilos para botones de acciones */
+    .acciones-btn {
+        margin: 0 3px;
+        min-width: 36px;
+        text-align: center;
+    }
+
+    .btn-outline-primary {
+        color: #0d6efd;
+        border-color: #0d6efd;
+    }
+
+        .btn-outline-primary:hover {
+            color: #fff;
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+        }
+
+    .btn-outline-secondary {
+        color: #6c757d;
+        border-color: #6c757d;
+    }
+
+        .btn-outline-secondary:hover {
+            color: #fff;
+            background-color: #6c757d;
+            border-color: #6c757d;
+        }
+
+    .btn-outline-success {
+        color: #28a745;
+        border-color: #28a745;
+    }
+
+        .btn-outline-success:hover {
+            color: #fff;
+            background-color: #28a745;
+            border-color: #28a745;
+        }
+
     .btn-outline-info {
-        color: #0dcaf0;
-        border-color: #0dcaf0;
+        color: #17a2b8;
+        border-color: #17a2b8;
     }
 
         .btn-outline-info:hover {
-            color: #000;
-            background-color: #0dcaf0;
-            border-color: #0dcaf0;
+            color: #fff;
+            background-color: #17a2b8;
+            border-color: #17a2b8;
+        }
+
+    .btn-outline-danger {
+        color: #dc3545;
+        border-color: #dc3545;
+    }
+
+        .btn-outline-danger:hover {
+            color: #fff;
+            background-color: #dc3545;
+            border-color: #dc3545;
         }
 </style>
