@@ -22,9 +22,9 @@ namespace ClinicDent.Models
         }
     
         public int id_consulta { get; set; }
-        public int id_cita { get; set; }
-        public int id_dentista { get; set; }
-        public int id_paciente { get; set; }
+        public Nullable<int> id_cita { get; set; }
+        public Nullable<int> id_dentista { get; set; }
+        public Nullable<int> id_paciente { get; set; }
         public System.DateTime fecha_consulta { get; set; }
         public string diagnostico { get; set; }
         public string observaciones { get; set; }

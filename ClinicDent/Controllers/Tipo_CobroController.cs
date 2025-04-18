@@ -12,7 +12,7 @@ namespace ClinicDent.Controllers
 {
     public class Tipo_CobroController : Controller
     {
-        private ClinicaDentalAzure db = new ClinicaDentalAzure();
+        private ClinicaDentalLocal0 db = new ClinicaDentalLocal0();
 
         // GET: Tipo_Cobro
         public ActionResult Index()

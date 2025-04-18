@@ -12,7 +12,7 @@ namespace ClinicDent.Controllers
 {
     public class PagosController : Controller
     {
-        private ClinicaDentalLocal db = new ClinicaDentalLocal();
+        private ClinicaDentalLocal0 db = new ClinicaDentalLocal0();
 
         // GET: Pagos
         public ActionResult Index()
