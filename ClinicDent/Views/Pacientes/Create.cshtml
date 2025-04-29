@@ -12,9 +12,13 @@
         max-width: 700px;
         margin: 0 0 0 10px; /* Reducido margen izquierdo */
         padding: 25px 25px 25px 15px; /* Reducido padding izquierdo */
-        background-color: #f8f9fa;
-        border-radius: 8px;
-        box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        background-color: #e5e7e9;
+        border-radius: 15px;
+        box-shadow: 0 0 75px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-container {
+        border-left: 5px solid #007bff;
     }
 
     .form-title {
@@ -46,12 +50,13 @@
         transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
         width: 100%;
         margin-left: 0; /* Eliminamos cualquier margen izquierdo */
+        box-shadow: inset 0 1px 45px rgba(0, 0, 0, 0.1);
     }
 
         .form-control:focus {
             border-color: #80bdff;
             outline: 0;
-            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25), inset 0 1px 3px rgba(0, 0, 0, 0.1);
         }
 
     .btn-submit {
@@ -135,15 +140,18 @@
         min-height: 100px;
         resize: vertical;
         margin-left: 0; /* Eliminado margen izquierdo */
+        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
     }
 </style>
 
 <div class="form-container">
     <h2 class="form-title"> Registro de Paciente</h2>
 
-    @using (Html.BeginForm())
+    @using (Html.BeginForm(null, null, FormMethod.Post, new { autocomplete = "off" }))
     {
         @Html.AntiForgeryToken()
+        <!-- Campo oculto para redirigir sugerencias de dirección -->
+        <input type="text" style="display:none;" autocomplete="street-address" />
 
         <div class="form-horizontal">
             @Html.ValidationSummary(true, "", new { @class = "text-danger" })
@@ -153,7 +161,7 @@
                     <i class="fas fa-user"></i> Nombres
                 </label>
                 <div class="input-icon">
-                    @Html.EditorFor(model => model.nombres, new { htmlAttributes = new { @class = "form-control", placeholder = "Nombres del paciente", required = "required" } })
+                    @Html.EditorFor(model => model.nombres, new { htmlAttributes = new { @class = "form-control", placeholder = "Nombres del paciente", required = "required", autocomplete = "given-name" } })
                     @Html.ValidationMessageFor(model => model.nombres, "", new { @class = "text-danger" })
                 </div>
             </div>
@@ -163,7 +171,7 @@
                     <i class="fas fa-user"></i> Apellidos
                 </label>
                 <div class="input-icon">
-                    @Html.EditorFor(model => model.apellidos, new { htmlAttributes = new { @class = "form-control", placeholder = "Apellidos del paciente", required = "required" } })
+                    @Html.EditorFor(model => model.apellidos, new { htmlAttributes = new { @class = "form-control", placeholder = "Apellidos del paciente", required = "required", autocomplete = "family-name" } })
                     @Html.ValidationMessageFor(model => model.apellidos, "", new { @class = "text-danger" })
                 </div>
             </div>
@@ -173,7 +181,7 @@
                     <i class="fas fa-calendar-alt"></i> Fecha de Nacimiento
                 </label>
                 <div class="input-icon">
-                    <input type="text" id="fecha_nacimiento" name="fecha_nacimiento" class="form-control" placeholder="Seleccione la fecha" required />
+                    @Html.TextBoxFor(model => model.fecha_nacimiento, new { @class = "form-control", @id = "fecha_nacimiento", placeholder = "Seleccione la fecha", required = "required", autocomplete = "off" })
                     @Html.ValidationMessageFor(model => model.fecha_nacimiento, "", new { @class = "text-danger" })
                 </div>
             </div>
@@ -249,13 +257,13 @@
 
     <script>
         $(document).ready(function () {
-            // Datepicker con configuración en español
+            // Inicializa el datepicker con configuración en español
             $("#fecha_nacimiento").datepicker({
                 dateFormat: "dd/mm/yy",
                 changeMonth: true,
                 changeYear: true,
-                yearRange: "1900:+0",
-                maxDate: "0", // No permite fechas futuras
+                yearRange: "1927:+0",
+                maxDate: "0",
                 dayNames: ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"],
                 dayNamesMin: ["Do", "Lu", "Ma", "Mi", "Ju", "Vi", "Sa"],
                 monthNames: ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"],
@@ -263,13 +271,21 @@
                 prevText: "Anterior",
                 nextText: "Siguiente",
                 currentText: "Hoy",
-                closeText: "Cerrar"
+                closeText: "Cerrar",
+                onSelect: function (dateText, inst) {
+                    // Convertir dd/mm/yyyy a yyyy-mm-dd al seleccionar
+                    var parts = dateText.split('/');
+                    if (parts.length === 3) {
+                        var isoDate = parts[2] + '-' + parts[1] + '-' + parts[0];
+                        $(this).val(isoDate);
+                    }
+                }
             });
 
             // Máscara para el teléfono
             $('#telefono').mask('0000-0000', { placeholder: "____-____" });
 
-            // Validación en tiempo real para nombres y apellidos (solo letras y espacios)
+            // Validación en tiempo real para nombres y apellidos
             $('#nombres, #apellidos').on('input', function () {
                 this.value = this.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '');
             });
