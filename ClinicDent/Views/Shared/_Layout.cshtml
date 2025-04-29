@@ -94,6 +94,7 @@
                         <i class="fa-solid fa-tooth icon"></i> Dentistas
                     </a>
                 </li>
+
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="citasDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="fa-solid fa-calendar-day icon"></i> Citas
@@ -108,15 +109,39 @@
                     </ul>
                 </li>
                 <li class="nav-item">
+                    <a href="@Url.Action("Index", "Consultas")" class="nav-link">
+                        <i class="fa-solid fa-tooth icon"></i> Consultas
+                    </a>
+                </li>
+                <li class="nav-item">
                     <a href="@Url.Action("Index", "Pagos")" class="nav-link">
                         <i class="fa-solid fa-credit-card icon"></i> Pagos e Historial
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="@Url.Action("Contact", "Home")" class="nav-link">
-                        <i class="fa-solid fa-envelope icon"></i> Contacto
+                    <a href="@Url.Action("Index", "Tratamientos")" class="nav-link">
+                        <i class="fa-solid fa-envelope icon"></i> Tratamientos
                     </a>
                 </li>
+
+                <li class="nav-item">
+                    <a href="@Url.Action("Index", "Usuarios")" class="nav-link">
+                        <i class="fa-solid fa-envelope icon"></i> Usuarios
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="@Url.Action("Index", "Historial_Clinico")" class="nav-link">
+                        <i class="fa-solid fa-envelope icon"></i> Historial_Clinico
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="@Url.Action("Index", "Historial_Pagos")" class="nav-link">
+                        <i class="fa-solid fa-envelope icon"></i> Historial_Pagos
+                    </a>
+                </li>
+
             </ul>
         </nav>
 

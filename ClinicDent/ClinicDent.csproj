@@ -149,28 +149,28 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\Citas.cs">
-      <DependentUpon>ModelLocal.tt</DependentUpon>
+      <DependentUpon>ModelLocal1.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\Consulta.cs">
-      <DependentUpon>ModelLocal.tt</DependentUpon>
+      <DependentUpon>ModelLocal1.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\Consultas_Tratamientos.cs">
-      <DependentUpon>ModelLocal.tt</DependentUpon>
+      <DependentUpon>ModelLocal1.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\Dentistas.cs">
-      <DependentUpon>ModelLocal.tt</DependentUpon>
+      <DependentUpon>ModelLocal1.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\Historial_Clinico.cs">
-      <DependentUpon>ModelLocal.tt</DependentUpon>
+      <DependentUpon>ModelLocal1.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\Historial_Pagos.cs">
-      <DependentUpon>ModelLocal.tt</DependentUpon>
+      <DependentUpon>ModelLocal1.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\Inventario.cs">
-      <DependentUpon>ModelLocal.tt</DependentUpon>
+      <DependentUpon>ModelLocal1.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\Materiales.cs">
-      <DependentUpon>ModelLocal.tt</DependentUpon>
+      <DependentUpon>ModelLocal1.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\ModelAzure.Context.cs">
       <AutoGen>True</AutoGen>
@@ -202,26 +202,41 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>ModelLocal.edmx</DependentUpon>
     </Compile>
+    <Compile Include="Models\ModelLocal1.Context.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ModelLocal1.Context.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\ModelLocal1.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ModelLocal1.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\ModelLocal1.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ModelLocal1.edmx</DependentUpon>
+    </Compile>
     <Compile Include="Models\Pacientes.cs">
-      <DependentUpon>ModelLocal.tt</DependentUpon>
+      <DependentUpon>ModelLocal1.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\Pagos.cs">
-      <DependentUpon>ModelLocal.tt</DependentUpon>
+      <DependentUpon>ModelLocal1.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\Pagos_Cuotas.cs">
-      <DependentUpon>ModelLocal.tt</DependentUpon>
+      <DependentUpon>ModelLocal1.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\Roles.cs">
-      <DependentUpon>ModelLocal.tt</DependentUpon>
+      <DependentUpon>ModelLocal1.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\Tipo_Cobro.cs">
-      <DependentUpon>ModelLocal.tt</DependentUpon>
+      <DependentUpon>ModelLocal1.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\Tratamientos.cs">
-      <DependentUpon>ModelLocal.tt</DependentUpon>
+      <DependentUpon>ModelLocal1.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\Usuarios.cs">
-      <DependentUpon>ModelLocal.tt</DependentUpon>
+      <DependentUpon>ModelLocal1.tt</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -265,6 +280,16 @@
       <DependentUpon>ModelLocal.edmx</DependentUpon>
       <LastGenOutput>ModelLocal.cs</LastGenOutput>
     </Content>
+    <Content Include="Models\ModelLocal1.Context.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <DependentUpon>ModelLocal1.edmx</DependentUpon>
+      <LastGenOutput>ModelLocal1.Context.cs</LastGenOutput>
+    </Content>
+    <Content Include="Models\ModelLocal1.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <DependentUpon>ModelLocal1.edmx</DependentUpon>
+      <LastGenOutput>ModelLocal1.cs</LastGenOutput>
+    </Content>
     <Content Include="Scripts\bootstrap.bundle.js" />
     <Content Include="Scripts\bootstrap.bundle.min.js" />
     <Content Include="Scripts\bootstrap.esm.js" />
@@ -284,6 +309,13 @@
     </EntityDeploy>
     <Content Include="Models\ModelLocal.edmx.diagram">
       <DependentUpon>ModelLocal.edmx</DependentUpon>
+    </Content>
+    <EntityDeploy Include="Models\ModelLocal1.edmx">
+      <Generator>EntityModelCodeGenerator</Generator>
+      <LastGenOutput>ModelLocal1.Designer.cs</LastGenOutput>
+    </EntityDeploy>
+    <Content Include="Models\ModelLocal1.edmx.diagram">
+      <DependentUpon>ModelLocal1.edmx</DependentUpon>
     </Content>
     <None Include="Scripts\jquery-3.7.0.intellisense.js" />
     <Content Include="Scripts\jquery-3.7.0.js" />
@@ -386,9 +418,11 @@
     <Content Include="Views\Usuarios\Edit.cshtml" />
     <Content Include="Views\Usuarios\Index.cshtml" />
     <Content Include="Views\Citas\Calendario.cshtml" />
+    <Content Include="Views\Consultas\Consulta_sin_cita.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
+    <Folder Include="Repositories\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\bootstrap.rtl.min.css.map" />

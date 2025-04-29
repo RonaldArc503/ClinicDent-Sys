@@ -12,12 +12,51 @@ namespace ClinicDent.Controllers
 {
     public class DentistasController : Controller
     {
-        private ClinicaDentalAzure db = new ClinicaDentalAzure();
+        private ClinicaDentalLocal0 db = new ClinicaDentalLocal0();
 
         // GET: Dentistas
-        public ActionResult Index()
+        public ActionResult Index(string searchString, string filterBy)
         {
-            return View(db.Dentistas.ToList());
+            var dentistas = db.Dentistas.AsQueryable();
+
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                searchString = searchString.ToLower();
+
+                switch (filterBy)
+                {
+                    case "nombre":
+                        dentistas = dentistas.Where(d => d.nombre.ToLower().Contains(searchString));
+                        break;
+                    case "apellido":
+                        dentistas = dentistas.Where(d => d.apellido.ToLower().Contains(searchString));
+                        break;
+                    case "especialidad":
+                        dentistas = dentistas.Where(d => d.especialidad.ToLower().Contains(searchString));
+                        break;
+                    case "correo":
+                        dentistas = dentistas.Where(d => d.correo.ToLower().Contains(searchString));
+                        break;
+                    case "telefono":
+                        dentistas = dentistas.Where(d => d.telefono.Contains(searchString));
+                        break;
+                    default:
+                        // Búsqueda general en todos los campos
+                        dentistas = dentistas.Where(d =>
+                            d.nombre.ToLower().Contains(searchString) ||
+                            d.apellido.ToLower().Contains(searchString) ||
+                            d.especialidad.ToLower().Contains(searchString) ||
+                            d.correo.ToLower().Contains(searchString) ||
+                            d.telefono.Contains(searchString));
+                        break;
+                }
+            }
+
+            // Pasar los parámetros de búsqueda a la vista para mantener el filtro
+            ViewBag.CurrentFilter = searchString;
+            ViewBag.FilterBy = filterBy;
+
+            return View(dentistas.ToList());
         }
 
         // GET: Dentistas/Details/5
@@ -42,8 +81,6 @@ namespace ClinicDent.Controllers
         }
 
         // POST: Dentistas/Create
-        // Para protegerse de ataques de publicación excesiva, habilite las propiedades específicas a las que quiere enlazarse. Para obtener 
-        // más detalles, vea https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Create([Bind(Include = "id_dentista,nombre,apellido,telefono,correo,especialidad,activo")] Dentistas dentistas)
@@ -74,8 +111,6 @@ namespace ClinicDent.Controllers
         }
 
         // POST: Dentistas/Edit/5
-        // Para protegerse de ataques de publicación excesiva, habilite las propiedades específicas a las que quiere enlazarse. Para obtener 
-        // más detalles, vea https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Edit([Bind(Include = "id_dentista,nombre,apellido,telefono,correo,especialidad,activo")] Dentistas dentistas)

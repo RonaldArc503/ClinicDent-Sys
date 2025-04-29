@@ -1,63 +1,239 @@
 ﻿@model IEnumerable<ClinicDent.Models.Tratamientos>
 
 @{
-    ViewBag.Title = "Index";
+    ViewBag.Title = "Gestión de Tratamientos";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h2>Index</h2>
+<div class="container-fluid py-4">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <div class="d-flex justify-content-between align-items-center">
+                <h3 class="mb-0">
+                    <i class="fas fa-teeth me-2"></i>@ViewBag.Title
+                </h3>
+                <a href="@Url.Action("Create")" class="btn btn-light">
+                    <i class="fas fa-plus-circle me-1"></i> Nuevo Tratamiento
+                </a>
+            </div>
+        </div>
 
-<p>
-    @Html.ActionLink("Create New", "Create")
-</p>
-<table class="table">
-    <tr>
-        <th>
-            @Html.DisplayNameFor(model => model.fecha_inicio)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.odontograma)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.costo)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.duracion_estimada)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.seguimiento)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.Tipo_Cobro.nombre)
-        </th>
-        <th></th>
-    </tr>
+        <div class="card-body">
+            <!-- Barra de búsqueda -->
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    @using (Html.BeginForm("Index", "Tratamientos", FormMethod.Get, new { autocomplete = "off" }))
+                    {
+                        <div class="row g-3 align-items-end">
+                            <!-- Búsqueda por texto -->
+                            <div class="col-md-5">
+                                <label class="form-label mb-1">Buscar tratamiento</label>
+                                <div class="input-group">
+                                    <select name="filterBy" class="form-select" style="width: 160px;">
+                                        <option value="odontograma" @(ViewBag.FilterBy == "odontograma" ? "selected" : "")>Odontograma</option>
+                                        <option value="tipo_cobro" @(ViewBag.FilterBy == "tipo_cobro" ? "selected" : "")>Tipo de Cobro</option>
+                                        <option value="seguimiento" @(ViewBag.FilterBy == "seguimiento" ? "selected" : "")>Seguimiento</option>
+                                    </select>
+                                    <input type="text" name="searchString" class="form-control"
+                                           placeholder="Ingrese términos de búsqueda..." value="@ViewBag.CurrentFilter">
+                                </div>
+                            </div>
 
-@foreach (var item in Model) {
-    <tr>
-        <td>
-            @Html.DisplayFor(modelItem => item.fecha_inicio)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.odontograma)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.costo)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.duracion_estimada)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.seguimiento)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.Tipo_Cobro.nombre)
-        </td>
-        <td>
-            @Html.ActionLink("Edit", "Edit", new { id=item.id_tratamiento }) |
-            @Html.ActionLink("Details", "Details", new { id=item.id_tratamiento }) |
-            @Html.ActionLink("Delete", "Delete", new { id=item.id_tratamiento })
-        </td>
-    </tr>
-}
+                            <!-- Filtro por fecha -->
+                            <div class="col-md-3">
+                                <label class="form-label mb-1">Filtrar por fecha</label>
+                                <input type="date" name="fechaFilter" class="form-control" value="@ViewBag.FechaFilter">
+                            </div>
 
-</table>
+                            <!-- Botones alineados en la parte inferior -->
+                            <div class="col-md-4 d-flex align-items-end">
+                                <div class="d-flex gap-2" style="height: 38px;">
+                                    <button type="submit" class="btn btn-primary" style="height: 100%;">
+                                        <i class="fas fa-search me-1"></i> Buscar
+                                    </button>
+                                    @if (!string.IsNullOrEmpty(ViewBag.CurrentFilter) || !string.IsNullOrEmpty(ViewBag.FechaFilter))
+                                    {
+                                        <a href="@Url.Action("Index")" class="btn btn-outline-secondary" style="height: 100%;">
+                                            <i class="fas fa-undo me-1"></i> Limpiar
+                                        </a>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover table-striped">
+                    <thead class="thead-light">
+                        <tr>
+                            <th>Fecha Inicio</th>
+                            <th>Odontograma</th>
+                            <th>Costo</th>
+                            <th>Duración Estimada</th>
+                            <th>Seguimiento</th>
+                            <th>Tipo de Cobro</th>
+                            <th class="text-end">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Any())
+                        {
+                            foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>@Html.DisplayFor(modelItem => item.fecha_inicio)</td>
+                                    <td>@Html.DisplayFor(modelItem => item.odontograma)</td>
+                                    <td>@Html.DisplayFor(modelItem => item.costo.ToString("C"))</td>
+                                    <td>@Html.DisplayFor(modelItem => item.duracion_estimada)</td>
+                                    <td>
+                                        @if (item.seguimiento)
+                                        {
+                                            <span class="badge bg-info text-dark">Con seguimiento</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">Sin seguimiento</span>
+                                        }
+                                    </td>
+                                    <td>@Html.DisplayFor(modelItem => item.Tipo_Cobro.nombre)</td>
+                                    <td class="text-end">
+                                        <div class="btn-group" role="group">
+                                            <a href="@Url.Action("Edit", new { id = item.id_tratamiento })" class="btn btn-sm btn-outline-primary" title="Editar">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <a href="@Url.Action("Details", new { id = item.id_tratamiento })" class="btn btn-sm btn-outline-info" title="Detalles">
+                                                <i class="fas fa-info-circle"></i>
+                                            </a>
+                                            <a href="@Url.Action("Delete", new { id = item.id_tratamiento })" class="btn btn-sm btn-outline-danger" title="Eliminar">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="7" class="text-center">
+                                    <div class="alert alert-info">
+                                        No se encontraron tratamientos
+                                        @if (!string.IsNullOrEmpty(ViewBag.CurrentFilter) || !string.IsNullOrEmpty(ViewBag.FechaFilter))
+                                        {
+                                            <span>con los filtros actuales</span>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        border-radius: 10px;
+        overflow: hidden;
+        border: none;
+    }
+
+    .card-header {
+        padding: 1.25rem 1.5rem;
+    }
+
+    .table th {
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        color: #6c757d;
+        border-top: none;
+    }
+
+    .table td {
+        vertical-align: middle;
+    }
+
+    .badge {
+        font-size: 0.75rem;
+        padding: 0.35em 0.65em;
+        font-weight: 500;
+    }
+
+    .btn-group .btn {
+        border-radius: 4px !important;
+        margin-left: 8px;
+        margin-right: 8px;
+    }
+
+        .btn-group .btn:first-child {
+            margin-left: 0;
+        }
+
+        .btn-group .btn:last-child {
+            margin-right: 0;
+        }
+
+    .table-hover tbody tr:hover {
+        background-color: rgba(13, 110, 253, 0.05);
+    }
+
+    .table-striped tbody tr:nth-of-type(odd) {
+        background-color: rgba(0, 0, 0, 0.02);
+    }
+
+    .btn-outline-info {
+        color: #0dcaf0;
+        border-color: #0dcaf0;
+    }
+
+        .btn-outline-info:hover {
+            color: #fff;
+            background-color: #0dcaf0;
+            border-color: #0dcaf0;
+        }
+
+    .input-group .form-control {
+        flex: 1;
+        min-width: 220px;
+    }
+
+    /* Mejoras en la barra de búsqueda */
+    .input-group .form-control,
+    .input-group .form-select {
+        height: 38px;
+    }
+
+    .form-label {
+        font-size: 0.85rem;
+        color: #6c757d;
+        margin-bottom: 0.3rem;
+        font-weight: 500;
+    }
+
+    .alert-info {
+        background-color: #f0f8ff;
+        border-color: #d1e7ff;
+        color: #0c5460;
+    }
+
+    /* Espaciado mejorado */
+    .card-body {
+        padding: 1.5rem;
+    }
+
+    .mb-4 {
+        margin-bottom: 1.8rem !important;
+    }
+
+    /* Estilo para el formato de moneda */
+    .currency-cell {
+        font-family: 'Courier New', monospace;
+        font-weight: 600;
+        color: #28a745;
+    }
+</style>

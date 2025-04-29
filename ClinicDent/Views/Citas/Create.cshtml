@@ -1,85 +1,223 @@
 ﻿@model ClinicDent.Models.Citas
 
 @{
-    ViewBag.Title = "Crear Cita";
+    ViewBag.Title = "Programar Nueva Cita";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h2>Crear Cita</h2>
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-calendar-plus me-2"></i>@ViewBag.Title
+                    </h3>
+                </div>
 
-@using (Html.BeginForm())
-{
-    @Html.AntiForgeryToken()
+                <div class="card-body">
+                    @using (Html.BeginForm())
+                    {
+                        @Html.AntiForgeryToken()
 
-    <div class="form-horizontal">
-        <h4>Citas</h4>
-        <hr />
-        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                        @Html.ValidationSummary(true, "", new { @class = "alert alert-danger" })
 
-        <div class="form-group">
-            @Html.LabelFor(model => model.id_paciente, "Paciente", htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.DropDownList("id_paciente", null, new { @class = "form-control" })
-                @Html.ValidationMessageFor(model => model.id_paciente, "", new { @class = "text-danger" })
-            </div>
-        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    @Html.LabelFor(model => model.id_paciente, "Paciente", htmlAttributes: new { @class = "form-label fw-bold" })
+                                    @Html.DropDownList("id_paciente", null, "Seleccione un paciente...", new { @class = "form-select", required = "required" })
+                                    @Html.ValidationMessageFor(model => model.id_paciente, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
 
-        <div class="form-group">
-            @Html.LabelFor(model => model.id_dentista, "Dentista", htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.DropDownList("id_dentista", null, new { @class = "form-control" })
-                @Html.ValidationMessageFor(model => model.id_dentista, "", new { @class = "text-danger" })
-            </div>
-        </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    @Html.LabelFor(model => model.id_dentista, "Dentista", htmlAttributes: new { @class = "form-label fw-bold" })
+                                    @Html.DropDownList("id_dentista", null, "Seleccione un dentista...", new { @class = "form-select", required = "required" })
+                                    @Html.ValidationMessageFor(model => model.id_dentista, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
 
-        <div class="form-group">
-            @Html.LabelFor(model => model.fecha_hora, "Fecha y Hora", htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                <input type="datetime-local" id="fecha_hora" name="fecha_hora" class="form-control" required>
-                @Html.ValidationMessageFor(model => model.fecha_hora, "", new { @class = "text-danger" })
-            </div>
-        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    @Html.LabelFor(model => model.fecha_hora, "Fecha y Hora", htmlAttributes: new { @class = "form-label fw-bold" })
+                                    <input type="datetime-local" id="fecha_hora" name="fecha_hora" class="form-control" required
+                                           min="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")">
+                                    @Html.ValidationMessageFor(model => model.fecha_hora, "", new { @class = "text-danger" })
+                                    <small class="text-muted">Seleccione fecha y hora para la cita</small>
+                                </div>
+                            </div>
 
-        <div class="form-group">
-            @Html.LabelFor(model => model.estado, "Estado", htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.DropDownListFor(model => model.estado, new List<SelectListItem>
-                {
-                    new SelectListItem { Text = "Pendiente", Value = "Pendiente" },
-                    new SelectListItem { Text = "Confirmada", Value = "Confirmada" },
-                    new SelectListItem { Text = "Cancelada", Value = "Cancelada" }
-                }, new { @class = "form-control" })
-                @Html.ValidationMessageFor(model => model.estado, "", new { @class = "text-danger" })
-            </div>
-        </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    @Html.LabelFor(model => model.estado, "Estado", htmlAttributes: new { @class = "form-label fw-bold" })
+                                    @Html.DropDownListFor(model => model.estado, new List<SelectListItem>
+                                    {
+                                        new SelectListItem { Text = "Pendiente", Value = "Pendiente", Selected = true },
+                                        new SelectListItem { Text = "Confirmada", Value = "Confirmada" },
+                                        new SelectListItem { Text = "Cancelada", Value = "Cancelada" }
+                                    }, new { @class = "form-select" })
+                                    @Html.ValidationMessageFor(model => model.estado, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
 
-        <div class="form-group">
-            <div class="col-md-offset-2 col-md-10">
-                <button type="submit" class="btn btn-primary">Guardar Cita</button>
-                <a href="@Url.Action("Index")" class="btn btn-secondary">Cancelar</a>
+                        <div class="form-group mt-4">
+                            <div class="d-flex justify-content-between">
+                                <a href="@Url.Action("Index")" class="btn btn-outline-secondary">
+                                    <i class="fas fa-arrow-left me-1"></i> Volver al Listado
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-1"></i> Guardar Cita
+                                </button>
+                            </div>
+                        </div>
+                    }
+                </div>
             </div>
         </div>
     </div>
-}
+</div>
 
-@section Scripts {
+
+    <style>
+        .card {
+            border-radius: 10px;
+            overflow: hidden;
+            border: none;
+        }
+
+        .form-label {
+            margin-bottom: 0.5rem;
+            color: #495057;
+        }
+
+        .form-control, .form-select {
+            border-radius: 8px;
+            padding: 10px 15px;
+            border: 1px solid #ced4da;
+            transition: all 0.3s;
+        }
+
+            .form-control:focus, .form-select:focus {
+                border-color: #86b7fe;
+                box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+            }
+
+        .btn {
+            border-radius: 50px;
+            padding: 8px 20px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+        }
+
+            .btn-primary:hover {
+                background-color: #0b5ed7;
+                border-color: #0a58ca;
+                transform: translateY(-1px);
+            }
+
+        .btn-outline-secondary {
+            border-color: #6c757d;
+            color: #6c757d;
+        }
+
+            .btn-outline-secondary:hover {
+                background-color: #6c757d;
+                color: white;
+            }
+
+        .is-validating {
+            background-color: #fff8e1;
+        }
+    </style>
+
+
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         $(document).ready(function() {
+            // Validación de disponibilidad en tiempo real
             $('#fecha_hora').change(function() {
                 var fechaHora = $(this).val();
                 var idDentista = $('#id_dentista').val();
 
+                if (!fechaHora || !idDentista) return;
+
                 $.ajax({
                     url: '@Url.Action("ValidarDisponibilidad", "Citas")',
                     type: 'GET',
-                    data: { id_dentista: idDentista, fecha_hora: fechaHora },
+                    data: {
+                        id_dentista: idDentista,
+                        fecha_hora: fechaHora
+                    },
+                    beforeSend: function() {
+                        $('#fecha_hora').addClass('is-validating');
+                    },
                     success: function(response) {
                         if (!response.disponible) {
-                            alert("El dentista ya tiene una cita a esta hora. Elija otra.");
+                            Swal.fire({
+                                icon: 'warning',
+                                title: 'Horario no disponible',
+                                text: 'El dentista ya tiene una cita programada para esta fecha y hora. Por favor, seleccione otro horario.',
+                                confirmButtonColor: '#0d6efd'
+                            });
                             $('#fecha_hora').val('');
                         }
+                    },
+                    complete: function() {
+                        $('#fecha_hora').removeClass('is-validating');
+                    },
+                    error: function() {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Ocurrió un error al verificar la disponibilidad. Por favor, intente nuevamente.',
+                            confirmButtonColor: '#0d6efd'
+                        });
                     }
                 });
             });
+
+            // Mejorar la experiencia de usuario para selección de fecha/hora
+            $('#fecha_hora').on('focus', function() {
+                if (!$(this).val()) {
+                    // Establecer un valor predeterminado (ahora + 1 hora)
+                    var now = new Date();
+                    now.setHours(now.getHours() + 1);
+                    now.setMinutes(0);
+                    now.setSeconds(0);
+
+                    var year = now.getFullYear();
+                    var month = String(now.getMonth() + 1).padStart(2, '0');
+                    var day = String(now.getDate()).padStart(2, '0');
+                    var hours = String(now.getHours()).padStart(2, '0');
+                    var minutes = String(now.getMinutes()).padStart(2, '0');
+
+                    $(this).val(year + '-' + month + '-' + day + 'T' + hours + ':' + minutes);
+                }
+            });
+
+            // Validación del formulario
+            $('form').submit(function(e) {
+                if (!$('#id_paciente').val() || !$('#id_dentista').val() || !$('#fecha_hora').val()) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Campos requeridos',
+                        text: 'Por favor complete todos los campos obligatorios.',
+                        confirmButtonColor: '#0d6efd'
+                    });
+                    return false;
+                }
+                return true;
+            });
         });
     </script>
-}

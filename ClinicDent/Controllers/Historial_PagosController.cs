@@ -12,7 +12,7 @@ namespace ClinicDent.Controllers
 {
     public class Historial_PagosController : Controller
     {
-        private ClinicaDentalAzure db = new ClinicaDentalAzure();
+        private ClinicaDentalLocal0 db = new ClinicaDentalLocal0();
 
         // GET: Historial_Pagos
         public ActionResult Index()

@@ -1,92 +1,288 @@
 ﻿@model IEnumerable<ClinicDent.Models.Citas>
 
 @{
-    ViewBag.Title = "Citas";
+    ViewBag.Title = "Gestión de Citas";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
-<style>
-    .search-cita input {
-        width: 100%; /* Esto hace que el campo ocupe el 100% del contenedor */
-        max-width: 500px; /* Limita el ancho máximo a 1000px */
-    }
 
-    .conteiner-busqueda {
-        margin-top: 20px;
-        margin-bottom: 25px;
-    }
-</style>
-
-<div class="search-form conteiner-busqueda" >
-    @using (Html.BeginForm("Search", "Citas", FormMethod.Get))
-    {
-        <div class="form-row d-flex align-items-end ml-2">
-            <!-- Aquí quitamos col-md-6 y hacemos el input de búsqueda más ancho -->
-            <div class="col-md-6 search-cita">
-                <input type="text" name="searchTerm" class="form-control rounded-pill" placeholder="Buscar por paciente o dentista" />
-            </div>
-            <div class="search-cita" style="margin-right: 15px;">
-                <input type="date" name="fechaHora" class="form-control" />
-            </div>
-            <div class="search-cita">
-                <button type="submit" class="btn btn-primary w-100">
-                    <i class="fas fa-search"></i> Buscar
-                </button>
+<div class="container-fluid py-4">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <div class="d-flex justify-content-between align-items-center">
+                <h3 class="mb-0">
+                    <i class="fas fa-calendar-alt me-2"></i>@ViewBag.Title
+                </h3>
+                <div>
+                    <a href="@Url.Action("Calendario")" class="btn btn-light me-2">
+                        <i class="fas fa-calendar me-1"></i> Ver Calendario
+                    </a>
+                    <a href="@Url.Action("Create")" class="btn btn-light">
+                        <i class="fas fa-plus-circle me-1"></i> Nueva Cita
+                    </a>
+                </div>
             </div>
         </div>
 
-        <!-- Fila para los botones "Hoy" y "Todas" -->
-        <div class="form-row mt-2 form-row d-flex align-items-end" style="margin-top: 30px ;">
-            <div class="col-md-2" style="margin-right: 15px; ">
-                <button type="submit" name="all" value="true" class="btn btn-primary w-100">
-                    <i class="fas fa-calendar-alt"></i> Todas
-                </button>
-            </div>
-            <div class="col-md-2 " >
-                <button type="submit" name="today" value="true" class="btn btn-secondary w-100">
-                    <i class="fas fa-calendar-day"></i> Hoy
-                </button>
+        <div class="card-body">
+            <!-- Barra de búsqueda -->
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    @using (Html.BeginForm("Index", "Citas", FormMethod.Get))
+                    {
+                        <div class="row g-3 align-items-end">
+                            <!-- Búsqueda por texto -->
+                            <div class="col-md-4">
+                                <label class="form-label">Buscar</label>
+                                <div class="input-group">
+                                    <select name="filterBy" class="form-select" style="max-width: 150px;">
+                                        <option value="ambos" @(ViewBag.FilterBy == "ambos" ? "selected" : "")>Paciente/Dentista</option>
+                                        <option value="paciente" @(ViewBag.FilterBy == "paciente" ? "selected" : "")>Solo Paciente</option>
+                                        <option value="dentista" @(ViewBag.FilterBy == "dentista" ? "selected" : "")>Solo Dentista</option>
+                                    </select>
+                                    <input type="text" name="searchString" class="form-control"
+                                           placeholder="Buscar..." value="@ViewBag.CurrentFilter">
+                                </div>
+                            </div>
+
+                            <!-- Filtro por estado -->
+                            <div class="col-md-3">
+                                <label class="form-label">Estado</label>
+                                <select name="estadoFilter" class="form-select">
+                                    <option value="">Todos</option>
+                                    @foreach (var estado in ViewBag.Estados)
+                                    {
+                                        <option value="@estado" @(ViewBag.EstadoFilter == estado ? "selected" : "")>@estado</option>
+                                    }
+                                </select>
+                            </div>
+
+                            <!-- Filtro por fecha -->
+                            <div class="col-md-3">
+                                <label class="form-label">Rango de fechas</label>
+                                <select name="fechaFilter" class="form-select">
+                                    <option value="">Todas</option>
+                                    <option value="hoy" @(ViewBag.FechaFilter == "hoy" ? "selected" : "")>Hoy</option>
+                                    <option value="semana" @(ViewBag.FechaFilter == "semana" ? "selected" : "")>Esta semana</option>
+                                    <option value="mes" @(ViewBag.FechaFilter == "mes" ? "selected" : "")>Este mes</option>
+                                    <option value="pasadas" @(ViewBag.FechaFilter == "pasadas" ? "selected" : "")>Pasadas</option>
+                                    <option value="futuras" @(ViewBag.FechaFilter == "futuras" ? "selected" : "")>Futuras</option>
+                                </select>
+                            </div>
+
+                            <!-- Botones -->
+                            <div class="col-md-2 d-flex align-items-end">
+                                <button type="submit" class="btn btn-primary me-2">
+                                    <i class="fas fa-filter"></i> Buscar
+                                </button>
+                                <a href="@Url.Action("Index")" class="btn btn-outline-secondary">
+                                    <i class="fas fa-times"></i>
+                                </a>
+                            </div>
+                        </div>
+                    }
+                </div>
             </div>
 
+            <div class="table-responsive">
+                <table class="table table-hover table-striped">
+                    <thead class="thead-light">
+                        <tr>
+                            <th>@Html.ActionLink("Fecha y Hora", "Index", new { sortOrder = ViewBag.DateSortParm })</th>
+                            <th>Estado</th>
+                            <th>Dentista</th>
+                            <th>Paciente</th>
+                            <th class="text-end">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Any())
+                        {
+                            foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>@item.fecha_hora.ToString("g")</td>
+                                    <td>
+                                        <span class="badge @GetEstadoBadgeClass(item.estado)">
+                                            @item.estado
+                                        </span>
+                                    </td>
+                                    <td>@item.Dentistas.nombre @item.Dentistas.apellido</td>
+                                    <td>@item.Pacientes.nombres @item.Pacientes.apellidos</td>
+                                    <td class="text-end">
+                                        <div class="btn-group" role="group">
+                                            <a href="@Url.Action("Edit", new { id = item.id_cita })" class="btn btn-sm btn-outline-primary acciones-btn" title="Editar">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <a href="@Url.Action("Details", "Pacientes", new { id = item.id_paciente })" class="btn btn-sm btn-outline-secondary acciones-btn" title="Expediente">
+                                                <i class="fas fa-folder-open"></i>
+                                            </a>
+
+                                            @if (item.estado == "Confirmada" || item.estado == "Pendiente")
+                                            {
+                                                <a href="@Url.Action("Create", "Consultas", new { idCita = item.id_cita })"
+                                                   class="btn btn-sm btn-outline-success acciones-btn"
+                                                   title="Crear Consulta">
+                                                    <i class="fas fa-file-medical"></i> Consulta
+                                                </a>
+                                            }
+                                            else if (item.estado == "Completada" && item.Consulta.Any())
+                                            {
+                                                <a href="@Url.Action("Edit", "Consultas", new { id = item.Consulta.FirstOrDefault()?.id_consulta })"
+                                                   class="btn btn-sm btn-outline-info acciones-btn"
+                                                   title="Ver Consulta">
+                                                    <i class="fas fa-eye"></i> Consulta
+                                                </a>
+                                            }
+
+                                            <a href="@Url.Action("Delete", new { id = item.id_cita })" class="btn btn-sm btn-outline-danger acciones-btn" title="Eliminar">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="5" class="text-center">
+                                    <div class="alert alert-info">
+                                        No se encontraron citas
+                                        @if (!string.IsNullOrEmpty(ViewBag.CurrentFilter) || !string.IsNullOrEmpty(ViewBag.EstadoFilter) || !string.IsNullOrEmpty(ViewBag.FechaFilter))
+                                        {
+                                            <span>con los filtros actuales</span>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
         </div>
-    }
+    </div>
 </div>
 
-
-<h2>Citas</h2>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
-<p>
-    <a href="@Url.Action("Create")" class="btn btn-success" title="Crear Nuevo">
-        <i class="fas fa-plus"></i> Crear Nuevo
-    </a>
-</p>
-
-<table class="table">
-    <tr>
-        <th>Fecha y Hora</th>
-        <th>Estado</th>
-        <th>Dentista</th>
-        <th>Paciente</th>
-        <th></th>
-    </tr>
-
-    @foreach (var item in Model)
+@functions {
+    public string GetEstadoBadgeClass(string estado)
     {
-        <tr>
-            <td>@Html.DisplayFor(modelItem => item.fecha_hora)</td>
-            <td>@Html.DisplayFor(modelItem => item.estado)</td>
-            <td>@Html.DisplayFor(modelItem => item.Dentistas.nombre)</td>
-            <td>@Html.DisplayFor(modelItem => item.Pacientes.nombres)</td>
-            <td>
-                <a href="@Url.Action("Edit", new { id = item.id_cita })" title="Editar" class="btn btn-sm btn-primary">
-                    <i class="fas fa-edit"></i>
-                </a>
-                <a href="@Url.Action("Calendario", "Citas")" title="Ver Calendario" class="btn btn-sm btn-info">
-                    <i class="fas fa-calendar-alt"></i>
-                </a>
-
-                <a href="@Url.Action("Delete", new { id = item.id_cita })" title="Eliminar" class="btn btn-sm btn-danger">
-                    <i class="fas fa-trash"></i>
-                </a>
-            </td>
-        </tr>
+        switch (estado?.ToLower())
+        {
+            case "confirmada":
+                return "bg-success";
+            case "pendiente":
+                return "bg-warning";
+            case "cancelada":
+                return "bg-danger";
+            case "completada":
+                return "bg-info";
+            default:
+                return "bg-secondary";
+        }
     }
-</table>
+}
+
+<style>
+    .card {
+        border-radius: 10px;
+        overflow: hidden;
+        border: none;
+    }
+
+    .card-header {
+        padding: 1.25rem 1.5rem;
+    }
+
+    .table th {
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        color: #6c757d;
+        border-top: none;
+    }
+
+    .table td {
+        vertical-align: middle;
+    }
+
+    .badge {
+        font-size: 0.75rem;
+        padding: 0.35em 0.65em;
+        font-weight: 500;
+    }
+
+    .btn-group .btn {
+        border-radius: 4px !important;
+        margin-left: 3px;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: rgba(13, 110, 253, 0.05);
+    }
+
+    .table-striped tbody tr:nth-of-type(odd) {
+        background-color: rgba(0, 0, 0, 0.02);
+    }
+
+    /* Estilos para botones de acciones */
+    .acciones-btn {
+        margin: 0 3px;
+        min-width: 36px;
+        text-align: center;
+    }
+
+    .btn-outline-primary {
+        color: #0d6efd;
+        border-color: #0d6efd;
+    }
+
+        .btn-outline-primary:hover {
+            color: #fff;
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+        }
+
+    .btn-outline-secondary {
+        color: #6c757d;
+        border-color: #6c757d;
+    }
+
+        .btn-outline-secondary:hover {
+            color: #fff;
+            background-color: #6c757d;
+            border-color: #6c757d;
+        }
+
+    .btn-outline-success {
+        color: #28a745;
+        border-color: #28a745;
+    }
+
+        .btn-outline-success:hover {
+            color: #fff;
+            background-color: #28a745;
+            border-color: #28a745;
+        }
+
+    .btn-outline-info {
+        color: #17a2b8;
+        border-color: #17a2b8;
+    }
+
+        .btn-outline-info:hover {
+            color: #fff;
+            background-color: #17a2b8;
+            border-color: #17a2b8;
+        }
+
+    .btn-outline-danger {
+        color: #dc3545;
+        border-color: #dc3545;
+    }
+
+        .btn-outline-danger:hover {
+            color: #fff;
+            background-color: #dc3545;
+            border-color: #dc3545;
+        }
+</style>

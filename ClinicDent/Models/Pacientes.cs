@@ -11,9 +11,20 @@ namespace ClinicDent.Models
 {
     using System;
     using System.Collections.Generic;
-    
+    using System.ComponentModel.DataAnnotations;
+
     public partial class Pacientes
     {
+        public int Edad
+        {
+            get
+            {
+                var edad = DateTime.Now.Year - fecha_nacimiento.Year;
+                if (fecha_nacimiento > DateTime.Now.AddYears(-edad)) edad--;
+                return edad;
+            }
+        }
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
         public Pacientes()
         {
@@ -24,7 +35,9 @@ namespace ClinicDent.Models
         public int id_paciente { get; set; }
         public string nombres { get; set; }
         public string apellidos { get; set; }
-        public System.DateTime fecha_nacimiento { get; set; }
+        [DataType(DataType.Date)]
+        [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
+        public DateTime fecha_nacimiento { get; set; }
         public string telefono { get; set; }
         public string genero { get; set; }
         public string alergias { get; set; }

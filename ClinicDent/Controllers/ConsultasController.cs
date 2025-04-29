@@ -12,7 +12,7 @@ namespace ClinicDent.Controllers
 {
     public class ConsultasController : Controller
     {
-        private ClinicaDentalAzure db = new ClinicaDentalAzure();
+        private ClinicaDentalLocal0 db = new ClinicaDentalLocal0();
 
         // GET: Consultas
         public ActionResult Index()
@@ -37,17 +37,46 @@ namespace ClinicDent.Controllers
         }
 
         // GET: Consultas/Create
-        public ActionResult Create()
+        // GET: Consultas/Create
+public ActionResult Create(int? idCita, string fechaConsulta, int? idDentista, int? idPaciente)
+{
+    // Inicializar listas desplegables
+    ViewBag.id_cita = new SelectList(db.Citas, "id_cita", "estado");
+    ViewBag.id_dentista = new SelectList(db.Dentistas, "id_dentista", "nombre");
+    ViewBag.id_paciente = new SelectList(db.Pacientes, "id_paciente", "nombres");
+
+    var model = new Consulta();
+
+    if (idCita != null)
+    {
+        var cita = db.Citas.Find(idCita);
+        if (cita != null)
         {
-            ViewBag.id_cita = new SelectList(db.Citas, "id_cita", "estado");
-            ViewBag.id_dentista = new SelectList(db.Dentistas, "id_dentista", "nombre");
-            ViewBag.id_paciente = new SelectList(db.Pacientes, "id_paciente", "nombres");
-            return View();
+            model.id_cita = cita.id_cita;
+            model.fecha_consulta = cita.fecha_hora; // Asignar fecha directamente desde la cita
+            
+            // Configurar ViewBag para mostrar la fecha formateada
+            ViewBag.FechaFormateada = cita.fecha_hora.ToString("dd MMM. yyyy HH:mm", 
+                                      new System.Globalization.CultureInfo("es-ES"));
+            
+            if (idDentista != null)
+            {
+                model.id_dentista = idDentista.Value;
+                ViewBag.id_dentista = new SelectList(db.Dentistas, "id_dentista", "nombre", idDentista);
+            }
+
+            if (idPaciente != null)
+            {
+                model.id_paciente = idPaciente.Value;
+                ViewBag.id_paciente = new SelectList(db.Pacientes, "id_paciente", "nombres", idPaciente);
+            }
         }
+    }
+
+    return View(model);
+}
 
         // POST: Consultas/Create
-        // Para protegerse de ataques de publicación excesiva, habilite las propiedades específicas a las que quiere enlazarse. Para obtener 
-        // más detalles, vea https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Create([Bind(Include = "id_consulta,id_cita,id_dentista,id_paciente,fecha_consulta,diagnostico,observaciones,recomendaciones,requiere_tratamiento")] Consulta consulta)
@@ -59,9 +88,11 @@ namespace ClinicDent.Controllers
                 return RedirectToAction("Index");
             }
 
+            // Reconstruir listas desplegables si hay error de validación
             ViewBag.id_cita = new SelectList(db.Citas, "id_cita", "estado", consulta.id_cita);
             ViewBag.id_dentista = new SelectList(db.Dentistas, "id_dentista", "nombre", consulta.id_dentista);
             ViewBag.id_paciente = new SelectList(db.Pacientes, "id_paciente", "nombres", consulta.id_paciente);
+
             return View(consulta);
         }
 
@@ -84,8 +115,6 @@ namespace ClinicDent.Controllers
         }
 
         // POST: Consultas/Edit/5
-        // Para protegerse de ataques de publicación excesiva, habilite las propiedades específicas a las que quiere enlazarse. Para obtener 
-        // más detalles, vea https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Edit([Bind(Include = "id_consulta,id_cita,id_dentista,id_paciente,fecha_consulta,diagnostico,observaciones,recomendaciones,requiere_tratamiento")] Consulta consulta)
@@ -136,5 +165,42 @@ namespace ClinicDent.Controllers
             }
             base.Dispose(disposing);
         }
+
+        // GET: Consultas/consulta_sin_cita
+public ActionResult Consulta_sin_cita()
+{
+    ViewBag.id_dentista = new SelectList(db.Dentistas, "id_dentista", "nombre");
+    ViewBag.id_paciente = new SelectList(db.Pacientes, "id_paciente", "nombres");
+    
+    // Establecer fecha actual por defecto
+    var model = new Consulta
+    {
+        fecha_consulta = DateTime.Now
+    };
+    
+    return View(model);
+}
+
+// POST: Consultas/consulta_sin_cita
+/*
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Consulta_sin_cita([Bind(Include = "id_dentista,id_paciente,fecha_consulta,diagnostico,observaciones,recomendaciones,requiere_tratamiento")] Consulta consulta)
+        {
+            if (ModelState.IsValid)
+            {
+                // Asegurar explícitamente que id_cita sea NULL
+                consulta.id_cita = null;
+
+                db.Consulta.Add(consulta);
+                db.SaveChanges();
+                return RedirectToAction("Index");
+            }
+
+            ViewBag.id_dentista = new SelectList(db.Dentistas, "id_dentista", "nombre", consulta.id_dentista);
+            ViewBag.id_paciente = new SelectList(db.Pacientes, "id_paciente", "nombres", consulta.id_paciente);
+
+            return View(consulta);
+        }*/
     }
 }
