@@ -20,12 +20,15 @@ namespace ClinicDent.Models
             this.Consulta = new HashSet<Consulta>();
         }
     
-        public int id_cita { get; set; }
+        public int? id_cita { get; set; }
         public int id_paciente { get; set; }
         public int id_dentista { get; set; }
         public System.DateTime fecha_hora { get; set; }
         public string estado { get; set; }
-    
+
+
+        public virtual Citas Cita { get; set; }
+      
         public virtual Dentistas Dentistas { get; set; }
         public virtual Pacientes Pacientes { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]

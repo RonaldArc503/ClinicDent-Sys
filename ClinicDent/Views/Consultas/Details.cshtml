@@ -1,82 +1,353 @@
 ﻿@model ClinicDent.Models.Consulta
 
 @{
-    ViewBag.Title = "Details";
+    ViewBag.Title = "Detalles de Consulta";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h2>Details</h2>
+<!-- Dependencias de Estilo -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
 
-<div>
-    <h4>Consulta</h4>
-    <hr />
-    <dl class="dl-horizontal">
-        <dt>
-            @Html.DisplayNameFor(model => model.fecha_consulta)
-        </dt>
+<style>
+    /* Contenedor Principal */
+    .consulta-container {
+        max-width: 800px;
+        margin: 20px auto;
+        padding: 30px;
+        background-color: #ffffff;
+        border-radius: 15px;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        border-left: 5px solid #17a2b8;
+    }
 
-        <dd>
-            @Html.DisplayFor(model => model.fecha_consulta)
-        </dd>
+    /* Clase para ocultar en PDF */
+    .pdf-only {
+        display: none;
+    }
 
-        <dt>
-            @Html.DisplayNameFor(model => model.diagnostico)
-        </dt>
+    /* Encabezado */
+    .consulta-header {
+        text-align: center;
+        margin-bottom: 30px;
+        color: #2c3e50;
+    }
 
-        <dd>
-            @Html.DisplayFor(model => model.diagnostico)
-        </dd>
+    .consulta-header h1 {
+        font-size: 28px;
+        font-weight: 700;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
 
-        <dt>
-            @Html.DisplayNameFor(model => model.observaciones)
-        </dt>
+    .consulta-header h1 i {
+        margin-right: 12px;
+        color: #17a2b8;
+    }
 
-        <dd>
-            @Html.DisplayFor(model => model.observaciones)
-        </dd>
+    .consulta-header p {
+        font-size: 16px;
+        color: #6c757d;
+        margin: 5px 0 0;
+    }
 
-        <dt>
-            @Html.DisplayNameFor(model => model.recomendaciones)
-        </dt>
+    /* Secciones */
+    .section {
+        margin-bottom: 25px;
+        page-break-inside: avoid;
+    }
 
-        <dd>
-            @Html.DisplayFor(model => model.recomendaciones)
-        </dd>
+    .section-title {
+        font-size: 20px;
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 15px;
+        border-bottom: 2px solid #17a2b8;
+        padding-bottom: 5px;
+        display: flex;
+        align-items: center;
+    }
 
-        <dt>
-            @Html.DisplayNameFor(model => model.requiere_tratamiento)
-        </dt>
+    .section-title i {
+        margin-right: 10px;
+        color: #17a2b8;
+    }
 
-        <dd>
-            @Html.DisplayFor(model => model.requiere_tratamiento)
-        </dd>
+    /* Lista de Detalles */
+    .details-list {
+        display: grid;
+        grid-template-columns: 1fr 2fr;
+        gap: 15px;
+        font-size: 16px;
+    }
 
-        <dt>
-            @Html.DisplayNameFor(model => model.Citas.estado)
-        </dt>
+    .details-list dt {
+        font-weight: 600;
+        color: #495057;
+        display: flex;
+        align-items: center;
+    }
 
-        <dd>
-            @Html.DisplayFor(model => model.Citas.estado)
-        </dd>
+    .details-list dt i {
+        margin-right: 8px;
+        color: #6c757d;
+        width: 20px;
+        text-align: center;
+    }
 
-        <dt>
-            @Html.DisplayNameFor(model => model.Dentistas.nombre)
-        </dt>
+    .details-list dd {
+        color: #2c3e50;
+        margin: 0;
+    }
 
-        <dd>
-            @Html.DisplayFor(model => model.Dentistas.nombre)
-        </dd>
+    /* Botones */
+    .action-buttons {
+        display: flex;
+        gap: 15px;
+        margin-top: 30px;
+        justify-content: center;
+    }
 
-        <dt>
-            @Html.DisplayNameFor(model => model.Pacientes.nombres)
-        </dt>
+    .btn {
+        padding: 10px 20px;
+        border-radius: 20px;
+        font-size: 16px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
 
-        <dd>
-            @Html.DisplayFor(model => model.Pacientes.nombres)
-        </dd>
+    .btn-edit {
+        background-color: #17a2b8;
+        color: white;
+        border: none;
+    }
 
-    </dl>
+    .btn-edit:hover {
+        background-color: #138496;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-back {
+        background-color: #6c757d;
+        color: white;
+        border: none;
+    }
+
+    .btn-back:hover {
+        background-color: #5a6268;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-pdf {
+        background-color: #dc3545;
+        color: white;
+        border: none;
+    }
+
+    .btn-pdf:hover {
+        background-color: #c82333;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn i {
+        margin-right: 8px;
+    }
+
+    /* Estilos para impresión/PDF */
+   
+</style>
+
+<!-- Contenido Principal -->
+<div class="consulta-container" id="consulta-content">
+    <!-- Cabecera para PDF -->
+    <div class="pdf-header pdf-only">
+        <h1 style="text-align: center; font-size: 24px; margin-bottom: 5px;">Clínica Dental Sonrisa Feliz</h1>
+        <p style="text-align: center; font-size: 14px; color: #555;">Informe de Consulta Dental</p>
+        <p style="text-align: center; font-size: 12px; color: #777;">Generado el: @DateTime.Now.ToString("dd/MM/yyyy HH:mm")</p>
+        <hr style="border-top: 1px solid #ccc; margin: 10px 0;">
+    </div>
+
+    <!-- Encabezado -->
+    <div class="consulta-header">
+        <h1>
+            <i class="fas fa-file-medical"></i> Detalles de Consulta
+        </h1>
+        <p>Clínica Dental - Informe de Consulta</p>
+    </div>
+
+    <!-- Información del Paciente -->
+    <div class="section">
+        <h2 class="section-title">
+            <i class="fas fa-user"></i> Paciente
+        </h2>
+        <dl class="details-list">
+            <dt>
+                <i class="fas fa-id-card"></i> Nombre
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => model.Pacientes.nombres)
+            </dd>
+            <dt>
+                <i class="fas fa-birthday-cake"></i> Edad
+            </dt>
+            <dd>
+                @(DateTime.Now.Year - Model.Pacientes.fecha_nacimiento.Year) años
+            </dd>
+            <dt>
+                <i class="fas fa-phone"></i> Teléfono
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => model.Pacientes.telefono)
+            </dd>
+        </dl>
+    </div>
+
+    <!-- Información de la Consulta -->
+    <div class="section">
+        <h2 class="section-title">
+            <i class="fas fa-stethoscope"></i> Consulta
+        </h2>
+        <dl class="details-list">
+            <dt>
+                <i class="fas fa-calendar-alt"></i> Fecha
+            </dt>
+            <dd>
+                @Model.fecha_consulta.ToString("dd/MM/yyyy HH:mm")
+            </dd>
+            <dt>
+                <i class="fas fa-diagnoses"></i> Diagnóstico
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => model.diagnostico)
+            </dd>
+            <dt>
+                <i class="fas fa-notes-medical"></i> Observaciones
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => model.observaciones)
+            </dd>
+            <dt>
+                <i class="fas fa-comment-medical"></i> Recomendaciones
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => model.recomendaciones)
+            </dd>
+            <dt>
+                <i class="fas fa-tooth"></i> Requiere Tratamiento
+            </dt>
+            <dd>
+                @(Model.requiere_tratamiento ? "Sí" : "No")
+            </dd>
+            <dt>
+                <i class="fas fa-clipboard-check"></i> Estado de la Cita
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => model.Citas.estado)
+            </dd>
+        </dl>
+    </div>
+
+    <!-- Información del Dentista -->
+    <div class="section">
+        <h2 class="section-title">
+            <i class="fas fa-user-md"></i> Dentista
+        </h2>
+        <dl class="details-list">
+            <dt>
+                <i class="fas fa-id-badge"></i> Nombre
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => model.Dentistas.nombre)
+            </dd>
+            <dt>
+                <i class="fas fa-graduation-cap"></i> Especialidad
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => model.Dentistas.especialidad)
+            </dd>
+        </dl>
+    </div>
+
+    <!-- Firma para PDF -->
+    <div class="pdf-only" style="margin-top: 50px;">
+        <div style="float: right; text-align: center; width: 250px;">
+            <hr style="border-top: 1px solid #000; width: 200px;">
+            <p style="margin-top: 5px;">Firma del Profesional</p>
+        </div>
+        <div style="clear: both;"></div>
+    </div>
+
+    <!-- Botones de Acción (no aparecerán en PDF) -->
+    <div class="action-buttons">
+        <a href="@Url.Action("Edit", new { id = Model.id_consulta })" class="btn btn-edit">
+            <i class="fas fa-edit"></i> Editar
+        </a>
+        <a href="@Url.Action("Index")" class="btn btn-back">
+            <i class="fas fa-arrow-left"></i> Volver al Listado
+        </a>
+        <button class="btn btn-pdf" onclick="generatePDF()">
+            <i class="fas fa-file-pdf"></i> Generar PDF
+        </button>
+    </div>
 </div>
-<p>
-    @Html.ActionLink("Edit", "Edit", new { id = Model.id_consulta }) |
-    @Html.ActionLink("Back to List", "Index")
-</p>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script>
+        function generatePDF() {
+            // Elemento a convertir
+            const element = document.getElementById('consulta-content');
+
+            // Clonar el elemento para modificar estilos sin afectar la vista web
+            const clone = element.cloneNode(true);
+
+            // Aplicar estilos específicos para PDF
+            clone.style.borderLeft = 'none';
+            clone.style.boxShadow = 'none';
+            clone.style.borderRadius = '0';
+            clone.style.padding = '10px';
+            clone.style.margin = '0';
+            clone.style.maxWidth = '100%';
+
+            // Mostrar elementos ocultos para PDF
+            const pdfOnlyElements = clone.querySelectorAll('.pdf-only');
+            pdfOnlyElements.forEach(el => el.style.display = 'block');
+
+            // Ocultar botones en el PDF
+            const buttons = clone.querySelector('.action-buttons');
+            if (buttons) buttons.style.display = 'none';
+
+            // Configuración para el PDF
+            const opt = {
+                margin: [10, 10, 10, 10], // [top, left, bottom, right] en mm
+                filename: 'consulta_' + @Model.id_consulta + '_' + new Date().toISOString().slice(0, 10) + '.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: {
+                    scale: 2,
+                    logging: true,
+                    useCORS: true,
+                    letterRendering: true,
+                    scrollX: 0,
+                    scrollY: 0
+                },
+                jsPDF: {
+                    unit: 'mm',
+                    format: 'a4',
+                    orientation: 'portrait',
+                    compress: true
+                },
+                pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+            };
+
+            // Crear PDF
+            html2pdf().set(opt).from(clone).save();
+        }
+    </script>
+}

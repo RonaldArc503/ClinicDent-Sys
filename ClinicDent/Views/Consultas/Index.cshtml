@@ -88,7 +88,11 @@
                             foreach (var item in Model)
                             {
                                 <tr>
-                                    <td>@item.fecha_consulta.ToString("dd/MM/yyyy", System.Globalization.CultureInfo.InvariantCulture)</td>
+                                    <td>
+                                        @System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(
+                                    item.fecha_consulta.ToString("dddd dd/MM/yyyy h:mm tt", new System.Globalization.CultureInfo("es-MX")).ToLower()
+                                )
+                                    </td>
                                     <td>@Html.DisplayFor(modelItem => item.Pacientes.nombres)</td>
                                     <td>@Html.DisplayFor(modelItem => item.Dentistas.nombre)</td>
                                     <td>
@@ -105,7 +109,7 @@
                                             <span class="badge bg-secondary">No</span>
                                         }
                                     </td>
-                                    <td>@Html.DisplayFor(modelItem => item.Citas.estado)</td>
+                                    <td>@(item.Citas != null ? item.Citas.estado : "Sin cita")</td>
                                     <td class="text-end">
                                         <div class="btn-group" role="group">
                                             <a href="@Url.Action("Edit", new { id = item.id_consulta })" class="btn btn-sm btn-outline-primary" title="Editar">
@@ -236,17 +240,10 @@
 
 @section Scripts {
     <script>
-        // Formatear fechas al cargar la página
-        $(document).ready(function() {
-            $('.date-cell').each(function() {
-                var dateText = $(this).text().trim();
-                if (dateText) {
-                    var dateParts = dateText.split('-');
-                    if (dateParts.length === 3) {
-                        $(this).text(dateParts[2] + '/' + dateParts[1] + '/' + dateParts[0]);
-                    }
-                }
-            });
+        // No need for date formatting script since we're handling it server-side
+        $(document).ready(function () {
+            // Ensure table responsiveness
+            $('.table-responsive').css('overflow-x', 'auto');
         });
     </script>
 }
