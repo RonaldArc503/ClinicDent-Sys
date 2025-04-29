@@ -172,36 +172,6 @@
     <Compile Include="Models\Materiales.cs">
       <DependentUpon>ModelLocal1.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\ModelAzure.Context.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>ModelAzure.Context.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\ModelAzure.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>ModelAzure.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\ModelAzure.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>ModelAzure.edmx</DependentUpon>
-    </Compile>
-    <Compile Include="Models\ModelLocal.Context.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>ModelLocal.Context.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\ModelLocal.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>ModelLocal.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\ModelLocal.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>ModelLocal.edmx</DependentUpon>
-    </Compile>
     <Compile Include="Models\ModelLocal1.Context.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -260,26 +230,6 @@
     <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
     <Content Include="Content\Site.css" />
-    <Content Include="Models\ModelAzure.Context.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <DependentUpon>ModelAzure.edmx</DependentUpon>
-      <LastGenOutput>ModelAzure.Context.cs</LastGenOutput>
-    </Content>
-    <Content Include="Models\ModelAzure.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <DependentUpon>ModelAzure.edmx</DependentUpon>
-      <LastGenOutput>ModelAzure.cs</LastGenOutput>
-    </Content>
-    <Content Include="Models\ModelLocal.Context.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <DependentUpon>ModelLocal.edmx</DependentUpon>
-      <LastGenOutput>ModelLocal.Context.cs</LastGenOutput>
-    </Content>
-    <Content Include="Models\ModelLocal.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <DependentUpon>ModelLocal.edmx</DependentUpon>
-      <LastGenOutput>ModelLocal.cs</LastGenOutput>
-    </Content>
     <Content Include="Models\ModelLocal1.Context.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <DependentUpon>ModelLocal1.edmx</DependentUpon>
@@ -296,20 +246,6 @@
     <Content Include="Scripts\bootstrap.esm.min.js" />
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
-    <EntityDeploy Include="Models\ModelAzure.edmx">
-      <Generator>EntityModelCodeGenerator</Generator>
-      <LastGenOutput>ModelAzure.Designer.cs</LastGenOutput>
-    </EntityDeploy>
-    <Content Include="Models\ModelAzure.edmx.diagram">
-      <DependentUpon>ModelAzure.edmx</DependentUpon>
-    </Content>
-    <EntityDeploy Include="Models\ModelLocal.edmx">
-      <Generator>EntityModelCodeGenerator</Generator>
-      <LastGenOutput>ModelLocal.Designer.cs</LastGenOutput>
-    </EntityDeploy>
-    <Content Include="Models\ModelLocal.edmx.diagram">
-      <DependentUpon>ModelLocal.edmx</DependentUpon>
-    </Content>
     <EntityDeploy Include="Models\ModelLocal1.edmx">
       <Generator>EntityModelCodeGenerator</Generator>
       <LastGenOutput>ModelLocal1.Designer.cs</LastGenOutput>

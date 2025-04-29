@@ -17,8 +17,10 @@ namespace ClinicDent.Controllers
         // GET: Tratamientos
         public ActionResult Index()
         {
-            var tratamientos = db.Tratamientos.Include(t => t.Tipo_Cobro);
-            return View(tratamientos.ToList());
+            var tratamientos = db.Tratamientos.Include(t => t.Tipo_Cobro)
+                                .OrderByDescending(t => t.fecha_inicio)
+                                .ToList();
+            return View(tratamientos);
         }
 
         // GET: Tratamientos/Details/5
@@ -28,37 +30,60 @@ namespace ClinicDent.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Tratamientos tratamientos = db.Tratamientos.Find(id);
-            if (tratamientos == null)
+            Tratamientos tratamiento = db.Tratamientos.Find(id);
+            if (tratamiento == null)
             {
                 return HttpNotFound();
             }
-            return View(tratamientos);
+            return View(tratamiento);
         }
 
         // GET: Tratamientos/Create
         public ActionResult Create()
         {
-            ViewBag.id_tipo_cobro = new SelectList(db.Tipo_Cobro, "id_tipo_cobro", "nombre");
+            // Cargar tipos de cobro ordenados alfabéticamente
+            ViewBag.id_tipo_cobro = new SelectList(
+                db.Tipo_Cobro.OrderBy(t => t.nombre),
+                "id_tipo_cobro",
+                "nombre");
+
+            // Establecer fecha por defecto como hoy
+            ViewBag.FechaActual = DateTime.Now.ToString("dd/MM/yyyy");
+
             return View();
         }
 
         // POST: Tratamientos/Create
-        // Para protegerse de ataques de publicación excesiva, habilite las propiedades específicas a las que quiere enlazarse. Para obtener 
-        // más detalles, vea https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "id_tratamiento,id_tipo_cobro,fecha_inicio,odontograma,costo,duracion_estimada,seguimiento")] Tratamientos tratamientos)
+        public ActionResult Create([Bind(Include = "id_tratamiento,id_tipo_cobro,fecha_inicio,odontograma,costo,duracion_estimada,seguimiento")] Tratamientos tratamiento)
         {
             if (ModelState.IsValid)
             {
-                db.Tratamientos.Add(tratamientos);
-                db.SaveChanges();
-                return RedirectToAction("Index");
+                // Validar costo mínimo
+                if (tratamiento.costo <= 0)
+                {
+                    ModelState.AddModelError("costo", "El costo debe ser mayor a cero");
+                }
+                else
+                {
+                    // Validar fecha no futura (opcional, descomentar si se necesita)
+                    // if (tratamiento.fecha_inicio > DateTime.Today)
+                    // {
+                    //     ModelState.AddModelError("fecha_inicio", "La fecha no puede ser futura");
+                    // }
+                    // else
+                    // {
+                    db.Tratamientos.Add(tratamiento);
+                    db.SaveChanges();
+                    return RedirectToAction("Index");
+                    // }
+                }
             }
 
-            ViewBag.id_tipo_cobro = new SelectList(db.Tipo_Cobro, "id_tipo_cobro", "nombre", tratamientos.id_tipo_cobro);
-            return View(tratamientos);
+            // Si hay errores, recargar la lista de tipos de cobro
+            ViewBag.id_tipo_cobro = new SelectList(db.Tipo_Cobro, "id_tipo_cobro", "nombre", tratamiento.id_tipo_cobro);
+            return View(tratamiento);
         }
 
         // GET: Tratamientos/Edit/5
@@ -68,30 +93,43 @@ namespace ClinicDent.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Tratamientos tratamientos = db.Tratamientos.Find(id);
-            if (tratamientos == null)
+            Tratamientos tratamiento = db.Tratamientos.Find(id);
+            if (tratamiento == null)
             {
                 return HttpNotFound();
             }
-            ViewBag.id_tipo_cobro = new SelectList(db.Tipo_Cobro, "id_tipo_cobro", "nombre", tratamientos.id_tipo_cobro);
-            return View(tratamientos);
+
+            ViewBag.id_tipo_cobro = new SelectList(
+                db.Tipo_Cobro.OrderBy(t => t.nombre),
+                "id_tipo_cobro",
+                "nombre",
+                tratamiento.id_tipo_cobro);
+
+            return View(tratamiento);
         }
 
         // POST: Tratamientos/Edit/5
-        // Para protegerse de ataques de publicación excesiva, habilite las propiedades específicas a las que quiere enlazarse. Para obtener 
-        // más detalles, vea https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "id_tratamiento,id_tipo_cobro,fecha_inicio,odontograma,costo,duracion_estimada,seguimiento")] Tratamientos tratamientos)
+        public ActionResult Edit([Bind(Include = "id_tratamiento,id_tipo_cobro,fecha_inicio,odontograma,costo,duracion_estimada,seguimiento")] Tratamientos tratamiento)
         {
             if (ModelState.IsValid)
             {
-                db.Entry(tratamientos).State = EntityState.Modified;
-                db.SaveChanges();
-                return RedirectToAction("Index");
+                // Validación de costo mínimo
+                if (tratamiento.costo <= 0)
+                {
+                    ModelState.AddModelError("costo", "El costo debe ser mayor a cero");
+                }
+                else
+                {
+                    db.Entry(tratamiento).State = EntityState.Modified;
+                    db.SaveChanges();
+                    return RedirectToAction("Index");
+                }
             }
-            ViewBag.id_tipo_cobro = new SelectList(db.Tipo_Cobro, "id_tipo_cobro", "nombre", tratamientos.id_tipo_cobro);
-            return View(tratamientos);
+
+            ViewBag.id_tipo_cobro = new SelectList(db.Tipo_Cobro, "id_tipo_cobro", "nombre", tratamiento.id_tipo_cobro);
+            return View(tratamiento);
         }
 
         // GET: Tratamientos/Delete/5
@@ -101,12 +139,12 @@ namespace ClinicDent.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Tratamientos tratamientos = db.Tratamientos.Find(id);
-            if (tratamientos == null)
+            Tratamientos tratamiento = db.Tratamientos.Find(id);
+            if (tratamiento == null)
             {
                 return HttpNotFound();
             }
-            return View(tratamientos);
+            return View(tratamiento);
         }
 
         // POST: Tratamientos/Delete/5
@@ -114,10 +152,23 @@ namespace ClinicDent.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(int id)
         {
-            Tratamientos tratamientos = db.Tratamientos.Find(id);
-            db.Tratamientos.Remove(tratamientos);
+            Tratamientos tratamiento = db.Tratamientos.Find(id);
+            db.Tratamientos.Remove(tratamiento);
             db.SaveChanges();
             return RedirectToAction("Index");
+        }
+
+        // Método para obtener los tipos de cobro (puede usarse para AJAX)
+        public JsonResult GetTiposCobro()
+        {
+            var tipos = db.Tipo_Cobro
+                         .OrderBy(t => t.nombre)
+                         .Select(t => new {
+                             id = t.id_tipo_cobro,
+                             nombre = t.nombre
+                         })
+                         .ToList();
+            return Json(tipos, JsonRequestBehavior.AllowGet);
         }
 
         protected override void Dispose(bool disposing)

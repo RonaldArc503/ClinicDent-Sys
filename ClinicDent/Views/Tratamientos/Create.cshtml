@@ -1,82 +1,276 @@
 ﻿@model ClinicDent.Models.Tratamientos
 
 @{
-    ViewBag.Title = "Create";
+    ViewBag.Title = "Nuevo Tratamiento";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h2>Create</h2>
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
 
+<style>
+    .form-container {
+        max-width: 700px;
+        margin: 0 0 0 10px;
+        padding: 25px 25px 25px 15px;
+        background-color: #ffffff;
+        border-radius: 15px;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        border-left: 5px solid #17a2b8;
+    }
 
-@using (Html.BeginForm()) 
-{
-    @Html.AntiForgeryToken()
-    
-    <div class="form-horizontal">
-        <h4>Tratamientos</h4>
-        <hr />
-        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
-        <div class="form-group">
-            @Html.LabelFor(model => model.id_tipo_cobro, "id_tipo_cobro", htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.DropDownList("id_tipo_cobro", null, htmlAttributes: new { @class = "form-control" })
-                @Html.ValidationMessageFor(model => model.id_tipo_cobro, "", new { @class = "text-danger" })
+    .form-title {
+        color: #2c3e50;
+        margin-bottom: 25px;
+        text-align: left;
+        font-size: 24px;
+        padding-left: 5px;
+        display: flex;
+        align-items: center;
+    }
+
+        .form-title i {
+            margin-right: 12px;
+            color: #17a2b8;
+        }
+
+    .form-group {
+        margin-bottom: 20px;
+        display: flex;
+        flex-direction: column;
+        padding-left: 5px;
+    }
+
+    .control-label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 8px;
+        text-align: left;
+        display: flex;
+        align-items: center;
+    }
+
+    .label-icon {
+        margin-right: 10px;
+        color: #6c757d;
+        width: 20px;
+        text-align: center;
+    }
+
+    .form-control {
+        border-radius: 20px;
+        padding: 10px 15px;
+        border: 1px solid #ced4da;
+        transition: all 0.3s ease;
+        width: 100%;
+    }
+
+        .form-control:focus {
+            border-color: #17a2b8;
+            box-shadow: 0 0 0 0.2rem rgba(23, 162, 184, 0.25);
+        }
+
+    .input-icon {
+        position: relative;
+    }
+
+        .input-icon i {
+            position: absolute;
+            left: 15px;
+            top: 12px;
+            color: #6c757d;
+        }
+
+        .input-icon input, .input-icon select {
+            padding-left: 40px;
+        }
+
+    .btn-submit {
+        background-color: #17a2b8;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 20px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-top: 20px;
+        display: inline-flex;
+        align-items: center;
+    }
+
+        .btn-submit:hover {
+            background-color: #138496;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+    .btn-back {
+        display: inline-block;
+        margin-top: 20px;
+        color: #6c757d;
+        text-decoration: none;
+        transition: color 0.3s;
+        display: inline-flex;
+        align-items: center;
+    }
+
+        .btn-back:hover {
+            color: #0056b3;
+            text-decoration: underline;
+        }
+
+    .field-required::after {
+        content: " *";
+        color: #dc3545;
+    }
+
+    .checkbox-container {
+        display: flex;
+        align-items: center;
+        margin-top: 10px;
+    }
+
+    .checkbox-label {
+        margin-left: 10px;
+        cursor: pointer;
+    }
+
+    .ui-datepicker {
+        font-size: 14px;
+        padding: 10px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        z-index: 1000 !important;
+    }
+
+        .ui-datepicker select.ui-datepicker-year,
+        .ui-datepicker select.ui-datepicker-month {
+            height: auto;
+            padding: 5px;
+            margin: 0 5px;
+            border-radius: 4px;
+            border: 1px solid #ced4da;
+        }
+</style>
+
+<div class="form-container">
+    <h2 class="form-title">
+        <i class="fas fa-teeth-open"></i> Nuevo Tratamiento
+    </h2>
+
+    @using (Html.BeginForm())
+    {
+        @Html.AntiForgeryToken()
+
+        <div class="form-horizontal">
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+            <div class="form-group">
+                <label class="control-label required">
+                    <i class="fas fa-money-bill-wave label-icon"></i>Tipo de Cobro
+                </label>
+                <div class="input-icon">
+                    @Html.DropDownList("id_tipo_cobro", null, htmlAttributes: new { @class = "form-control" })
+                    @Html.ValidationMessageFor(model => model.id_tipo_cobro, "", new { @class = "text-danger" })
+                </div>
             </div>
-        </div>
 
-        <div class="form-group">
-            @Html.LabelFor(model => model.fecha_inicio, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.fecha_inicio, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.fecha_inicio, "", new { @class = "text-danger" })
+            <div class="form-group">
+                <label class="control-label required">
+                    <i class="fas fa-calendar-alt label-icon"></i>Fecha de Inicio
+                </label>
+                <div class="input-icon">
+                    @Html.EditorFor(model => model.fecha_inicio, new { htmlAttributes = new { @class = "form-control datepicker", placeholder = "Seleccione la fecha", required = "required" } })
+                    @Html.ValidationMessageFor(model => model.fecha_inicio, "", new { @class = "text-danger" })
+                </div>
             </div>
-        </div>
 
-        <div class="form-group">
-            @Html.LabelFor(model => model.odontograma, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.odontograma, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.odontograma, "", new { @class = "text-danger" })
+            <div class="form-group">
+                <label class="control-label">
+                    <i class="fas fa-tooth label-icon"></i>Odontograma
+                </label>
+                <div class="input-icon">
+                    @Html.EditorFor(model => model.odontograma, new { htmlAttributes = new { @class = "form-control", placeholder = "Referencia del odontograma" } })
+                    @Html.ValidationMessageFor(model => model.odontograma, "", new { @class = "text-danger" })
+                </div>
             </div>
-        </div>
 
-        <div class="form-group">
-            @Html.LabelFor(model => model.costo, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.costo, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.costo, "", new { @class = "text-danger" })
+            <div class="form-group">
+                <label class="control-label required">
+                    <i class="fas fa-dollar-sign label-icon"></i>Costo
+                </label>
+                <div class="input-icon">
+                    @Html.EditorFor(model => model.costo, new { htmlAttributes = new { @class = "form-control", placeholder = "0.00", required = "required" } })
+                    @Html.ValidationMessageFor(model => model.costo, "", new { @class = "text-danger" })
+                </div>
             </div>
-        </div>
 
-        <div class="form-group">
-            @Html.LabelFor(model => model.duracion_estimada, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.duracion_estimada, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.duracion_estimada, "", new { @class = "text-danger" })
+            <div class="form-group">
+                <label class="control-label">
+                    <i class="fas fa-clock label-icon"></i>Duración Estimada
+                </label>
+                <div class="input-icon">
+                    @Html.EditorFor(model => model.duracion_estimada, new { htmlAttributes = new { @class = "form-control", placeholder = "Ej: 1 hora, 30 minutos" } })
+                    @Html.ValidationMessageFor(model => model.duracion_estimada, "", new { @class = "text-danger" })
+                </div>
             </div>
-        </div>
 
-        <div class="form-group">
-            @Html.LabelFor(model => model.seguimiento, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                <div class="checkbox">
-                    @Html.EditorFor(model => model.seguimiento)
+            <div class="form-group">
+                <label class="control-label">
+                    <i class="fas fa-clipboard-check label-icon"></i>Seguimiento Requerido
+                </label>
+                <div class="checkbox-container">
+                    @Html.EditorFor(model => model.seguimiento, new { htmlAttributes = new { @class = "form-check-input" } })
+                    <label class="checkbox-label">Sí</label>
                     @Html.ValidationMessageFor(model => model.seguimiento, "", new { @class = "text-danger" })
                 </div>
             </div>
-        </div>
 
-        <div class="form-group">
-            <div class="col-md-offset-2 col-md-10">
-                <input type="submit" value="Create" class="btn btn-default" />
+            <div class="form-group">
+                <button type="submit" class="btn-submit">
+                    <i class="fas fa-save"></i> Guardar Tratamiento
+                </button>
             </div>
         </div>
-    </div>
-}
+    }
 
-<div>
-    @Html.ActionLink("Back to List", "Index")
+    <div>
+        <a href="@Url.Action("Index")" class="btn-back">
+            <i class="fas fa-arrow-left"></i> Volver al Listado
+        </a>
+    </div>
 </div>
 
 @section Scripts {
     @Scripts.Render("~/bundles/jqueryval")
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            // Configuración del datepicker
+            $(".datepicker").datepicker({
+                dateFormat: "dd/mm/yy",
+                changeMonth: true,
+                changeYear: true,
+                yearRange: "2020:+5",
+                dayNames: ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"],
+                dayNamesMin: ["Do", "Lu", "Ma", "Mi", "Ju", "Vi", "Sa"],
+                monthNames: ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"],
+                monthNamesShort: ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"],
+                prevText: "Anterior",
+                nextText: "Siguiente",
+                currentText: "Hoy",
+                closeText: "Cerrar"
+            });
+
+            // Formatear campo de costo
+            $('#costo').on('input', function() {
+                this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');
+            });
+
+            // Enfoque automático en el primer campo
+            $('#id_tipo_cobro').focus();
+        });
+    </script>
 }

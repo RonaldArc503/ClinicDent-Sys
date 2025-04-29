@@ -131,18 +131,6 @@
             text-decoration: underline;
         }
 
-    .field-required::after {
-        content: " *";
-        color: #dc3545;
-    }
-
-    textarea.form-control {
-        min-height: 120px;
-        resize: vertical;
-        border-radius: 10px !important;
-    }
-
-    /* Estilos específicos para los dropdowns */
     select.form-control {
         appearance: none;
         -webkit-appearance: none;
@@ -153,7 +141,6 @@
         background-size: 15px;
     }
 
-    /* Estilo para el datetime picker */
     .datetime-input {
         position: relative;
     }
@@ -170,7 +157,6 @@
             padding-left: 40px;
         }
 
-    /* Diseño de dos columnas */
     .form-columns {
         display: flex;
         gap: 30px;
@@ -184,20 +170,13 @@
         flex: 1;
     }
 
-    /* Preservar iconos blancos del menú exterior */
     body .navbar .nav-link i,
     body .sidebar .nav-link i,
     body .menu-exterior i {
         color: white !important;
     }
 
-    /* Responsive */
-    @@media (max-width: 768px) {
-        .form-columns {
-            flex-direction: column;
-            gap: 0;
-        }
-    }
+   
 </style>
 
 <div class="edit-container">
@@ -216,13 +195,13 @@
             <div class="form-left-column">
                 <div class="form-group">
                     <label class="control-label">
-                        <i class="fas fa-calendar-check label-icon"></i>Cita
+                        <i class="fas fa-calendar-check label-icon"></i>Cita (opcional)
                     </label>
-                    @Html.DropDownList("id_cita", null, htmlAttributes: new { @class = "form-control" })
+                    @Html.DropDownList("id_cita", null, "Sin cita", htmlAttributes: new { @class = "form-control", @id = "id_cita" })
                     @Html.ValidationMessageFor(model => model.id_cita, "", new { @class = "text-danger" })
                 </div>
 
-                @Html.HiddenFor(model => model.id_cita)
+                @Html.HiddenFor(model => model.id_cita, new { @id = "hidden_id_cita" })
 
                 <div class="form-group">
                     <label class="control-label">
@@ -232,13 +211,13 @@
                         @if (ViewBag.FechaConsulta != null)
                         {
                             <input type="text" class="form-control" value="@ViewBag.FechaConsulta" readonly />
-                            @Html.HiddenFor(model => model.fecha_consulta, new { Value = DateTime.Now.ToString("yyyy-MM-ddTHH:mm") })
+                            @Html.HiddenFor(model => model.fecha_consulta, new { Value = ViewBag.FechaConsulta })
                         }
                         else
                         {
                             @Html.TextBoxFor(model => model.fecha_consulta, "{0:yyyy-MM-ddTHH:mm}", new { @class = "form-control", @type = "datetime-local" })
                         }
-                        @Html.ValidationMessageFor(model => model.fecha_consulta)
+                        @Html.ValidationMessageFor(model => model.fecha_consulta, "", new { @class = "text-danger" })
                     </div>
                 </div>
 
