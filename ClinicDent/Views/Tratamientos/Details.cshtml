@@ -1,66 +1,231 @@
 ﻿@model ClinicDent.Models.Tratamientos
 
 @{
-    ViewBag.Title = "Details";
+    ViewBag.Title = "Detalles del Tratamiento";
+    var hasOdontograma = !string.IsNullOrEmpty(Model.dientes_seleccionados) && Model.dientes_seleccionados != "{}";
 }
 
-<h2>Details</h2>
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>@ViewBag.Title</h2>
+        <div>
+            @Html.ActionLink("Editar", "Edit", new { id = Model.id_tratamiento }, new { @class = "btn btn-primary" })
+            @Html.ActionLink("Volver a la lista", "Index", null, new { @class = "btn btn-secondary" })
+        </div>
+    </div>
 
-<div>
-    <h4>Tratamientos</h4>
-    <hr />
-    <dl class="dl-horizontal">
-        <dt>
-            @Html.DisplayNameFor(model => model.fecha_inicio)
-        </dt>
+    <!-- Tarjeta de información general -->
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">Información General</h4>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <!-- Tipo de Tratamiento -->
+                <div class="col-md-6">
+                    <div class="detail-item">
+                        <h5 class="detail-label">Tipo de Tratamiento:</h5>
+                        <p class="detail-value">@Model.Tipo_Cobro.nombre</p>
+                    </div>
+                </div>
 
-        <dd>
-            @Html.DisplayFor(model => model.fecha_inicio)
-        </dd>
+                <!-- Fecha de Inicio -->
+                <div class="col-md-6">
+                    <div class="detail-item">
+                        <h5 class="detail-label">Fecha de Inicio:</h5>
+                        <p class="detail-value">@(Model.fecha_inicio != null ? Model.fecha_inicio.ToString("dddd dd 'de' MMMM 'de' yyyy", new System.Globalization.CultureInfo("es-ES")) : "No especificada")</p>
+                    </div>
+                </div>
+            </div>
 
-        <dt>
-            @Html.DisplayNameFor(model => model.odontograma)
-        </dt>
+            <div class="row">
+                <!-- Costo -->
+                <div class="col-md-6">
+                    <div class="detail-item">
+                        <h5 class="detail-label">Costo:</h5>
+                        <p class="detail-value">@Model.costo.ToString("C")</p>
+                    </div>
+                </div>
 
-        <dd>
-            @Html.DisplayFor(model => model.odontograma)
-        </dd>
+                <!-- Duración Estimada -->
+                <div class="col-md-6">
+                    <div class="detail-item">
+                        <h5 class="detail-label">Duración Estimada:</h5>
+                        <p class="detail-value">@Model.duracion_estimada día(s)</p>
+                    </div>
+                </div>
+            </div>
 
-        <dt>
-            @Html.DisplayNameFor(model => model.costo)
-        </dt>
+            <!-- Seguimiento -->
+            <div class="detail-item">
+                <h5 class="detail-label">Requiere Seguimiento:</h5>
+                <p class="detail-value">
+                    @if (Model.seguimiento)
+                    {
+                        <span class="badge badge-success">Sí</span>
+                    }
+                    else
+                    {
+                        <span class="badge badge-secondary">No</span>
+                    }
+                </p>
+            </div>
+        </div>
+    </div>
 
-        <dd>
-            @Html.DisplayFor(model => model.costo)
-        </dd>
+    <!-- Tarjeta del Odontograma -->
+    <div class="card">
+        <div class="card-header bg-info text-white">
+            <h4 class="mb-0">Odontograma</h4>
+        </div>
+        <div class="card-body">
+            @if (hasOdontograma)
+            {
+                <!-- Mostrar odontograma en modo solo lectura -->
+                <div class="odontograma-view-only">
+                    @Html.Partial("_OdontogramaViewOnlyPartial", Model.dientes_seleccionados)
+                </div>
 
-        <dt>
-            @Html.DisplayNameFor(model => model.duracion_estimada)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.duracion_estimada)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.seguimiento)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.seguimiento)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.Tipo_Cobro.nombre)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.Tipo_Cobro.nombre)
-        </dd>
-
-    </dl>
+                <!-- Resumen de dientes afectados -->
+                <div class="mt-4">
+                    <h5>Resumen de Dientes Afectados:</h5>
+                    <div id="resumenDientes" class="alert alert-light">
+                        <!-- JavaScript generará el resumen aquí -->
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-warning">
+                    No se han seleccionado dientes para este tratamiento.
+                </div>
+            }
+        </div>
+    </div>
 </div>
-<p>
-    @Html.ActionLink("Edit", "Edit", new { id = Model.id_tratamiento }) |
-    @Html.ActionLink("Back to List", "Index")
-</p>
+
+<style>
+    .card {
+        border-radius: 0.5rem;
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        margin-bottom: 1.5rem;
+    }
+
+    .card-header {
+        border-radius: 0.5rem 0.5rem 0 0 !important;
+        padding: 1rem 1.25rem;
+    }
+
+    .detail-item {
+        margin-bottom: 1.25rem;
+    }
+
+    .detail-label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 0.25rem;
+        font-size: 0.95rem;
+    }
+
+    .detail-value {
+        font-size: 1.1rem;
+        color: #212529;
+        padding: 0.5rem;
+        background-color: #f8f9fa;
+        border-radius: 0.25rem;
+        margin-bottom: 0;
+    }
+
+    .badge {
+        font-size: 0.9rem;
+        padding: 0.35em 0.65em;
+    }
+
+    .odontograma-view-only {
+        background-color: white;
+        padding: 1.5rem;
+        border-radius: 0.5rem;
+        border: 1px solid #dee2e6;
+    }
+</style>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Generar resumen de dientes afectados
+            if (@hasOdontograma.ToString().ToLower()) {
+                generarResumenDientes();
+            }
+        });
+
+        function generarResumenDientes() {
+            try {
+                const odontogramaData = '@Html.Raw(Model.dientes_seleccionados)';
+                const data = JSON.parse(odontogramaData.replace(/"/g, '"'));
+                let resumenHTML = '';
+                let contadorDientes = 0;
+
+                // Agrupar por tipo de afección
+                const caries = [];
+                const rellenos = [];
+                const faltantes = [];
+                const extraer = [];
+
+                Object.keys(data).forEach(dienteId => {
+                    const diente = data[dienteId];
+                    contadorDientes++;
+
+                    // Verificar si tiene marca
+                    if (diente.marca) {
+                        if (diente.marca === 'faltante') {
+                            faltantes.push(dienteId);
+                        } else if (diente.marca === 'extraer') {
+                            extraer.push(dienteId);
+                        }
+                        return;
+                    }
+
+                    // Verificar partes con tratamientos
+                    if (diente.partes) {
+                        let tieneCaries = false;
+                        let tieneRellenos = false;
+
+                        Object.keys(diente.partes).forEach(parte => {
+                            if (diente.partes[parte] === 'caries') {
+                                tieneCaries = true;
+                            } else if (diente.partes[parte] === 'relleno') {
+                                tieneRellenos = true;
+                            }
+                        });
+
+                        if (tieneCaries) caries.push(dienteId);
+                        if (tieneRellenos) rellenos.push(dienteId);
+                    }
+                });
+
+                // Construir HTML del resumen
+                if (faltantes.length > 0) {
+                    resumenHTML += `<p><strong>Dientes faltantes:</strong> ${faltantes.join(', ')}</p>`;
+                }
+                if (extraer.length > 0) {
+                    resumenHTML += `<p><strong>Dientes para extraer:</strong> ${extraer.join(', ')}</p>`;
+                }
+                if (caries.length > 0) {
+                    resumenHTML += `<p><strong>Dientes con caries:</strong> ${caries.join(', ')}</p>`;
+                }
+                if (rellenos.length > 0) {
+                    resumenHTML += `<p><strong>Dientes con rellenos:</strong> ${rellenos.join(', ')}</p>`;
+                }
+
+                if (resumenHTML === '') {
+                    resumenHTML = '<p>No se detectaron afecciones específicas en los dientes seleccionados.</p>';
+                }
+
+                $('#resumenDientes').html(resumenHTML);
+            } catch (e) {
+                console.error('Error al generar resumen de dientes:', e);
+                $('#resumenDientes').html('<p class="text-danger">No se pudo generar el resumen de dientes afectados.</p>');
+            }
+        }
+    </script>
+}

@@ -4,7 +4,7 @@
   <edmx:Runtime>
     <!-- SSDL content -->
     <edmx:StorageModels>
-      <Schema Namespace="ClinicaDental1Model.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+    <Schema Namespace="ClinicaDental1Model.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
         <EntityType Name="Citas">
           <Key>
             <PropertyRef Name="id_cita" />
@@ -23,7 +23,7 @@
           <Property Name="id_cita" Type="int" />
           <Property Name="id_dentista" Type="int" />
           <Property Name="id_paciente" Type="int" />
-          <Property Name="fecha_consulta" Type="date" Nullable="false" />
+          <Property Name="fecha_consulta" Type="datetime" Nullable="false" />
           <Property Name="diagnostico" Type="text" />
           <Property Name="observaciones" Type="text" />
           <Property Name="recomendaciones" Type="text" />
@@ -146,10 +146,10 @@
           <Property Name="id_tratamiento" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="id_tipo_cobro" Type="int" Nullable="false" />
           <Property Name="fecha_inicio" Type="date" Nullable="false" />
-          <Property Name="odontograma" Type="varchar" MaxLength="255" />
           <Property Name="costo" Type="decimal" Precision="10" Scale="2" Nullable="false" />
           <Property Name="duracion_estimada" Type="int" Nullable="false" />
           <Property Name="seguimiento" Type="bit" Nullable="false" />
+          <Property Name="dientes_seleccionados" Type="nvarchar(max)" />
         </EntityType>
         <EntityType Name="Usuarios">
           <Key>
@@ -163,7 +163,7 @@
           <Property Name="clave" Type="text" Nullable="false" />
           <Property Name="id_rol" Type="int" Nullable="false" />
         </EntityType>
-        <Association Name="FK__Citas__id_dentis__681373AD">
+        <Association Name="FK__Citas__id_dentis__60A75C0F">
           <End Role="Dentistas" Type="Self.Dentistas" Multiplicity="1" />
           <End Role="Citas" Type="Self.Citas" Multiplicity="*" />
           <ReferentialConstraint>
@@ -175,7 +175,7 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__Citas__id_pacien__671F4F74">
+        <Association Name="FK__Citas__id_pacien__619B8048">
           <End Role="Pacientes" Type="Self.Pacientes" Multiplicity="1" />
           <End Role="Citas" Type="Self.Citas" Multiplicity="*" />
           <ReferentialConstraint>
@@ -187,7 +187,7 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__Consulta__id_cit__690797E6">
+        <Association Name="FK__Consulta__id_cit__628FA481">
           <End Role="Citas" Type="Self.Citas" Multiplicity="0..1" />
           <End Role="Consulta" Type="Self.Consulta" Multiplicity="*" />
           <ReferentialConstraint>
@@ -199,7 +199,7 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__Consulta__id_den__69FBBC1F">
+        <Association Name="FK__Consulta__id_den__6383C8BA">
           <End Role="Dentistas" Type="Self.Dentistas" Multiplicity="0..1" />
           <End Role="Consulta" Type="Self.Consulta" Multiplicity="*" />
           <ReferentialConstraint>
@@ -211,7 +211,7 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__Consulta__id_pac__6AEFE058">
+        <Association Name="FK__Consulta__id_pac__6477ECF3">
           <End Role="Pacientes" Type="Self.Pacientes" Multiplicity="0..1" />
           <End Role="Consulta" Type="Self.Consulta" Multiplicity="*" />
           <ReferentialConstraint>
@@ -223,7 +223,7 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__Consultas__id_co__6CD828CA">
+        <Association Name="FK__Consultas__id_co__656C112C">
           <End Role="Consulta" Type="Self.Consulta" Multiplicity="1" />
           <End Role="Consultas_Tratamientos" Type="Self.Consultas_Tratamientos" Multiplicity="*" />
           <ReferentialConstraint>
@@ -235,7 +235,7 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__Consultas__id_tr__6DCC4D03">
+        <Association Name="FK__Consultas__id_tr__66603565">
           <End Role="Tratamientos" Type="Self.Tratamientos" Multiplicity="1" />
           <End Role="Consultas_Tratamientos" Type="Self.Consultas_Tratamientos" Multiplicity="*" />
           <ReferentialConstraint>
@@ -247,7 +247,7 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__Historial__id_co__72910220">
+        <Association Name="FK__Historial__id_co__6754599E">
           <End Role="Consultas_Tratamientos" Type="Self.Consultas_Tratamientos" Multiplicity="0..1" />
           <End Role="Historial_Clinico" Type="Self.Historial_Clinico" Multiplicity="*" />
           <ReferentialConstraint>
@@ -259,7 +259,7 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__Historial__id_cu__70A8B9AE">
+        <Association Name="FK__Historial__id_cu__68487DD7">
           <End Role="Pagos_Cuotas" Type="Self.Pagos_Cuotas" Multiplicity="0..1" />
           <End Role="Historial_Pagos" Type="Self.Historial_Pagos" Multiplicity="*" />
           <ReferentialConstraint>
@@ -271,7 +271,7 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__Historial__id_pa__719CDDE7">
+        <Association Name="FK__Historial__id_pa__693CA210">
           <End Role="Pagos" Type="Self.Pagos" Multiplicity="1" />
           <End Role="Historial_Pagos" Type="Self.Historial_Pagos" Multiplicity="*" />
           <ReferentialConstraint>
@@ -283,7 +283,7 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__Inventari__id_ma__73852659">
+        <Association Name="FK__Inventari__id_ma__6A30C649">
           <End Role="Materiales" Type="Self.Materiales" Multiplicity="1" />
           <End Role="Inventario" Type="Self.Inventario" Multiplicity="*" />
           <ReferentialConstraint>
@@ -295,7 +295,7 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__Pagos__id_consul__6EC0713C">
+        <Association Name="FK__Pagos__id_consul__6B24EA82">
           <End Role="Consulta" Type="Self.Consulta" Multiplicity="0..1" />
           <End Role="Pagos" Type="Self.Pagos" Multiplicity="*" />
           <ReferentialConstraint>
@@ -307,7 +307,7 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__Pagos_Cuo__id_pa__6FB49575">
+        <Association Name="FK__Pagos_Cuo__id_pa__6C190EBB">
           <End Role="Pagos" Type="Self.Pagos" Multiplicity="1" />
           <End Role="Pagos_Cuotas" Type="Self.Pagos_Cuotas" Multiplicity="*" />
           <ReferentialConstraint>
@@ -319,7 +319,7 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__Tratamien__id_ti__6BE40491">
+        <Association Name="FK__Tratamien__id_ti__6D0D32F4">
           <End Role="Tipo_Cobro" Type="Self.Tipo_Cobro" Multiplicity="1" />
           <End Role="Tratamientos" Type="Self.Tratamientos" Multiplicity="*" />
           <ReferentialConstraint>
@@ -331,7 +331,7 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__Usuarios__id_rol__74794A92">
+        <Association Name="FK__Usuarios__id_rol__6E01572D">
           <End Role="Roles" Type="Self.Roles" Multiplicity="1" />
           <End Role="Usuarios" Type="Self.Usuarios" Multiplicity="*" />
           <ReferentialConstraint>
@@ -359,69 +359,68 @@
           <EntitySet Name="Tipo_Cobro" EntityType="Self.Tipo_Cobro" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Tratamientos" EntityType="Self.Tratamientos" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Usuarios" EntityType="Self.Usuarios" Schema="dbo" store:Type="Tables" />
-          <AssociationSet Name="FK__Citas__id_dentis__681373AD" Association="Self.FK__Citas__id_dentis__681373AD">
+          <AssociationSet Name="FK__Citas__id_dentis__60A75C0F" Association="Self.FK__Citas__id_dentis__60A75C0F">
             <End Role="Dentistas" EntitySet="Dentistas" />
             <End Role="Citas" EntitySet="Citas" />
           </AssociationSet>
-          <AssociationSet Name="FK__Citas__id_pacien__671F4F74" Association="Self.FK__Citas__id_pacien__671F4F74">
+          <AssociationSet Name="FK__Citas__id_pacien__619B8048" Association="Self.FK__Citas__id_pacien__619B8048">
             <End Role="Pacientes" EntitySet="Pacientes" />
             <End Role="Citas" EntitySet="Citas" />
           </AssociationSet>
-          <AssociationSet Name="FK__Consulta__id_cit__690797E6" Association="Self.FK__Consulta__id_cit__690797E6">
+          <AssociationSet Name="FK__Consulta__id_cit__628FA481" Association="Self.FK__Consulta__id_cit__628FA481">
             <End Role="Citas" EntitySet="Citas" />
             <End Role="Consulta" EntitySet="Consulta" />
           </AssociationSet>
-          <AssociationSet Name="FK__Consulta__id_den__69FBBC1F" Association="Self.FK__Consulta__id_den__69FBBC1F">
+          <AssociationSet Name="FK__Consulta__id_den__6383C8BA" Association="Self.FK__Consulta__id_den__6383C8BA">
             <End Role="Dentistas" EntitySet="Dentistas" />
             <End Role="Consulta" EntitySet="Consulta" />
           </AssociationSet>
-          <AssociationSet Name="FK__Consulta__id_pac__6AEFE058" Association="Self.FK__Consulta__id_pac__6AEFE058">
+          <AssociationSet Name="FK__Consulta__id_pac__6477ECF3" Association="Self.FK__Consulta__id_pac__6477ECF3">
             <End Role="Pacientes" EntitySet="Pacientes" />
             <End Role="Consulta" EntitySet="Consulta" />
           </AssociationSet>
-          <AssociationSet Name="FK__Consultas__id_co__6CD828CA" Association="Self.FK__Consultas__id_co__6CD828CA">
+          <AssociationSet Name="FK__Consultas__id_co__656C112C" Association="Self.FK__Consultas__id_co__656C112C">
             <End Role="Consulta" EntitySet="Consulta" />
             <End Role="Consultas_Tratamientos" EntitySet="Consultas_Tratamientos" />
           </AssociationSet>
-          <AssociationSet Name="FK__Consultas__id_tr__6DCC4D03" Association="Self.FK__Consultas__id_tr__6DCC4D03">
+          <AssociationSet Name="FK__Consultas__id_tr__66603565" Association="Self.FK__Consultas__id_tr__66603565">
             <End Role="Tratamientos" EntitySet="Tratamientos" />
             <End Role="Consultas_Tratamientos" EntitySet="Consultas_Tratamientos" />
           </AssociationSet>
-          <AssociationSet Name="FK__Historial__id_co__72910220" Association="Self.FK__Historial__id_co__72910220">
+          <AssociationSet Name="FK__Historial__id_co__6754599E" Association="Self.FK__Historial__id_co__6754599E">
             <End Role="Consultas_Tratamientos" EntitySet="Consultas_Tratamientos" />
             <End Role="Historial_Clinico" EntitySet="Historial_Clinico" />
           </AssociationSet>
-          <AssociationSet Name="FK__Historial__id_cu__70A8B9AE" Association="Self.FK__Historial__id_cu__70A8B9AE">
+          <AssociationSet Name="FK__Historial__id_cu__68487DD7" Association="Self.FK__Historial__id_cu__68487DD7">
             <End Role="Pagos_Cuotas" EntitySet="Pagos_Cuotas" />
             <End Role="Historial_Pagos" EntitySet="Historial_Pagos" />
           </AssociationSet>
-          <AssociationSet Name="FK__Historial__id_pa__719CDDE7" Association="Self.FK__Historial__id_pa__719CDDE7">
+          <AssociationSet Name="FK__Historial__id_pa__693CA210" Association="Self.FK__Historial__id_pa__693CA210">
             <End Role="Pagos" EntitySet="Pagos" />
             <End Role="Historial_Pagos" EntitySet="Historial_Pagos" />
           </AssociationSet>
-          <AssociationSet Name="FK__Inventari__id_ma__73852659" Association="Self.FK__Inventari__id_ma__73852659">
+          <AssociationSet Name="FK__Inventari__id_ma__6A30C649" Association="Self.FK__Inventari__id_ma__6A30C649">
             <End Role="Materiales" EntitySet="Materiales" />
             <End Role="Inventario" EntitySet="Inventario" />
           </AssociationSet>
-          <AssociationSet Name="FK__Pagos__id_consul__6EC0713C" Association="Self.FK__Pagos__id_consul__6EC0713C">
+          <AssociationSet Name="FK__Pagos__id_consul__6B24EA82" Association="Self.FK__Pagos__id_consul__6B24EA82">
             <End Role="Consulta" EntitySet="Consulta" />
             <End Role="Pagos" EntitySet="Pagos" />
           </AssociationSet>
-          <AssociationSet Name="FK__Pagos_Cuo__id_pa__6FB49575" Association="Self.FK__Pagos_Cuo__id_pa__6FB49575">
+          <AssociationSet Name="FK__Pagos_Cuo__id_pa__6C190EBB" Association="Self.FK__Pagos_Cuo__id_pa__6C190EBB">
             <End Role="Pagos" EntitySet="Pagos" />
             <End Role="Pagos_Cuotas" EntitySet="Pagos_Cuotas" />
           </AssociationSet>
-          <AssociationSet Name="FK__Tratamien__id_ti__6BE40491" Association="Self.FK__Tratamien__id_ti__6BE40491">
+          <AssociationSet Name="FK__Tratamien__id_ti__6D0D32F4" Association="Self.FK__Tratamien__id_ti__6D0D32F4">
             <End Role="Tipo_Cobro" EntitySet="Tipo_Cobro" />
             <End Role="Tratamientos" EntitySet="Tratamientos" />
           </AssociationSet>
-          <AssociationSet Name="FK__Usuarios__id_rol__74794A92" Association="Self.FK__Usuarios__id_rol__74794A92">
+          <AssociationSet Name="FK__Usuarios__id_rol__6E01572D" Association="Self.FK__Usuarios__id_rol__6E01572D">
             <End Role="Roles" EntitySet="Roles" />
             <End Role="Usuarios" EntitySet="Usuarios" />
           </AssociationSet>
         </EntityContainer>
-      </Schema>
-    </edmx:StorageModels>
+      </Schema></edmx:StorageModels>
     <!-- CSDL content -->
     <edmx:ConceptualModels>
       <Schema Namespace="ClinicaDental1Model" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
@@ -446,7 +445,7 @@
           <Property Name="id_cita" Type="Int32" />
           <Property Name="id_dentista" Type="Int32" />
           <Property Name="id_paciente" Type="Int32" />
-          <Property Name="fecha_consulta" Type="DateTime" Nullable="false" Precision="0" />
+          <Property Name="fecha_consulta" Type="DateTime" Nullable="false" Precision="3" />
           <Property Name="diagnostico" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
           <Property Name="observaciones" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
           <Property Name="recomendaciones" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
@@ -593,12 +592,12 @@
           <Property Name="id_tratamiento" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="id_tipo_cobro" Type="Int32" Nullable="false" />
           <Property Name="fecha_inicio" Type="DateTime" Nullable="false" Precision="0" />
-          <Property Name="odontograma" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
           <Property Name="costo" Type="Decimal" Precision="10" Scale="2" Nullable="false" />
           <Property Name="duracion_estimada" Type="Int32" Nullable="false" />
           <Property Name="seguimiento" Type="Boolean" Nullable="false" />
           <NavigationProperty Name="Consultas_Tratamientos" Relationship="Self.FK__Consultas__id_tr__6DCC4D03" FromRole="Tratamientos" ToRole="Consultas_Tratamientos" />
           <NavigationProperty Name="Tipo_Cobro" Relationship="Self.FK__Tratamien__id_ti__6BE40491" FromRole="Tratamientos" ToRole="Tipo_Cobro" />
+          <Property Name="dientes_seleccionados" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
         </EntityType>
         <EntityType Name="Usuarios">
           <Key>
@@ -1026,10 +1025,10 @@
           <EntitySetMapping Name="Tratamientos">
             <EntityTypeMapping TypeName="ClinicaDental1Model.Tratamientos">
               <MappingFragment StoreEntitySet="Tratamientos">
+                <ScalarProperty Name="dientes_seleccionados" ColumnName="dientes_seleccionados" />
                 <ScalarProperty Name="id_tratamiento" ColumnName="id_tratamiento" />
                 <ScalarProperty Name="id_tipo_cobro" ColumnName="id_tipo_cobro" />
                 <ScalarProperty Name="fecha_inicio" ColumnName="fecha_inicio" />
-                <ScalarProperty Name="odontograma" ColumnName="odontograma" />
                 <ScalarProperty Name="costo" ColumnName="costo" />
                 <ScalarProperty Name="duracion_estimada" ColumnName="duracion_estimada" />
                 <ScalarProperty Name="seguimiento" ColumnName="seguimiento" />

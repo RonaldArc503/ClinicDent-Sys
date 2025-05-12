@@ -5,6 +5,87 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
+<style>
+    /* Estilos adicionales para el expediente mejorado */
+    .patient-card {
+        border-radius: 10px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        border: none;
+        margin-bottom: 30px;
+    }
+
+    .section-title {
+        color: #2c3e50;
+        border-bottom: 2px solid #f8f9fa;
+        padding-bottom: 8px;
+        margin-bottom: 15px;
+        font-size: 1.1rem;
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 0.5rem;
+    }
+
+    .info-item {
+        margin-bottom: 0rem;
+    }
+
+    .info-label {
+        font-size: 0.8125rem;
+        font-weight: 600;
+        color: #6e84a3;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        margin-bottom: 0.25rem;
+    }
+
+    .info-value {
+        font-size: 0.9375rem;
+        font-weight: 500;
+        color: #12263f;
+    }
+
+    .stat-card {
+        transition: all 0.3s ease;
+    }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+    .stat-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+    }
+
+    .stat-label {
+        font-size: 0.8rem;
+    }
+
+    .nav-tabs .nav-link {
+        font-weight: 500;
+        color: #495057;
+    }
+
+        .nav-tabs .nav-link.active {
+            font-weight: 600;
+            color: #0d6efd;
+            border-bottom: 3px solid #0d6efd;
+        }
+
+    /* Mejoras para las tablas */
+    .table-hover tbody tr:hover {
+        background-color: rgba(13, 110, 253, 0.05);
+    }
+
+    /* Responsividad */
+
+</style>
+
 <div class="container mt-4">
     <div class="row">
         <div class="col-md-12">
@@ -24,38 +105,41 @@
 
                 <div class="card-body">
                     <div class="row">
-                        <!-- Columna de información básica -->
+                        <!-- Columna de información básica - Diseño actualizado -->
                         <div class="col-md-6">
                             <div class="info-section mb-4">
                                 <h4 class="section-title">
-                                    <i class="fas fa-info-circle text-primary me-2"></i>Información Básica
+                                    <i class="fas fa-info-circle text-primary me-2"></i>Información Personal
                                 </h4>
                                 <div class="info-grid">
                                     <div class="info-item">
-                                        <strong>Nombre completo:</strong>
-                                        <span>@Model.nombres @Model.apellidos</span>
+                                        <div class="info-label">Nombre completo</div>
+                                        <div class="info-value">@Model.nombres @Model.apellidos</div>
                                     </div>
                                     <div class="info-item">
-                                        <strong>Fecha de nacimiento:</strong>
-                                        <span>@Model.fecha_nacimiento.ToString("dd/MM/yyyy")</span>
-                                        <span class="text-muted">(@CalcularEdad(Model.fecha_nacimiento) años)</span>
+                                        <div class="info-label">Edad</div>
+                                        <div class="info-value">@CalcularEdad(Model.fecha_nacimiento) años</div>
                                     </div>
                                     <div class="info-item">
-                                        <strong>Género:</strong>
-                                        <span>@Model.genero</span>
+                                        <div class="info-label">Fecha de Nacimiento</div>
+                                        <div class="info-value">@Model.fecha_nacimiento.ToString("dd/MM/yyyy")</div>
                                     </div>
                                     <div class="info-item">
-                                        <strong>Teléfono:</strong>
-                                        <span>
+                                        <div class="info-label">Género</div>
+                                        <div class="info-value">@Model.genero</div>
+                                    </div>
+                                    <div class="info-item">
+                                        <div class="info-label">Teléfono</div>
+                                        <div class="info-value">
                                             <a href="tel:@Model.telefono">@Model.telefono</a>
-                                        </span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
 
                             <div class="info-section mb-4">
                                 <h4 class="section-title">
-                                    <i class="fas fa-allergies text-danger me-2"></i>Alergias y Notas
+                                    <i class="fas fa-allergies text-danger me-2"></i>Alergias
                                 </h4>
                                 <div class="alert @(string.IsNullOrEmpty(Model.alergias) ? "alert-info" : "alert-warning")">
                                     @if (string.IsNullOrEmpty(Model.alergias))
@@ -66,6 +150,32 @@
                                     {
                                         <p class="mb-0">@Model.alergias</p>
                                     }
+                                </div>
+                            </div>
+
+                            <div class="info-section">
+                                <h4 class="section-title">
+                                    <i class="fas fa-chart-line text-info me-2"></i>Estadísticas
+                                </h4>
+                                <div class="row text-center">
+                                    <div class="col-md-4">
+                                        <div class="stat-card bg-light p-3 rounded">
+                                            <h5 class="stat-value text-primary">@ViewBag.HistorialCitas.Count</h5>
+                                            <p class="stat-label text-muted mb-0">Citas realizadas</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="stat-card bg-light p-3 rounded">
+                                            <h5 class="stat-value text-success">@ViewBag.ConsultasRecientes.Count</h5>
+                                            <p class="stat-label text-muted mb-0">Consultas</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="stat-card bg-light p-3 rounded">
+                                            <h5 class="stat-value text-warning">@ViewBag.Tratamientos.Count</h5>
+                                            <p class="stat-label text-muted mb-0">Tratamientos</p>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -83,13 +193,18 @@
                                         {
                                             <div class="list-group-item list-group-item-action">
                                                 <div class="d-flex w-100 justify-content-between">
-
-                                                    <small class="text-muted">@cita.fecha_hora.ToString("dd/MM/yyyy hh:mm tt")</small>
+                                                    <h6 class="mb-1">@cita.fecha_hora.ToString("dddd, dd MMMM yyyy", new System.Globalization.CultureInfo("es-ES"))</h6>
+                                                    <small class="text-muted">@cita.fecha_hora.ToString("hh:mm tt")</small>
                                                 </div>
-                                                <p class="mb-1">Con: Dr. @cita.Dentistas.nombre</p>
-                                                <small class="badge bg-@(cita.estado == "Confirmada" ? "success" : cita.estado == "Pendiente" ? "warning" : "danger")">
-                                                    @cita.estado
-                                                </small>
+                                                <p class="mb-1">Con: Dr. @cita.Dentistas.nombre @cita.Dentistas.apellido</p>
+                                                <div>
+                                                    <span class="badge bg-@(cita.estado == "Confirmada" ? "success" : cita.estado == "Pendiente" ? "warning" : "danger")">
+                                                        @cita.estado
+                                                    </span>
+                                                    <a href="@Url.Action("Details", "Citas", new { id = cita.id_cita })" class="btn btn-sm btn-outline-primary float-end">
+                                                        <i class="fas fa-eye"></i> Detalles
+                                                    </a>
+                                                </div>
                                             </div>
                                         }
                                     </div>
@@ -101,37 +216,206 @@
                                     </div>
                                 }
                             </div>
+                        </div>
+                    </div>
 
-                            <div class="info-section">
-                                <h4 class="section-title">
-                                    <i class="fas fa-tooth text-info me-2"></i>Historial Dental
-                                </h4>
-                                <div class="accordion" id="dentalHistoryAccordion">
-                                    <div class="accordion-item">
-                                        <h2 class="accordion-header" id="headingOne">
-                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne">
-                                                Últimos tratamientos
-                                            </button>
-                                        </h2>
-                                        <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne">
-                                            <div class="accordion-body">
-                                                Lista de tratamientos recientes...
-                                            </div>
-                                        </div>
+                    <!-- Sección de pestañas para historial completo -->
+                    <div class="mt-4">
+                        <ul class="nav nav-tabs" id="patientTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="historial-tab" data-bs-toggle="tab" data-bs-target="#historial" type="button" role="tab">
+                                    <i class="fas fa-history me-1"></i> Historial Completo
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="tratamientos-tab" data-bs-toggle="tab" data-bs-target="#tratamientos" type="button" role="tab">
+                                    <i class="fas fa-tooth me-1"></i> Tratamientos
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="pagos-tab" data-bs-toggle="tab" data-bs-target="#pagos" type="button" role="tab">
+                                    <i class="fas fa-money-bill-wave me-1"></i> Pagos
+                                </button>
+                            </li>
+                        </ul>
+
+                        <div class="tab-content p-3 border border-top-0 rounded-bottom" id="patientTabsContent">
+                            <!-- Pestaña de Historial -->
+                            <div class="tab-pane fade show active" id="historial" role="tabpanel">
+                                <h5 class="mb-3"><i class="fas fa-calendar-day me-2"></i>Últimas consultas</h5>
+                                @if (ViewBag.ConsultasRecientes.Count > 0)
+                                {
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Fecha</th>
+                                                    <th>Dentista</th>
+                                                    <th>Diagnóstico</th>
+                                                    <th>Acciones</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach (var consulta in ViewBag.ConsultasRecientes)
+                                                {
+                                                    <tr>
+                                                        <td>@consulta.fecha_consulta.ToString("dd/MM/yyyy HH:mm")</td>
+                                                        <td>Dr. @consulta.Dentistas.nombre</td>
+                                                        <td>@(consulta.diagnostico != null && consulta.diagnostico.Length > 50 ? consulta.diagnostico.Substring(0, 50) + "..." : consulta.diagnostico)</td>
+                                                        <td>
+                                                            <a href="@Url.Action("Details", "Consultas", new { id = consulta.id_consulta })" class="btn btn-sm btn-outline-primary">
+                                                                <i class="fas fa-eye"></i> Ver
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
                                     </div>
-                                    <div class="accordion-item">
-                                        <h2 class="accordion-header" id="headingTwo">
-                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo">
-                                                Radiografías
-                                            </button>
-                                        </h2>
-                                        <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo">
-                                            <div class="accordion-body">
-                                                Galería de imágenes...
-                                            </div>
-                                        </div>
+                                }
+                                else
+                                {
+                                    <div class="alert alert-info">
+                                        No se encontraron consultas registradas
                                     </div>
-                                </div>
+                                }
+
+                                <h5 class="mb-3 mt-4"><i class="fas fa-calendar-check me-2"></i>Historial de citas</h5>
+                                @if (ViewBag.HistorialCitas.Count > 0)
+                                {
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Fecha</th>
+                                                    <th>Dentista</th>
+                                                    <th>Estado</th>
+                                                    <th>Acciones</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach (var cita in ViewBag.HistorialCitas)
+                                                {
+                                                    <tr>
+                                                        <td>@cita.fecha_hora.ToString("dd/MM/yyyy HH:mm")</td>
+                                                        <td>Dr. @cita.Dentistas.nombre</td>
+                                                        <td>
+                                                            <span class="badge bg-@(cita.estado == "Confirmada" ? "success" : cita.estado == "Pendiente" ? "warning" : "danger")">
+                                                                @cita.estado
+                                                            </span>
+                                                        </td>
+                                                        <td>
+                                                            <a href="@Url.Action("Details", "Citas", new { id = cita.id_cita })" class="btn btn-sm btn-outline-primary">
+                                                                <i class="fas fa-eye"></i> Detalles
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="alert alert-info">
+                                        No se encontraron citas anteriores
+                                    </div>
+                                }
+                            </div>
+
+                            <!-- Pestaña de Tratamientos -->
+                            <div class="tab-pane fade" id="tratamientos" role="tabpanel">
+                                @if (ViewBag.Tratamientos.Count > 0)
+                                {
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Tratamiento</th>
+                                                    <th>Fecha</th>
+                                                    <th>Costo</th>
+                                                    <th>Estado</th>
+                                                    <th>Acciones</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach (var tratamiento in ViewBag.Tratamientos)
+                                                {
+                                                    <tr>
+                                                        <td>@tratamiento.Tratamientos.Tipo_Cobro.nombre</td>
+                                                        <td>@tratamiento.Consulta.fecha_consulta.ToString("dd/MM/yyyy")</td>
+                                                        <td>@tratamiento.total.ToString("C")</td>
+                                                        <td>
+                                                            @{
+                                                                var pagos = ViewBag.Pagos as IEnumerable<ClinicDent.Models.Pagos>;
+                                                                var estadoPago = pagos.FirstOrDefault(p => p.id_consulta == tratamiento.Consulta.id_consulta)?.Pagos_Cuotas.Any(pc => pc.estado == "Pendiente") == true ? "Pendiente" : "Pagado";
+                                                            }
+                                                            <span class="badge bg-@(estadoPago == "Pagado" ? "success" : "warning")">
+                                                                @estadoPago
+                                                            </span>
+                                                        </td>
+                                                        <td>
+                                                            <a href="@Url.Action("Details", "Tratamientos", new { id = tratamiento.id_tratamiento })" class="btn btn-sm btn-outline-primary">
+                                                                <i class="fas fa-eye"></i> Detalles
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="alert alert-info">
+                                        No se encontraron tratamientos registrados
+                                    </div>
+                                }
+                            </div>
+
+                            <!-- Pestaña de Pagos -->
+                            <div class="tab-pane fade" id="pagos" role="tabpanel">
+                                @if (ViewBag.Pagos.Count > 0)
+                                {
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Fecha</th>
+                                                    <th>Monto</th>
+                                                    <th>Método</th>
+                                                    <th>Tipo</th>
+                                                    <th>Estado</th>
+                                                    <th>Acciones</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach (var pago in ViewBag.Pagos)
+                                                {
+                                                    <tr>
+                                                        <td>@pago.fecha_pago.ToString("dd/MM/yyyy")</td>
+                                                        <td>@pago.monto_total.ToString("C")</td>
+                                                        <td>@pago.metodo_pago</td>
+                                                        <td>@pago.tipo_pago</td>
+                                                        <td>
+                                                        </td>
+                                                        <td>
+                                                            <a href="@Url.Action("Details", "Pagos", new { id = pago.id_pago })" class="btn btn-sm btn-outline-primary">
+                                                                <i class="fas fa-eye"></i> Detalles
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="alert alert-info">
+                                        No se encontraron registros de pagos
+                                    </div>
+                                }
                             </div>
                         </div>
                     </div>
@@ -146,10 +430,9 @@
                             <a href="@Url.Action("Edit", new { id = Model.id_paciente })" class="btn btn-primary me-2">
                                 <i class="fas fa-edit me-1"></i> Editar información
                             </a>
-                            <a href="@Url.Action("Create", "Citas")" class="btn btn-success">
+                            <a href="@Url.Action("Create", "Citas", new { pacienteId = Model.id_paciente })" class="btn btn-success">
                                 <i class="fas fa-calendar-plus me-1"></i> Nueva cita
                             </a>
-
                         </div>
                     </div>
                 </div>
@@ -158,68 +441,28 @@
     </div>
 </div>
 
-<!-- Modal para nueva cita -->
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Activar pestañas
+            $('#patientTabs a').on('click', function (e) {
+                e.preventDefault();
+                $(this).tab('show');
+            });
 
+            // Guardar la pestaña activa en localStorage
+            $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+                localStorage.setItem('lastTab', $(e.target).attr('href'));
+            });
 
-<style>
-    .patient-card {
-        border-radius: 10px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-        overflow: hidden;
-        border: none;
-    }
-
-    .section-title {
-        color: #2c3e50;
-        border-bottom: 2px solid #f8f9fa;
-        padding-bottom: 8px;
-        margin-bottom: 15px;
-    }
-
-    .info-grid {
-        display: grid;
-        grid-template-columns: 1fr 2fr;
-        gap: 12px;
-    }
-
-    .info-item {
-        padding: 8px 0;
-        border-bottom: 1px dashed #eee;
-    }
-
-        .info-item strong {
-            color: #6c757d;
-        }
-
-    .accordion-button:not(.collapsed) {
-        background-color: rgba(13, 110, 253, 0.1);
-        color: #0d6efd;
-    }
-
-    .badge {
-        font-size: 0.9rem;
-        padding: 0.5em 0.75em;
-    }
-
-    /* Estilos para la lista de citas */
-    .list-group-item {
-        border-radius: 8px !important;
-        margin-bottom: 8px;
-        border: 1px solid rgba(0, 0, 0, 0.08);
-        transition: all 0.3s ease;
-    }
-
-        .list-group-item:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-</style>
-
-<script>
-    $(document).ready(function() {
-        console.log('Expediente cargado para @Model.nombres');
-    });
-</script>
+            // Recuperar la última pestaña activa
+            var lastTab = localStorage.getItem('lastTab');
+            if (lastTab) {
+                $('[href="' + lastTab + '"]').tab('show');
+            }
+        });
+    </script>
+}
 
 @functions {
     int CalcularEdad(DateTime fechaNacimiento)

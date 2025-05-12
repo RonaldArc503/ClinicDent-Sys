@@ -1,72 +1,1224 @@
-﻿@model ClinicDent.Models.Tratamientos
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Odontograma Completo</title>
+    <style>
+        /* Estilo general del odontograma */
+        .odontograma {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 20px auto;
+            max-width: 1200px;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        }
 
-@{
-    ViewBag.Title = "Delete";
-}
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 30px;
+            text-align: center;
+        }
 
-<h2>Delete</h2>
+        .controles {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #ecf0f1;
+            border-radius: 5px;
+            width: 100%;
+            max-width: 800px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
 
-<h3>Are you sure you want to delete this?</h3>
-<div>
-    <h4>Tratamientos</h4>
-    <hr />
-    <dl class="dl-horizontal">
-        <dt>
-            @Html.DisplayNameFor(model => model.fecha_inicio)
-        </dt>
+        .btn-opcion {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
 
-        <dd>
-            @Html.DisplayFor(model => model.fecha_inicio)
-        </dd>
+        .btn-normal {
+            background-color: #bdc3c7;
+        }
 
-        <dt>
-            @Html.DisplayNameFor(model => model.odontograma)
-        </dt>
+        .btn-caries {
+            background-color: rgba(231, 76, 60, 0.2);
+            color: #c0392b;
+        }
 
-        <dd>
-            @Html.DisplayFor(model => model.odontograma)
-        </dd>
+        .btn-relleno {
+            background-color: rgba(52, 152, 219, 0.2);
+            color: #2980b9;
+        }
 
-        <dt>
-            @Html.DisplayNameFor(model => model.costo)
-        </dt>
+        .btn-faltante {
+            background-color: rgba(52, 152, 219, 0.1);
+            color: #2980b9;
+        }
 
-        <dd>
-            @Html.DisplayFor(model => model.costo)
-        </dd>
+        .btn-extraer {
+            background-color: rgba(231, 76, 60, 0.1);
+            color: #c0392b;
+        }
 
-        <dt>
-            @Html.DisplayNameFor(model => model.duracion_estimada)
-        </dt>
+        .btn-opcion.active {
+            transform: scale(1.05);
+            box-shadow: 0 0 5px rgba(0,0,0,0.2);
+        }
 
-        <dd>
-            @Html.DisplayFor(model => model.duracion_estimada)
-        </dd>
+        .btn-caries.active {
+            background-color: rgba(231, 76, 60, 0.7);
+            color: white;
+        }
 
-        <dt>
-            @Html.DisplayNameFor(model => model.seguimiento)
-        </dt>
+        .btn-relleno.active {
+            background-color: rgba(52, 152, 219, 0.7);
+            color: white;
+        }
 
-        <dd>
-            @Html.DisplayFor(model => model.seguimiento)
-        </dd>
+        .btn-faltante.active {
+            background-color: rgba(52, 152, 219, 0.3);
+        }
 
-        <dt>
-            @Html.DisplayNameFor(model => model.Tipo_Cobro.nombre)
-        </dt>
+        .btn-extraer.active {
+            background-color: rgba(231, 76, 60, 0.3);
+        }
 
-        <dd>
-            @Html.DisplayFor(model => model.Tipo_Cobro.nombre)
-        </dd>
+        .cuadrante {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            width: 100%;
+        }
 
-    </dl>
+        .fila {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            align-items: center;
+        }
 
-    @using (Html.BeginForm()) {
-        @Html.AntiForgeryToken()
+        .grupo-dientes {
+            display: flex;
+            gap: 5px;
+        }
 
-        <div class="form-actions no-color">
-            <input type="submit" value="Delete" class="btn btn-default" /> |
-            @Html.ActionLink("Back to List", "Index")
+        .separacion-grupos {
+            width: 40px;
+        }
+
+        .diente-container {
+            position: relative;
+            width: 50px;
+            height: 50px;
+            margin: 2px;
+        }
+
+        .diente-partes {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 2px solid #333;
+            overflow: hidden;
+            background-color: #ccc;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+
+        .diente-container:hover .diente-partes {
+            transform: scale(1.05);
+        }
+
+        .diente-parte {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            box-sizing: border-box;
+            cursor: pointer;
+            transition: all 0.2s;
+            background-color: #fff;
+            z-index: 2;
+        }
+
+        .diente-parte-superior {
+            clip-path: polygon(0% 0%, 100% 0%, 50% 50%);
+            top: 0;
+            left: 0;
+            border-bottom: none;
+        }
+
+        .diente-parte-inferior {
+            clip-path: polygon(0% 100%, 100% 100%, 50% 50%);
+            bottom: 0;
+            left: 0;
+            border-top: none;
+        }
+
+        .diente-parte-izquierda {
+            clip-path: polygon(0% 0%, 0% 100%, 50% 50%);
+            left: 0;
+            top: 0;
+            border-right: none;
+        }
+
+        .diente-parte-derecha {
+            clip-path: polygon(100% 0%, 100% 100%, 50% 50%);
+            right: 0;
+            top: 0;
+            border-left: none;
+        }
+
+        .diente-parte-centro {
+            clip-path: circle(30% at 50% 50%);
+            background-color: #fff;
+            border: 2px solid #333;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60%;
+            height: 60%;
+            z-index: 5;
+        }
+
+        .diente-label {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 12px;
+            font-weight: bold;
+            color: #2c3e50;
+            z-index: 10;
+            pointer-events: none;
+            text-shadow: 0 0 2px white;
+        }
+
+        /* Estilos para las marcas completas del diente */
+        .diente-marca {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 30; /* Asegurar que esté encima de todo */
+            pointer-events: none; /* Evita que la marca interfiera con clics */
+            display: none;
+            background-color: rgba(255, 255, 255, 0.8); /* Fondo semitransparente */
+            border-radius: 50%; /* Forma circular */
+        }
+
+            .diente-marca::before, .diente-marca::after {
+                content: '';
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                width: 80%; /* Tamaño grande para cubrir el círculo */
+                height: 4px; /* Grosor de la X */
+                background-color: inherit;
+                transform-origin: center;
+            }
+
+            .diente-marca::before {
+                transform: translate(-50%, -50%) rotate(45deg);
+            }
+
+            .diente-marca::after {
+                transform: translate(-50%, -50%) rotate(-45deg);
+            }
+
+        .marca-faltante::before, .marca-faltante::after {
+            background-color: #3498db; /* Azul para pieza faltante */
+        }
+
+        .marca-extraer::before, .marca-extraer::after {
+            background-color: #e74c3c; /* Roja para pieza para extraer */
+        }
+
+        /* Estilos para los diferentes tipos de tratamiento */
+        .tratamiento-caries {
+            background-color: rgba(231, 76, 60, 0.7);
+            border-color: rgba(231, 76, 60, 0.9);
+        }
+
+        .tratamiento-relleno {
+            background-color: rgba(52, 152, 219, 0.7);
+            border-color: rgba(52, 152, 219, 0.9);
+        }
+
+        /* HOVER */
+        .diente-parte:hover {
+            background-color: rgba(241, 196, 15, 0.3);
+            border-color: rgba(241, 196, 15, 0.9);
+            outline: 2px solid #f1c40f;
+            box-shadow: inset 0 0 5px rgba(241, 196, 15, 0.7);
+            z-index: 3;
+        }
+
+        .etiqueta-lateral {
+            font-weight: bold;
+            font-size: 14px;
+            width: 80px;
+            text-align: center;
+            color: #34495e;
+            padding: 5px;
+            background-color: #ecf0f1;
+            border-radius: 5px;
+        }
+
+        .leyenda {
+            margin-top: 30px;
+            padding: 15px;
+            background-color: #ecf0f1;
+            border-radius: 5px;
+            width: 100%;
+            max-width: 800px;
+        }
+
+            .leyenda h3 {
+                margin-top: 0;
+                color: #2c3e50;
+                border-bottom: 1px solid #bdc3c7;
+                padding-bottom: 5px;
+            }
+
+        .leyenda-item {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+        }
+
+        .leyenda-color {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+            border: 1px solid #333;
+        }
+
+        .leyenda-x {
+            position: relative;
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+        }
+
+            .leyenda-x::before, .leyenda-x::after {
+                content: '';
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                width: 100%;
+                height: 2px;
+                transform-origin: center;
+            }
+
+            .leyenda-x::before {
+                transform: translate(-50%, -50%) rotate(45deg);
+            }
+
+            .leyenda-x::after {
+                transform: translate(-50%, -50%) rotate(-45deg);
+            }
+
+        .x-azul::before, .x-azul::after {
+            background-color: #3498db;
+        }
+
+        .x-roja::before, .x-roja::after {
+            background-color: #e74c3c;
+        }
+
+        .instrucciones {
+            margin-top: 20px;
+            font-style: italic;
+            color: #7f8c8d;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="odontograma">
+        <h1>Odontograma Dental Completo</h1>
+
+        <div class="controles">
+            <button class="btn-opcion btn-normal active" data-opcion="normal">Normal</button>
+            <button class="btn-opcion btn-caries" data-opcion="caries">Caries</button>
+            <button class="btn-opcion btn-relleno" data-opcion="relleno">Relleno</button>
+            <button class="btn-opcion btn-faltante" data-opcion="faltante">Pieza Faltante (X azul)</button>
+            <button class="btn-opcion btn-extraer" data-opcion="extraer">Pieza para Extraer (X roja)</button>
         </div>
-    }
-</div>
+
+        <div class="cuadrante">
+            <!-- Primera fila: 18 al 11 espacio 21 al 28 -->
+            <div class="fila">
+                <div class="etiqueta-lateral">Superior Derecho</div>
+                <div class="grupo-dientes">
+                    <!-- Dientes 18 al 11 -->
+                    <div class="diente-container" data-diente="18">
+                        <div class="diente-label">18</div>
+                        <div class="diente-partes">
+                            <div class="diente-parte diente-parte-superior" data-parte="superior"></div>
+                            <div class="diente-parte diente-parte-inferior" data-parte="inferior"></div>
+                            <div class="diente-parte diente-parte-izquierda" data-parte="izquierda"></div>
+                            <div class="diente-parte diente-parte-derecha" data-parte="derecha"></div>
+                            <div class="diente-parte diente-parte-centro" data-parte="centro"></div>
+                        </div>
+                        <div class="diente-marca marca-faltante"></div>
+                        <div class="diente-marca marca-extraer"></div>
+                    </div>
+                    <div class="diente-container" data-diente="17">
+                        <div class="diente-label">17</div>
+                        <div class="diente-partes">
+                            <div class="diente-parte diente-parte-superior" data-parte="superior"></div>
+                            <div class="diente-parte diente-parte-inferior" data-parte="inferior"></div>
+                            <div class="diente-parte diente-parte-izquierda" data-parte="izquierda"></div>
+                            <div class="diente-parte diente-parte-derecha" data-parte="derecha"></div>
+                            <div class="diente-parte diente-parte-centro" data-parte="centro"></div>
+                        </div>
+                        <div class="diente-marca marca-faltante"></div>
+                        <div class="diente-marca marca-extraer"></div>
+                    </div>
+                    <div class="diente-container" data-diente="16">
+                        <div class="diente-label">16</div>
+                        <div class="diente-partes">
+                            <div class="diente-parte diente-parte-superior" data-parte="superior"></div>
+                            <div class="diente-parte diente-parte-inferior" data-parte="inferior"></div>
+                            <div class="diente-parte diente-parte-izquierda" data-parte="izquierda"></div>
+                            <div class="diente-parte diente-parte-derecha" data-parte="derecha"></div>
+                            <div class="diente-parte diente-parte-centro" data-parte="centro"></div>
+                        </div>
+                        <div class="diente-marca marca-faltante"></div>
+                        <div class="diente-marca marca-extraer"></div>
+                    </div>
+                    <div class="diente-container" data-diente="15">
+                        <div class="diente-label">15</div>
+                        <div class="diente-partes">
+                            <div class="diente-parte diente-parte-superior" data-parte="superior"></div>
+                            <div class="diente-parte diente-parte-inferior" data-parte="inferior"></div>
+                            <div class="diente-parte diente-parte-izquierda" data-parte="izquierda"></div>
+                            <div class="diente-parte diente-parte-derecha" data-parte="derecha"></div>
+                            <div class="diente-parte diente-parte-centro" data-parte="centro"></div>
+                        </div>
+                        <div class="diente-marca marca-faltante"></div>
+                        <div class="diente-marca marca-extraer"></div>
+                    </div>
+                    <div class="diente-container" data-diente="14">
+                        <div class="diente-label">14</div>
+                        <div class="diente-partes">
+                            <div class="diente-parte diente-parte-superior" data-parte="superior"></div>
+                            <div class="diente-parte diente-parte-inferior" data-parte="inferior"></div>
+                            <div class="diente-parte diente-parte-izquierda" data-parte="izquierda"></div>
+                            <div class="diente-parte diente-parte-derecha" data-parte="derecha"></div>
+                            <div class="diente-parte diente-parte-centro" data-parte="centro"></div>
+                        </div>
+                        <div class="diente-marca marca-faltante"></div>
+                        <div class="diente-marca marca-extraer"></div>
+                    </div>
+                    <div class="diente-container" data-diente="13">
+                        <div class="diente-label">13</div>
+                        <div class="diente-partes">
+                            <div class="diente-parte diente-parte-superior" data-parte="superior"></div>
+                            <div class="diente-parte diente-parte-inferior" data-parte="inferior"></div>
+                            <div class="diente-parte diente-parte-izquierda" data-parte="izquierda"></div>
+                            <div class="diente-parte diente-parte-derecha" data-parte="derecha"></div>
+                            <div class="diente-parte diente-parte-centro" data-parte="centro"></div>
+                        </div>
+                        <div class="diente-marca marca-faltante"></div>
+                        <div class="diente-marca marca-extraer"></div>
+                    </div>
+                    <div class="diente-container" data-diente="12">
+                        <div class="diente-label">12</div>
+                        <div class="diente-partes">
+                            <div class="diente-parte diente-parte-superior" data-parte="superior"></div>
+                            <div class="diente-parte diente-parte-inferior" data-parte="inferior"></div>
+                            <div class="diente-parte diente-parte-izquierda" data-parte="izquierda"></div>
+                            <div class="diente-parte diente-parte-derecha" data-parte="derecha"></div>
+                            <div class="diente-parte diente-parte-centro" data-parte="centro"></div>
+                        </div>
+                        <div class="diente-marca marca-faltante"></div>
+                        <div class="diente-marca marca-extraer"></div>
+                    </div>
+                    <div class="diente-container" data-diente="11">
+                        <div class="diente-label">11</div>
+                        <div class="diente-partes">
+                            <div class="diente-parte diente-parte-superior" data-parte="superior"></div>
+                            <div class="diente-parte diente-parte-inferior" data-parte="inferior"></div>
+                            <div class="diente-parte diente-parte-izquierda" data-parte="izquierda"></div>
+                            <div class="diente-parte diente-parte-derecha" data-parte="derecha"></div>
+                            <div class="diente-parte diente-parte-centro" data-parte="centro"></div>
+                        </div>
+                        <div class="diente-marca marca-faltante"></div>
+                        <div class="diente-marca marca-extraer"></div>
+                    </div>
+                </div>
+                <div class="separacion-grupos"></div>
+                <div class="grupo-dientes">
+                    <!-- Dientes 21 al 28 -->
+                    <div class="diente-container" data-diente="21">
+                        <div class="diente-label">21</div>
+                        <div class="diente-partes">
+                            <div class="diente-parte diente-parte-superior" data-parte="superior"></div>
+                            <div class="diente-parte diente-parte-inferior" data-parte="inferior"></div>
+                            <div class="diente-parte diente-parte-izquierda" data-parte="izquierda"></div>
+                            <div class="diente-parte diente-parte-derecha" data-parte="derecha"></div>
+                            <div class="diente-parte diente-parte-centro" data-parte="centro"></div>
+                        </div>
+                        <div class="diente-marca marca-faltante"></div>
+                        <div class="diente-marca marca-extraer"></div>
+                    </div>
+                    <div class="diente-container" data-diente="22">
+                        <div class="diente-label">22</div>
+                        <div class="diente-partes">
+                            <div class="diente-parte diente-parte-superior" data-parte="superior"></div>
+                            <div class="diente-parte diente-parte-inferior" data-parte="inferior"></div>
+                            <div class="diente-parte diente-parte-izquierda" data-parte="izquierda"></div>
+                            <div class="diente-parte diente-parte-derecha" data-parte="derecha"></div>
+                            <div class="diente-parte diente-parte-centro" data-parte="centro"></div>
+                        </div>
+                        <div class="diente-marca marca-faltante"></div>
+                        <div class="diente-marca marca-extraer"></div>
+                    </div>
+                    <div class="diente-container" data-diente="23">
+                        <div class="diente-label">23</div>
+                        <div class="diente-partes">
+                            <div class="diente-parte diente-parte-superior" data-parte="superior"></div>
+                            <div class="diente-parte diente-parte-inferior" data-parte="inferior"></div>
+                            <div class="diente-parte diente-parte-izquierda" data-parte="izquierda"></div>
+                            <div class="diente-parte diente-parte-derecha" data-parte="derecha"></div>
+                            <div class="diente-parte diente-parte-centro" data-parte="centro"></div>
+                        </div>
+                        <div class="diente-marca marca-faltante"></div>
+                        <div class="diente-marca marca-extraer"></div>
+                    </div>
+                    <div class="diente-container" data-diente="24">
+                        <div class="diente-label">24</div>
+                        <div class="diente-partes">
+                            <div class="diente-parte diente-parte-superior" data-parte="superior"></div>
+                            <div class="diente-parte diente-parte-inferior" data-parte="inferior"></div>
+                            <div class="diente-parte diente-parte-izquierda" data-parte="izquierda"></div>
+                            <div class="diente-parte diente-parte-derecha" data-parte="derecha"></div>
+                            <div class="diente-parte diente-parte-centro" data-parte="centro"></div>
+                        </div>
+                        <div class="diente-marca marca-faltante"></div>
+                        <div class="diente-marca marca-extraer"></div>
+                    </div>
+                    <div class="diente-container" data-diente="25">
+                        <div class="diente-label">25</div>
+                        <div class="diente-partes">
+                            <div class="diente-parte diente-parte-superior" data-parte="superior"></div>
+                            <div class="diente-parte diente-parte-inferior" data-parte="inferior"></div>
+                            <div class="diente-parte diente-parte-izquierda" data-parte="izquierda"></div>
+                            <div class="diente-parte diente-parte-derecha" data-parte="derecha"></div>
+                            <div class="diente-parte diente-parte-centro" data-parte="centro"></div>
+                        </div>
+                        <div class="diente-marca marca-faltante"></div>
+                        <div class="diente-marca marca-extraer"></div>
+                    </div>
+                    <div class="diente-container" data-diente="26">
+                        <div class="diente-label">26</div>
+                        <div class="diente-partes">
+                            <div class="diente-parte diente-parte-superior" data-parte="superior"></div>
+                            <div class="diente-parte diente-parte-inferior" data-parte="inferior"></div>
+                            <div class="diente-parte diente-parte-izquierda" data-parte="izquierda"></div>
+                            <div class="diente-parte diente-parte-derecha" data-parte="derecha"></div>
+                            <div class="diente-parte diente-parte-centro" data-parte="centro"></div>
+                        </div>
+                        <div class="diente-marca marca-faltante"></div>
+                        <div class="diente-marca marca-extraer"></div>
+                    </div>
+                    <div class="diente-container" data-diente="27">
+                        <div class="diente-label">27</div>
+                        <div class="diente-partes">
+                            <div class="diente-parte diente-parte-superior" data-parte="superior"></div>
+                            <div class="diente-parte diente-parte-inferior" data-parte="inferior"></div>
+                            <div class="diente-parte diente-parte-izquierda" data-parte="izquierda"></div>
+                            <div class="diente-parte diente-parte-derecha" data-parte="derecha"></div>
+                            <div class="diente-parte diente-parte-centro" data-parte="centro"></div>
+                        </div>
+                        <div class="diente-marca marca-faltante"></div>
+                        <div class="diente-marca marca-extraer"></div>
+                    </div>
+                    <div class="diente-container" data-diente="28">
+                        <div class="diente-label">28</div>
+                        <div class="diente-partes">
+                            <div class="diente-parte diente-parte-superior" data-parte="superior"></div>
+                            <div class="diente-parte diente-parte-inferior" data-parte="inferior"></div>
+                            <div class="diente-parte diente-parte-izquierda" data-parte="izquierda"></div>
+                            <div class="diente-parte diente-parte-derecha" data-parte="derecha"></div>
+                            <div class="diente-parte diente-parte-centro" data-parte="centro"></div>
+                        </div>
+                        <div class="diente-marca marca-faltante"></div>
+                        <div class="diente-marca marca-extraer"></div>
+                    </div>
+                </div>
+                <div class="etiqueta-lateral">Superior Izquierdo</div>
+            </div>
+
+            <!-- Segunda fila: 55 al 51 espacio 61 al 65 -->
+            <div class="fila">
+                <div class="etiqueta-lateral">Inferior Derecho</div>
+                <div class="grupo-dientes">
+                    <!-- Dientes 55 al 51 -->
+                    <div class="diente-container" data-diente="55">
+                        <div class="diente-label">55</div>
+                        <div class="diente-partes">
+                            <div class="diente-parte diente-parte-superior" data-parte="superior"></div>
+                            <div class="diente-parte diente-parte-inferior" data-parte="inferior"></div>
+                            <div class="diente-parte diente-parte-izquierda" data-parte="izquierda"></div>
+                            <div class="diente-parte diente-parte-derecha" data-parte="derecha"></div>
+                            <div class="diente-parte diente-parte-centro" data-parte="centro"></div>
+                        </div>
+                        <div class="diente-marca marca-faltante"></div>
+                        <div class="diente-marca marca-extraer"></div>
+                    </div>
+                    <div class="diente-container" data-diente="54">
+                        <div class="diente-label">54</div>
+                        <div class="diente-partes">
+                            <div class="diente-parte diente-parte-superior" data-parte="superior"></div>
+                            <div class="diente-parte diente-parte-inferior" data-parte="inferior"></div>
+                            <div class="diente-parte diente-parte-izquierda" data-parte="izquierda"></div>
+                            <div class="diente-parte diente-parte-derecha" data-parte="derecha"></div>
+                            <div class="diente-parte diente-parte-centro" data-parte="centro"></div>
+                        </div>
+                        <div class="diente-marca marca-faltante"></div>
+                        <div class="diente-marca marca-extraer"></div>
+                    </div>
+                    <div class="diente-container" data-diente="53">
+                        <div class="diente-label">53</div>
+                        <div class="diente-partes">
+                            <div class="diente-parte diente-parte-superior" data-parte="superior"></div>
+                            <div class="diente-parte diente-parte-inferior" data-parte="inferior"></div>
+                            <div class="diente-parte diente-parte-izquierda" data-parte="izquierda"></div>
+                            <div class="diente-parte diente-parte-derecha" data-parte="derecha"></div>
+                            <div class="diente-parte diente-parte-centro" data-parte="centro"></div>
+                        </div>
+                        <div class="diente-marca marca-faltante"></div>
+                        <div class="diente-marca marca-extraer"></div>
+                    </div>
+                    <div class="diente-container" data-diente="52">
+                        <div class="diente-label">52</div>
+                        <div class="diente-partes">
+                            <div class="diente-parte diente-parte-superior" data-parte="superior"></div>
+                            <div class="diente-parte diente-parte-inferior" data-parte="inferior"></div>
+                            <div class="diente-parte diente-parte-izquierda" data-parte="izquierda"></div>
+                            <div class="diente-parte diente-parte-derecha" data-parte="derecha"></div>
+                            <div class="diente-parte diente-parte-centro" data-parte="centro"></div>
+                        </div>
+                        <div class="diente-marca marca-faltante"></div>
+                        <div class="diente-marca marca-extraer"></div>
+                    </div>
+                    <div class="diente-container" data-diente="51">
+                        <div class="diente-label">51</div>
+                        <div class="diente-partes">
+                            <div class="diente-parte diente-parte-superior" data-parte="superior"></div>
+                            <div class="diente-parte diente-parte-inferior" data-parte="inferior"></div>
+                            <div class="diente-parte diente-parte-izquierda" data-parte="izquierda"></div>
+                            <div class="diente-parte diente-parte-derecha" data-parte="derecha"></div>
+                            <div class="diente-parte diente-parte-centro" data-parte="centro"></div>
+                        </div>
+                        <div class="diente-marca marca-faltante"></div>
+                        <div class="diente-marca marca-extraer"></div>
+                    </div>
+                </div>
+                <div class="separacion-grupos"></div>
+                <div class="grupo-dientes">
+                    <!-- Dientes 61 al 65 -->
+                    <div class="diente-container" data-diente="61">
+                        <div class="diente-label">61</div>
+                        <div class="diente-partes">
+                            <div class="diente-parte diente-parte-superior" data-parte="superior"></div>
+                            <div class="diente-parte diente-parte-inferior" data-parte="inferior"></div>
+                            <div class="diente-parte diente-parte-izquierda" data-parte="izquierda"></div>
+                            <div class="diente-parte diente-parte-derecha" data-parte="derecha"></div>
+                            <div class="diente-parte diente-parte-centro" data-parte="centro"></div>
+                        </div>
+                        <div class="diente-marca marca-faltante"></div>
+                        <div class="diente-marca marca-extraer"></div>
+                    </div>
+                    <div class="diente-container" data-diente="62">
+                        <div class="diente-label">62</div>
+                        <div class="diente-partes">
+                            <div class="diente-parte diente-parte-superior" data-parte="superior"></div>
+                            <div class="diente-parte diente-parte-inferior" data-parte="inferior"></div>
+                            <div class="diente-parte diente-parte-izquierda" data-parte="izquierda"></div>
+                            <div class="diente-parte diente-parte-derecha" data-parte="derecha"></div>
+                            <div class="diente-parte diente-parte-centro" data-parte="centro"></div>
+                        </div>
+                        <div class="diente-marca marca-faltante"></div>
+                        <div class="diente-marca marca-extraer"></div>
+                    </div>
+                    <div class="diente-container" data-diente="63">
+                        <div class="diente-label">63</div>
+                        <div class="diente-partes">
+                            <div class="diente-parte diente-parte-superior" data-parte="superior"></div>
+                            <div class="diente-parte diente-parte-inferior" data-parte="inferior"></div>
+                            <div class="diente-parte diente-parte-izquierda" data-parte="izquierda"></div>
+                            <div class="diente-parte diente-parte-derecha" data-parte="derecha"></div>
+                            <div class="diente-parte diente-parte-centro" data-parte="centro"></div>
+                        </div>
+                        <div class="diente-marca marca-faltante"></div>
+                        <div class="diente-marca marca-extraer"></div>
+                    </div>
+                    <div class="diente-container" data-diente="64">
+                        <div class="diente-label">64</div>
+                        <div class="diente-partes">
+                            <div class="diente-parte diente-parte-superior" data-parte="superior"></div>
+                            <div class="diente-parte diente-parte-inferior" data-parte="inferior"></div>
+                            <div class="diente-parte diente-parte-izquierda" data-parte="izquierda"></div>
+                            <div class="diente-parte diente-parte-derecha" data-parte="derecha"></div>
+                            <div class="diente-parte diente-parte-centro" data-parte="centro"></div>
+                        </div>
+                        <div class="diente-marca marca-faltante"></div>
+                        <div class="diente-marca marca-extraer"></div>
+                    </div>
+                    <div class="diente-container" data-diente="65">
+                        <div class="diente-label">65</div>
+                        <div class="diente-partes">
+                            <div class="diente-parte diente-parte-superior" data-parte="superior"></div>
+                            <div class="diente-parte diente-parte-inferior" data-parte="inferior"></div>
+                            <div class="diente-parte diente-parte-izquierda" data-parte="izquierda"></div>
+                            <div class="diente-parte diente-parte-derecha" data-parte="derecha"></div>
+                            <div class="diente-parte diente-parte-centro" data-parte="centro"></div>
+                        </div>
+                        <div class="diente-marca marca-faltante"></div>
+                        <div class="diente-marca marca-extraer"></div>
+                    </div>
+                </div>
+                <div class="etiqueta-lateral">Inferior Izquierdo</div>
+            </div>
+
+            <!-- Tercera fila: 85 al 81 espacio 71 al 75 -->
+            <div class="fila">
+                <div class="etiqueta-lateral">Inferior Derecho</div>
+                <div class="grupo-dientes">
+                    <!-- Dientes 85 al 81 -->
+                    <div class="diente-container" data-diente="85">
+                        <div class="diente-label">85</div>
+                        <div class="diente-partes">
+                            <div class="diente-parte diente-parte-superior" data-parte="superior"></div>
+                            <div class="diente-parte diente-parte-inferior" data-parte="inferior"></div>
+                            <div class="diente-parte diente-parte-izquierda" data-parte="izquierda"></div>
+                            <div class="diente-parte diente-parte-derecha" data-parte="derecha"></div>
+                            <div class="diente-parte diente-parte-centro" data-parte="centro"></div>
+                        </div>
+                        <div class="diente-marca marca-faltante"></div>
+                        <div class="diente-marca marca-extraer"></div>
+                    </div>
+                    <div class="diente-container" data-diente="84">
+                        <div class="diente-label">84</div>
+                        <div class="diente-partes">
+                            <div class="diente-parte diente-parte-superior" data-parte="superior"></div>
+                            <div class="diente-parte diente-parte-inferior" data-parte="inferior"></div>
+                            <div class="diente-parte diente-parte-izquierda" data-parte="izquierda"></div>
+                            <div class="diente-parte diente-parte-derecha" data-parte="derecha"></div>
+                            <div class="diente-parte diente-parte-centro" data-parte="centro"></div>
+                        </div>
+                        <div class="diente-marca marca-faltante"></div>
+                        <div class="diente-marca marca-extraer"></div>
+                    </div>
+                    <div class="diente-container" data-diente="83">
+                        <div class="diente-label">83</div>
+                        <div class="diente-partes">
+                            <div class="diente-parte diente-parte-superior" data-parte="superior"></div>
+                            <div class="diente-parte diente-parte-inferior" data-parte="inferior"></div>
+                            <div class="diente-parte diente-parte-izquierda" data-parte="izquierda"></div>
+                            <div class="diente-parte diente-parte-derecha" data-parte="derecha"></div>
+                            <div class="diente-parte diente-parte-centro" data-parte="centro"></div>
+                        </div>
+                        <div class="diente-marca marca-faltante"></div>
+                        <div class="diente-marca marca-extraer"></div>
+                    </div>
+                    <div class="diente-container" data-diente="82">
+                        <div class="diente-label">82</div>
+                        <div class="diente-partes">
+                            <div class="diente-parte diente-parte-superior" data-parte="superior"></div>
+                            <div class="diente-parte diente-parte-inferior" data-parte="inferior"></div>
+                            <div class="diente-parte diente-parte-izquierda" data-parte="izquierda"></div>
+                            <div class="diente-parte diente-parte-derecha" data-parte="derecha"></div>
+                            <div class="diente-parte diente-parte-centro" data-parte="centro"></div>
+                        </div>
+                        <div class="diente-marca marca-faltante"></div>
+                        <div class="diente-marca marca-extraer"></div>
+                    </div>
+                    <div class="diente-container" data-diente="81">
+                        <div class="diente-label">81</div>
+                        <div class="diente-partes">
+                            <div class="diente-parte diente-parte-superior" data-parte="superior"></div>
+                            <div class="diente-parte diente-parte-inferior" data-parte="inferior"></div>
+                            <div class="diente-parte diente-parte-izquierda" data-parte="izquierda"></div>
+                            <div class="diente-parte diente-parte-derecha" data-parte="derecha"></div>
+                            <div class="diente-parte diente-parte-centro" data-parte="centro"></div>
+                        </div>
+                        <div class="diente-marca marca-faltante"></div>
+                        <div class="diente-marca marca-extraer"></div>
+                    </div>
+                </div>
+                <div class="separacion-grupos"></div>
+                <div class="grupo-dientes">
+                    <!-- Dientes 71 al 75 -->
+                    <div class="diente-container" data-diente="71">
+                        <div class="diente-label">71</div>
+                        <div class="diente-partes">
+                            <div class="diente-parte diente-parte-superior" data-parte="superior"></div>
+                            <div class="diente-parte diente-parte-inferior" data-parte="inferior"></div>
+                            <div class="diente-parte diente-parte-izquierda" data-parte="izquierda"></div>
+                            <div class="diente-parte diente-parte-derecha" data-parte="derecha"></div>
+                            <div class="diente-parte diente-parte-centro" data-parte="centro"></div>
+                        </div>
+                        <div class="diente-marca marca-faltante"></div>
+                        <div class="diente-marca marca-extraer"></div>
+                    </div>
+                    <div class="diente-container" data-diente="72">
+                        <div class="diente-label">72</div>
+                        <div class="diente-partes">
+                            <div class="diente-parte diente-parte-superior" data-parte="superior"></div>
+                            <div class="diente-parte diente-parte-inferior" data-parte="inferior"></div>
+                            <div class="diente-parte diente-parte-izquierda" data-parte="izquierda"></div>
+                            <div class="diente-parte diente-parte-derecha" data-parte="derecha"></div>
+                            <div class="diente-parte diente-parte-centro" data-parte="centro"></div>
+                        </div>
+                        <div class="diente-marca marca-faltante"></div>
+                        <div class="diente-marca marca-extraer"></div>
+                    </div>
+                    <div class="diente-container" data-diente="73">
+                        <div class="diente-label">73</div>
+                        <div class="diente-partes">
+                            <div class="diente-parte diente-parte-superior" data-parte="superior"></div>
+                            <div class="diente-parte diente-parte-inferior" data-parte="inferior"></div>
+                            <div class="diente-parte diente-parte-izquierda" data-parte="izquierda"></div>
+                            <div class="diente-parte diente-parte-derecha" data-parte="derecha"></div>
+                            <div class="diente-parte diente-parte-centro" data-parte="centro"></div>
+                        </div>
+                        <div class="diente-marca marca-faltante"></div>
+                        <div class="diente-marca marca-extraer"></div>
+                    </div>
+                    <div class="diente-container" data-diente="74">
+                        <div class="diente-label">74</div>
+                        <div class="diente-partes">
+                            <div class="diente-parte diente-parte-superior" data-parte="superior"></div>
+                            <div class="diente-parte diente-parte-inferior" data-parte="inferior"></div>
+                            <div class="diente-parte diente-parte-izquierda" data-parte="izquierda"></div>
+                            <div class="diente-parte diente-parte-derecha" data-parte="derecha"></div>
+                            <div class="diente-parte diente-parte-centro" data-parte="centro"></div>
+                        </div>
+                        <div class="diente-marca marca-faltante"></div>
+                        <div class="diente-marca marca-extraer"></div>
+                    </div>
+                    <div class="diente-container" data-diente="75">
+                        <div class="diente-label">75</div>
+                        <div class="diente-partes">
+                            <div class="diente-parte diente-parte-superior" data-parte="superior"></div>
+                            <div class="diente-parte diente-parte-inferior" data-parte="inferior"></div>
+                            <div class="diente-parte diente-parte-izquierda" data-parte="izquierda"></div>
+                            <div class="diente-parte diente-parte-derecha" data-parte="derecha"></div>
+                            <div class="diente-parte diente-parte-centro" data-parte="centro"></div>
+                        </div>
+                        <div class="diente-marca marca-faltante"></div>
+                        <div class="diente-marca marca-extraer"></div>
+                    </div>
+                </div>
+                <div class="etiqueta-lateral">Inferior Izquierdo</div>
+            </div>
+
+            <!-- Cuarta fila: 48 al 41 espacio 31 al 38 -->
+            <div class="fila">
+                <div class="etiqueta-lateral">Superior Derecho</div>
+                <div class="grupo-dientes">
+                    <!-- Dientes 48 al 41 -->
+                    <div class="diente-container" data-diente="48">
+                        <div class="diente-label">48</div>
+                        <div class="diente-partes">
+                            <div class="diente-parte diente-parte-superior" data-parte="superior"></div>
+                            <div class="diente-parte diente-parte-inferior" data-parte="inferior"></div>
+                            <div class="diente-parte diente-parte-izquierda" data-parte="izquierda"></div>
+                            <div class="diente-parte diente-parte-derecha" data-parte="derecha"></div>
+                            <div class="diente-parte diente-parte-centro" data-parte="centro"></div>
+                        </div>
+                        <div class="diente-marca marca-faltante"></div>
+                        <div class="diente-marca marca-extraer"></div>
+                    </div>
+                    <div class="diente-container" data-diente="47">
+                        <div class="diente-label">47</div>
+                        <div class="diente-partes">
+                            <div class="diente-parte diente-parte-superior" data-parte="superior"></div>
+                            <div class="diente-parte diente-parte-inferior" data-parte="inferior"></div>
+                            <div class="diente-parte diente-parte-izquierda" data-parte="izquierda"></div>
+                            <div class="diente-parte diente-parte-derecha" data-parte="derecha"></div>
+                            <div class="diente-parte diente-parte-centro" data-parte="centro"></div>
+                        </div>
+                        <div class="diente-marca marca-faltante"></div>
+                        <div class="diente-marca marca-extraer"></div>
+                    </div>
+                    <div class="diente-container" data-diente="46">
+                        <div class="diente-label">46</div>
+                        <div class="diente-partes">
+                            <div class="diente-parte diente-parte-superior" data-parte="superior"></div>
+                            <div class="diente-parte diente-parte-inferior" data-parte="inferior"></div>
+                            <div class="diente-parte diente-parte-izquierda" data-parte="izquierda"></div>
+                            <div class="diente-parte diente-parte-derecha" data-parte="derecha"></div>
+                            <div class="diente-parte diente-parte-centro" data-parte="centro"></div>
+                        </div>
+                        <div class="diente-marca marca-faltante"></div>
+                        <div class="diente-marca marca-extraer"></div>
+                    </div>
+                    <div class="diente-container" data-diente="45">
+                        <div class="diente-label">45</div>
+                        <div class="diente-partes">
+                            <div class="diente-parte diente-parte-superior" data-parte="superior"></div>
+                            <div class="diente-parte diente-parte-inferior" data-parte="inferior"></div>
+                            <div class="diente-parte diente-parte-izquierda" data-parte="izquierda"></div>
+                            <div class="diente-parte diente-parte-derecha" data-parte="derecha"></div>
+                            <div class="diente-parte diente-parte-centro" data-parte="centro"></div>
+                        </div>
+                        <div class="diente-marca marca-faltante"></div>
+                        <div class="diente-marca marca-extraer"></div>
+                    </div>
+                    <div class="diente-container" data-diente="44">
+                        <div class="diente-label">44</div>
+                        <div class="diente-partes">
+                            <div class="diente-parte diente-parte-superior" data-parte="superior"></div>
+                            <div class="diente-parte diente-parte-inferior" data-parte="inferior"></div>
+                            <div class="diente-parte diente-parte-izquierda" data-parte="izquierda"></div>
+                            <div class="diente-parte diente-parte-derecha" data-parte="derecha"></div>
+                            <div class="diente-parte diente-parte-centro" data-parte="centro"></div>
+                        </div>
+                        <div class="diente-marca marca-faltante"></div>
+                        <div class="diente-marca marca-extraer"></div>
+                    </div>
+                    <div class="diente-container" data-diente="43">
+                        <div class="diente-label">43</div>
+                        <div class="diente-partes">
+                            <div class="diente-parte diente-parte-superior" data-parte="superior"></div>
+                            <div class="diente-parte diente-parte-inferior" data-parte="inferior"></div>
+                            <div class="diente-parte diente-parte-izquierda" data-parte="izquierda"></div>
+                            <div class="diente-parte diente-parte-derecha" data-parte="derecha"></div>
+                            <div class="diente-parte diente-parte-centro" data-parte="centro"></div>
+                        </div>
+                        <div class="diente-marca marca-faltante"></div>
+                        <div class="diente-marca marca-extraer"></div>
+                    </div>
+                    <div class="diente-container" data-diente="42">
+                        <div class="diente-label">42</div>
+                        <div class="diente-partes">
+                            <div class="diente-parte diente-parte-superior" data-parte="superior"></div>
+                            <div class="diente-parte diente-parte-inferior" data-parte="inferior"></div>
+                            <div class="diente-parte diente-parte-izquierda" data-parte="izquierda"></div>
+                            <div class="diente-parte diente-parte-derecha" data-parte="derecha"></div>
+                            <div class="diente-parte diente-parte-centro" data-parte="centro"></div>
+                        </div>
+                        <div class="diente-marca marca-faltante"></div>
+                        <div class="diente-marca marca-extraer"></div>
+                    </div>
+                    <div class="diente-container" data-diente="41">
+                        <div class="diente-label">41</div>
+                        <div class="diente-partes">
+                            <div class="diente-parte diente-parte-superior" data-parte="superior"></div>
+                            <div class="diente-parte diente-parte-inferior" data-parte="inferior"></div>
+                            <div class="diente-parte diente-parte-izquierda" data-parte="izquierda"></div>
+                            <div class="diente-parte diente-parte-derecha" data-parte="derecha"></div>
+                            <div class="diente-parte diente-parte-centro" data-parte="centro"></div>
+                        </div>
+                        <div class="diente-marca marca-faltante"></div>
+                        <div class="diente-marca marca-extraer"></div>
+                    </div>
+                </div>
+                <div class="separacion-grupos"></div>
+                <div class="grupo-dientes">
+                    <!-- Dientes 31 al 38 -->
+                    <div class="diente-container" data-diente="31">
+                        <div class="diente-label">31</div>
+                        <div class="diente-partes">
+                            <div class="diente-parte diente-parte-superior" data-parte="superior"></div>
+                            <div class="diente-parte diente-parte-inferior" data-parte="inferior"></div>
+                            <div class="diente-parte diente-parte-izquierda" data-parte="izquierda"></div>
+                            <div class="diente-parte diente-parte-derecha" data-parte="derecha"></div>
+                            <div class="diente-parte diente-parte-centro" data-parte="centro"></div>
+                        </div>
+                        <div class="diente-marca marca-faltante"></div>
+                        <div class="diente-marca marca-extraer"></div>
+                    </div>
+                    <div class="diente-container" data-diente="32">
+                        <div class="diente-label">32</div>
+                        <div class="diente-partes">
+                            <div class="diente-parte diente-parte-superior" data-parte="superior"></div>
+                            <div class="diente-parte diente-parte-inferior" data-parte="inferior"></div>
+                            <div class="diente-parte diente-parte-izquierda" data-parte="izquierda"></div>
+                            <div class="diente-parte diente-parte-derecha" data-parte="derecha"></div>
+                            <div class="diente-parte diente-parte-centro" data-parte="centro"></div>
+                        </div>
+                        <div class="diente-marca marca-faltante"></div>
+                        <div class="diente-marca marca-extraer"></div>
+                    </div>
+                    <div class="diente-container" data-diente="33">
+                        <div class="diente-label">33</div>
+                        <div class="diente-partes">
+                            <div class="diente-parte diente-parte-superior" data-parte="superior"></div>
+                            <div class="diente-parte diente-parte-inferior" data-parte="inferior"></div>
+                            <div class="diente-parte diente-parte-izquierda" data-parte="izquierda"></div>
+                            <div class="diente-parte diente-parte-derecha" data-parte="derecha"></div>
+                            <div class="diente-parte diente-parte-centro" data-parte="centro"></div>
+                        </div>
+                        <div class="diente-marca marca-faltante"></div>
+                        <div class="diente-marca marca-extraer"></div>
+                    </div>
+                    <div class="diente-container" data-diente="34">
+                        <div class="diente-label">34</div>
+                        <div class="diente-partes">
+                            <div class="diente-parte diente-parte-superior" data-parte="superior"></div>
+                            <div class="diente-parte diente-parte-inferior" data-parte="inferior"></div>
+                            <div class="diente-parte diente-parte-izquierda" data-parte="izquierda"></div>
+                            <div class="diente-parte diente-parte-derecha" data-parte="derecha"></div>
+                            <div class="diente-parte diente-parte-centro" data-parte="centro"></div>
+                        </div>
+                        <div class="diente-marca marca-faltante"></div>
+                        <div class="diente-marca marca-extraer"></div>
+                    </div>
+                    <div class="diente-container" data-diente="35">
+                        <div class="diente-label">35</div>
+                        <div class="diente-partes">
+                            <div class="diente-parte diente-parte-superior" data-parte="superior"></div>
+                            <div class="diente-parte diente-parte-inferior" data-parte="inferior"></div>
+                            <div class="diente-parte diente-parte-izquierda" data-parte="izquierda"></div>
+                            <div class="diente-parte diente-parte-derecha" data-parte="derecha"></div>
+                            <div class="diente-parte diente-parte-centro" data-parte="centro"></div>
+                        </div>
+                        <div class="diente-marca marca-faltante"></div>
+                        <div class="diente-marca marca-extraer"></div>
+                    </div>
+                    <div class="diente-container" data-diente="36">
+                        <div class="diente-label">36</div>
+                        <div class="diente-partes">
+                            <div class="diente-parte diente-parte-superior" data-parte="superior"></div>
+                            <div class="diente-parte diente-parte-inferior" data-parte="inferior"></div>
+                            <div class="diente-parte diente-parte-izquierda" data-parte="izquierda"></div>
+                            <div class="diente-parte diente-parte-derecha" data-parte="derecha"></div>
+                            <div class="diente-parte diente-parte-centro" data-parte="centro"></div>
+                        </div>
+                        <div class="diente-marca marca-faltante"></div>
+                        <div class="diente-marca marca-extraer"></div>
+                    </div>
+                    <div class="diente-container" data-diente="37">
+                        <div class="diente-label">37</div>
+                        <div class="diente-partes">
+                            <div class="diente-parte diente-parte-superior" data-parte="superior"></div>
+                            <div class="diente-parte diente-parte-inferior" data-parte="inferior"></div>
+                            <div class="diente-parte diente-parte-izquierda" data-parte="izquierda"></div>
+                            <div class="diente-parte diente-parte-derecha" data-parte="derecha"></div>
+                            <div class="diente-parte diente-parte-centro" data-parte="centro"></div>
+                        </div>
+                        <div class="diente-marca marca-faltante"></div>
+                        <div class="diente-marca marca-extraer"></div>
+                    </div>
+                    <div class="diente-container" data-diente="38">
+                        <div class="diente-label">38</div>
+                        <div class="diente-partes">
+                            <div class="diente-parte diente-parte-superior" data-parte="superior"></div>
+                            <div class="diente-parte diente-parte-inferior" data-parte="inferior"></div>
+                            <div class="diente-parte diente-parte-izquierda" data-parte="izquierda"></div>
+                            <div class="diente-parte diente-parte-derecha" data-parte="derecha"></div>
+                            <div class="diente-parte diente-parte-centro" data-parte="centro"></div>
+                        </div>
+                        <div class="diente-marca marca-faltante"></div>
+                        <div class="diente-marca marca-extraer"></div>
+                    </div>
+                </div>
+                <div class="etiqueta-lateral">Superior Izquierdo</div>
+            </div>
+        </div>
+
+        <div class="leyenda">
+            <h3>Leyenda</h3>
+            <div class="leyenda-item">
+                <div class="leyenda-color tratamiento-caries"></div>
+                <div>Caries</div>
+            </div>
+            <div class="leyenda-item">
+                <div class="leyenda-color tratamiento-relleno"></div>
+                <div>Relleno</div>
+            </div>
+            <div class="leyenda-item">
+                <div class="leyenda-x x-azul"></div>
+                <div>Pieza faltante (X azul)</div>
+            </div>
+            <div class="leyenda-item">
+                <div class="leyenda-x x-roja"></div>
+                <div>Pieza para extraer (X roja)</div>
+            </div>
+        </div>
+
+        <div class="instrucciones">
+            <p>Selecciona una opción y luego haz clic en una parte del diente para marcarla.</p>
+            <p>Usa "Pieza Faltante" o "Pieza para Extraer" para marcar todo el diente con una X.</p>
+        </div>
+    </div>
+
+    <script>
+        let opcionSeleccionada = 'normal';
+        let tratamientoActivo = null;
+        let estadoOdontograma = {}; // Objeto para almacenar el estado: { dienteId: { partes: {}, marca: null } }
+
+        function seleccionarOpcion(opcion, event) {
+            opcionSeleccionada = opcion;
+
+            // Actualizar botones
+            document.querySelectorAll('.btn-opcion').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Determinar el tratamiento activo
+            tratamientoActivo = opcion === 'caries' ? 'caries' :
+                opcion === 'relleno' ? 'relleno' : null;
+        }
+
+        function manejarClickParte(e) {
+            e.stopPropagation();
+            const dienteContainer = this.closest('.diente-container');
+            const dienteId = dienteContainer.dataset.dienteId; // Asumiendo que cada diente-container tiene data-diente-id
+            const parte = this.dataset.parte; // superior, inferior, izquierda, derecha, centro
+
+            // Bloquear si hay una marca completa
+            if (dienteContainer.querySelector('.diente-marca[style*="display: block"]')) {
+                return;
+            }
+
+            // Inicializar estado del diente si no existe
+            if (!estadoOdontograma[dienteId]) {
+                estadoOdontograma[dienteId] = { partes: {}, marca: null };
+            }
+
+            // Alternar tratamiento
+            if (tratamientoActivo) {
+                if (this.classList.contains(`tratamiento-${tratamientoActivo}`)) {
+                    this.classList.remove(`tratamiento-${tratamientoActivo}`);
+                    delete estadoOdontograma[dienteId].partes[parte];
+                } else {
+                    this.classList.add(`tratamiento-${tratamientoActivo}`);
+                    estadoOdontograma[dienteId].partes[parte] = tratamientoActivo;
+                }
+            } else {
+                this.classList.remove('tratamiento-caries', 'tratamiento-relleno');
+                delete estadoOdontograma[dienteId].partes[parte];
+            }
+
+            // Actualizar campo oculto
+            actualizarDientesSeleccionados();
+        }
+
+        function manejarDobleClickCentro(e) {
+            e.stopPropagation();
+            if (opcionSeleccionada !== 'faltante' && opcionSeleccionada !== 'extraer') {
+                return;
+            }
+
+            const dienteContainer = this.closest('.diente-container');
+            const dienteId = dienteContainer.dataset.dienteId;
+            const marcaFaltante = dienteContainer.querySelector('.marca-faltante');
+            const marcaExtraer = dienteContainer.querySelector('.marca-extraer');
+
+            // Inicializar estado del diente si no existe
+            if (!estadoOdontograma[dienteId]) {
+                estadoOdontograma[dienteId] = { partes: {}, marca: null };
+            }
+
+            // Verificar marca activa
+            const marcaActiva = marcaFaltante.style.display === 'block' ? 'faltante' :
+                marcaExtraer.style.display === 'block' ? 'extraer' : null;
+
+            // Ocultar todas las marcas
+            marcaFaltante.style.display = 'none';
+            marcaExtraer.style.display = 'none';
+            estadoOdontograma[dienteId].marca = null;
+
+            // Limpiar tratamientos de partes
+            dienteContainer.querySelectorAll('.diente-parte').forEach(parte => {
+                parte.classList.remove('tratamiento-caries', 'tratamiento-relleno');
+            });
+            estadoOdontograma[dienteId].partes = {};
+
+            // Mostrar nueva marca si no es la misma
+            if (marcaActiva !== opcionSeleccionada) {
+                const marca = opcionSeleccionada === 'faltante' ? marcaFaltante : marcaExtraer;
+                marca.style.display = 'block';
+                estadoOdontograma[dienteId].marca = opcionSeleccionada;
+            }
+
+            // Actualizar campo oculto
+            actualizarDientesSeleccionados();
+        }
+
+        function actualizarDientesSeleccionados() {
+            // Serializar estadoOdontograma como JSON
+            const jsonEstado = JSON.stringify(estadoOdontograma);
+            document.getElementById('dientesSeleccionados').value = jsonEstado;
+        }
+
+        function cargarEstadoInicial(estadoInicial) {
+            if (!estadoInicial) return;
+
+            try {
+                estadoOdontograma = JSON.parse(estadoInicial);
+                Object.keys(estadoOdontograma).forEach(dienteId => {
+                    const dienteContainer = document.querySelector(`.diente-container[data-diente-id="${dienteId}"]`);
+                    if (!dienteContainer) return;
+
+                    // Aplicar tratamientos a partes
+                    const partes = estadoOdontograma[dienteId].partes;
+                    Object.keys(partes).forEach(parte => {
+                        const elementoParte = dienteContainer.querySelector(`.diente-parte[data-parte="${parte}"]`);
+                        if (elementoParte) {
+                            elementoParte.classList.add(`tratamiento-${partes[parte]}`);
+                        }
+                    });
+
+                    // Aplicar marca completa
+                    const marca = estadoOdontograma[dienteId].marca;
+                    if (marca) {
+                        const marcaElemento = dienteContainer.querySelector(`.marca-${marca}`);
+                        if (marcaElemento) {
+                            marcaElemento.style.display = 'block';
+                        }
+                    }
+                });
+            } catch (e) {
+                console.error('Error al cargar estado inicial:', e);
+            }
+        }
+
+        // Asignar eventos
+        document.addEventListener('DOMContentLoaded', function () {
+            // Cargar estado inicial desde el campo oculto
+            const dientesSeleccionadosInput = document.getElementById('dientesSeleccionados');
+            if (dientesSeleccionadosInput && dientesSeleccionadosInput.value) {
+                cargarEstadoInicial(dientesSeleccionadosInput.value);
+            }
+
+            // Eventos para partes del diente (clic simple)
+            document.querySelectorAll('.diente-parte').forEach(parte => {
+                parte.addEventListener('click', manejarClickParte);
+            });
+
+            // Eventos para el círculo central (doble clic)
+            document.querySelectorAll('.diente-parte-centro').forEach(centro => {
+                centro.addEventListener('dblclick', manejarDobleClickCentro);
+            });
+
+            // Eventos para botones de opción
+            document.querySelectorAll('.btn-opcion').forEach(boton => {
+                boton.addEventListener('click', function (e) {
+                    seleccionarOpcion(this.dataset.opcion, e);
+                });
+            });
+        });
+    </script>
+</body>
+</html>

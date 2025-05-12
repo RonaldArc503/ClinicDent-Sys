@@ -187,6 +187,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>ModelLocal1.edmx</DependentUpon>
     </Compile>
+    <Compile Include="Models\OdontogramaViewModel.cs" />
     <Compile Include="Models\Pacientes.cs">
       <DependentUpon>ModelLocal1.tt</DependentUpon>
     </Compile>
@@ -355,9 +356,12 @@
     <Content Include="Views\Usuarios\Index.cshtml" />
     <Content Include="Views\Citas\Calendario.cshtml" />
     <Content Include="Views\Consultas\Consulta_sin_cita.cshtml" />
+    <Content Include="Views\Shared\_OdontogramaPartial.cshtml" />
+    <Content Include="Views\Shared\_OdontogramaViewOnlyPartial.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
+    <Folder Include="Content\Images\" />
     <Folder Include="Repositories\" />
   </ItemGroup>
   <ItemGroup>

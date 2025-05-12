@@ -1,0 +1,498 @@
+﻿@model string
+
+<style>
+    .odontograma-view-only {
+        max-width: 100%;
+        overflow-x: auto;
+    }
+
+    .odontograma-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin: 20px auto;
+        background-color: white;
+        max-width: 910px;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    }
+
+    .cuadrante {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        width: 100%;
+    }
+
+    .fila {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .grupo-dientes {
+        display: flex;
+        gap: 5px;
+    }
+
+    .separacion-grupos {
+        width: 40px;
+    }
+
+    .diente-container {
+        position: relative;
+        width: 50px;
+        height: 50px;
+        margin: 2px;
+    }
+
+    .diente-partes {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        border: 2px solid #333;
+        overflow: hidden;
+        background-color: #f8f9fa;
+    }
+
+    .diente-parte {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        box-sizing: border-box;
+        pointer-events: none;
+    }
+
+    .diente-parte-superior {
+        clip-path: polygon(0% 0%, 100% 0%, 50% 50%);
+        top: 0;
+        left: 0;
+    }
+
+    .diente-parte-inferior {
+        clip-path: polygon(0% 100%, 100% 100%, 50% 50%);
+        bottom: 0;
+        left: 0;
+    }
+
+    .diente-parte-izquierda {
+        clip-path: polygon(0% 0%, 0% 100%, 50% 50%);
+        left: 0;
+        top: 0;
+    }
+
+    .diente-parte-derecha {
+        clip-path: polygon(100% 0%, 100% 100%, 50% 50%);
+        right: 0;
+        top: 0;
+    }
+
+    .diente-parte-centro {
+        clip-path: circle(30% at 50% 50%);
+        background-color: #fff;
+        border: 2px solid #333;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 60%;
+        height: 60%;
+        z-index: 5;
+    }
+
+    .diente-label {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 12px;
+        font-weight: bold;
+        color: #2c3e50;
+        z-index: 40; /* Aumentar el z-index para que esté por encima de diente-marca */
+        pointer-events: none;
+    }
+
+    /* Asegúrate que estas clases estén presentes */
+    .diente-marca {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 20; /* Reducir el z-index para que esté debajo del diente-label */
+        pointer-events: none;
+        display: none;
+        background-color: transparent; /* Eliminar el fondo opaco */
+        border-radius: 50%;
+        overflow: visible;
+    }
+
+        .diente-marca[style*="display: block"] {
+            display: block !important;
+        }
+
+    .marca-faltante::before, .marca-faltante::after {
+        background-color: #3498db;
+    }
+
+    .marca-extraer::before, .marca-extraer::after {
+        background-color: #e74c3c;
+    }
+
+    .marca-faltante {
+        color: #3498db;
+    }
+
+    .marca-extraer {
+        color: #e74c3c;
+    }
+
+    .tratamiento-caries {
+        background-color: rgba(231, 76, 60, 0.7);
+    }
+
+    .tratamiento-relleno {
+        background-color: rgba(52, 152, 219, 0.7);
+    }
+
+
+
+    .leyenda {
+        margin-top: 30px;
+        padding: 15px;
+        background-color: #f8f9fa;
+        border-radius: 5px;
+        width: 100%;
+    }
+
+        .leyenda h4 {
+            margin-top: 0;
+            color: #2c3e50;
+            border-bottom: 1px solid #dee2e6;
+            padding-bottom: 5px;
+        }
+
+    .leyenda-item {
+        display: flex;
+        align-items: center;
+        margin: 8px 0;
+    }
+
+    .leyenda-color {
+        width: 20px;
+        height: 20px;
+        margin-right: 10px;
+        border: 1px solid #adb5bd;
+    }
+
+    .leyenda-x {
+        position: relative;
+        width: 20px;
+        height: 20px;
+        margin-right: 10px;
+    }
+
+        .leyenda-x::before, .leyenda-x::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100%;
+            height: 2px;
+            background-color: currentColor;
+            transform-origin: center;
+        }
+
+        .leyenda-x::before {
+            transform: translate(-50%, -50%) rotate(45deg);
+        }
+
+        .leyenda-x::after {
+            transform: translate(-50%, -50%) rotate(-45deg);
+        }
+
+    .x-azul {
+        color: #3498db;
+    }
+
+    .x-roja {
+        color: #e74c3c;
+    }
+
+
+</style>
+
+<div class="odontograma-view-only">
+    <div class="odontograma-container">
+        <h4>Odontograma del Tratamiento</h4>
+
+        <div class="cuadrante">
+            <!-- Cuadrante superior: 18-11 y 21-28 -->
+            <div class="fila">
+               
+                <div class="grupo-dientes">
+                    @for (int i = 18; i >= 11; i--)
+                    {
+                        <div class="diente-container" data-diente-id="@i">
+                            <div class="diente-label">@i</div>
+                            <div class="diente-partes">
+                                <div class="diente-parte diente-parte-superior" data-parte="superior"></div>
+                                <div class="diente-parte diente-parte-inferior" data-parte="inferior"></div>
+                                <div class="diente-parte diente-parte-izquierda" data-parte="izquierda"></div>
+                                <div class="diente-parte diente-parte-derecha" data-parte="derecha"></div>
+                                <div class="diente-parte diente-parte-centro" data-parte="centro"></div>
+                            </div>
+                            <div class="diente-marca marca-faltante"></div>
+                            <div class="diente-marca marca-extraer"></div>
+                        </div>
+                    }
+                </div>
+                <div class="separacion-grupos"></div>
+                <div class="grupo-dientes">
+                    @for (int i = 21; i <= 28; i++)
+                    {
+                        <div class="diente-container" data-diente-id="@i">
+                            <div class="diente-label">@i</div>
+                            <div class="diente-partes">
+                                <div class="diente-parte diente-parte-superior" data-parte="superior"></div>
+                                <div class="diente-parte diente-parte-inferior" data-parte="inferior"></div>
+                                <div class="diente-parte diente-parte-izquierda" data-parte="izquierda"></div>
+                                <div class="diente-parte diente-parte-derecha" data-parte="derecha"></div>
+                                <div class="diente-parte diente-parte-centro" data-parte="centro"></div>
+                            </div>
+                            <div class="diente-marca marca-faltante"></div>
+                            <div class="diente-marca marca-extraer"></div>
+                        </div>
+                    }
+                </div>
+              
+            </div>
+
+            <!-- Cuadrante temporal superior: 55-51 y 61-65 -->
+            <div class="fila">
+              
+                <div class="grupo-dientes">
+                    @for (int i = 55; i >= 51; i--)
+                    {
+                        <div class="diente-container" data-diente-id="@i">
+                            <div class="diente-label">@i</div>
+                            <div class="diente-partes">
+                                <div class="diente-parte diente-parte-superior" data-parte="superior"></div>
+                                <div class="diente-parte diente-parte-inferior" data-parte="inferior"></div>
+                                <div class="diente-parte diente-parte-izquierda" data-parte="izquierda"></div>
+                                <div class="diente-parte diente-parte-derecha" data-parte="derecha"></div>
+                                <div class="diente-parte diente-parte-centro" data-parte="centro"></div>
+                            </div>
+                            <div class="diente-marca marca-faltante"></div>
+                            <div class="diente-marca marca-extraer"></div>
+                        </div>
+                    }
+                </div>
+                <div class="separacion-grupos"></div>
+                <div class="grupo-dientes">
+                    @for (int i = 61; i <= 65; i++)
+                    {
+                        <div class="diente-container" data-diente-id="@i">
+                            <div class="diente-label">@i</div>
+                            <div class="diente-partes">
+                                <div class="diente-parte diente-parte-superior" data-parte="superior"></div>
+                                <div class="diente-parte diente-parte-inferior" data-parte="inferior"></div>
+                                <div class="diente-parte diente-parte-izquierda" data-parte="izquierda"></div>
+                                <div class="diente-parte diente-parte-derecha" data-parte="derecha"></div>
+                                <div class="diente-parte diente-parte-centro" data-parte="centro"></div>
+                            </div>
+                            <div class="diente-marca marca-faltante"></div>
+                            <div class="diente-marca marca-extraer"></div>
+                        </div>
+                    }
+                </div>
+                
+            </div>
+
+            <!-- Cuadrante temporal inferior: 85-81 y 71-75 -->
+            <div class="fila">
+               
+                <div class="grupo-dientes">
+                    @for (int i = 85; i >= 81; i--)
+                    {
+                        <div class="diente-container" data-diente-id="@i">
+                            <div class="diente-label">@i</div>
+                            <div class="diente-partes">
+                                <div class="diente-parte diente-parte-superior" data-parte="superior"></div>
+                                <div class="diente-parte diente-parte-inferior" data-parte="inferior"></div>
+                                <div class="diente-parte diente-parte-izquierda" data-parte="izquierda"></div>
+                                <div class="diente-parte diente-parte-derecha" data-parte="derecha"></div>
+                                <div class="diente-parte diente-parte-centro" data-parte="centro"></div>
+                            </div>
+                            <div class="diente-marca marca-faltante"></div>
+                            <div class="diente-marca marca-extraer"></div>
+                        </div>
+                    }
+                </div>
+                <div class="separacion-grupos"></div>
+                <div class="grupo-dientes">
+                    @for (int i = 71; i <= 75; i++)
+                    {
+                        <div class="diente-container" data-diente-id="@i">
+                            <div class="diente-label">@i</div>
+                            <div class="diente-partes">
+                                <div class="diente-parte diente-parte-superior" data-parte="superior"></div>
+                                <div class="diente-parte diente-parte-inferior" data-parte="inferior"></div>
+                                <div class="diente-parte diente-parte-izquierda" data-parte="izquierda"></div>
+                                <div class="diente-parte diente-parte-derecha" data-parte="derecha"></div>
+                                <div class="diente-parte diente-parte-centro" data-parte="centro"></div>
+                            </div>
+                            <div class="diente-marca marca-faltante"></div>
+                            <div class="diente-marca marca-extraer"></div>
+                        </div>
+                    }
+                </div>
+               
+            </div>
+
+            <!-- Cuadrante inferior: 48-41 y 31-38 -->
+            <div class="fila">
+              
+                <div class="grupo-dientes">
+                    @for (int i = 48; i >= 41; i--)
+                    {
+                        <div class="diente-container" data-diente-id="@i">
+                            <div class="diente-label">@i</div>
+                            <div class="diente-partes">
+                                <div class="diente-parte diente-parte-superior" data-parte="superior"></div>
+                                <div class="diente-parte diente-parte-inferior" data-parte="inferior"></div>
+                                <div class="diente-parte diente-parte-izquierda" data-parte="izquierda"></div>
+                                <div class="diente-parte diente-parte-derecha" data-parte="derecha"></div>
+                                <div class="diente-parte diente-parte-centro" data-parte="centro"></div>
+                            </div>
+                            <div class="diente-marca marca-faltante"></div>
+                            <div class="diente-marca marca-extraer"></div>
+                        </div>
+                    }
+                </div>
+                <div class="separacion-grupos"></div>
+                <div class="grupo-dientes">
+                    @for (int i = 31; i <= 38; i++)
+                    {
+                        <div class="diente-container" data-diente-id="@i">
+                            <div class="diente-label">@i</div>
+                            <div class="diente-partes">
+                                <div class="diente-parte diente-parte-superior" data-parte="superior"></div>
+                                <div class="diente-parte diente-parte-inferior" data-parte="inferior"></div>
+                                <div class="diente-parte diente-parte-izquierda" data-parte="izquierda"></div>
+                                <div class="diente-parte diente-parte-derecha" data-parte="derecha"></div>
+                                <div class="diente-parte diente-parte-centro" data-parte="centro"></div>
+                            </div>
+                            <div class="diente-marca marca-faltante"></div>
+                            <div class="diente-marca marca-extraer"></div>
+                        </div>
+                    }
+                </div>
+              
+            </div>
+        </div>
+
+        <div class="leyenda">
+            <h4>Leyenda</h4>
+            <div class="leyenda-item">
+                <div class="leyenda-color tratamiento-caries"></div>
+                <span>Caries</span>
+            </div>
+            <div class="leyenda-item">
+                <div class="leyenda-color tratamiento-relleno"></div>
+                <span>Relleno</span>
+            </div>
+            <div class="leyenda-item">
+                <div class="leyenda-x x-azul"></div>
+                <span>Pieza Faltante</span>
+            </div>
+            <div class="leyenda-item">
+                <div class="leyenda-x x-roja"></div>
+                <span>Pieza para Extraer</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Obtener datos del odontograma desde el modelo
+        const odontogramaData = '@Html.Raw(Model)';
+
+        if (!odontogramaData || odontogramaData === '{}') {
+            console.log('No hay datos de odontograma o están vacíos');
+            return;
+        }
+
+        try {
+            const estadoOdontograma = JSON.parse(odontogramaData.replace(/&quot;/g, '"'));
+            console.log('Datos del odontograma:', estadoOdontograma);
+
+            // Aplicar el estado al odontograma
+            Object.keys(estadoOdontograma).forEach(dienteId => {
+                const dienteContainer = document.querySelector(`.diente-container[data-diente-id="${dienteId}"]`);
+                if (!dienteContainer) {
+                    console.log(`No se encontró el contenedor para el diente ${dienteId}`);
+                    return;
+                }
+
+                // Aplicar tratamientos a las partes
+                const partes = estadoOdontograma[dienteId].partes || {};
+                Object.keys(partes).forEach(parte => {
+                    const elementoParte = dienteContainer.querySelector(`.diente-parte[data-parte="${parte}"]`);
+                    if (elementoParte) {
+                        elementoParte.classList.add(`tratamiento-${partes[parte]}`);
+                        console.log(`Aplicando tratamiento ${partes[parte]} a diente ${dienteId}, parte ${parte}`);
+                    }
+                });
+
+                // Aplicar marcas (faltante/extraer)
+                const marca = estadoOdontograma[dienteId].marca;
+                if (marca) {
+                    const marcaElemento = dienteContainer.querySelector(`.marca-${marca}`);
+                    if (marcaElemento) {
+                        // Crear elementos reales para las líneas de la X
+                        const line1 = document.createElement('div');
+                        const line2 = document.createElement('div');
+
+                        // Configurar estilos para ambas líneas
+                        const lineStyle = {
+                            position: 'absolute',
+                            top: '50%',
+                            left: '50%',
+                            width: '80%',
+                            height: '3px',
+                            backgroundColor: marca === 'faltante' ? '#3498db' : '#e74c3c',
+                            transformOrigin: 'center',
+                            zIndex: '35'
+                        };
+
+                        // Aplicar transformaciones específicas
+                        Object.assign(line1.style, lineStyle, {
+                            transform: 'translate(-50%, -50%) rotate(45deg)'
+                        });
+
+                        Object.assign(line2.style, lineStyle, {
+                            transform: 'translate(-50%, -50%) rotate(-45deg)'
+                        });
+
+                        // Limpiar y agregar nuevas líneas
+                        marcaElemento.innerHTML = '';
+                        marcaElemento.appendChild(line1);
+                        marcaElemento.appendChild(line2);
+
+                        // Hacer visible la marca
+                        marcaElemento.style.display = 'block';
+                        marcaElemento.style.zIndex = '30';
+
+                        console.log(`Mostrando marca ${marca} en diente ${dienteId}`);
+                    }
+                }
+            });
+        } catch (e) {
+            console.error('Error al cargar odontograma:', e);
+        }
+    });
+</script>
