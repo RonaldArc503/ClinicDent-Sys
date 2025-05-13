@@ -179,9 +179,10 @@ namespace ClinicDent.Controllers
                 using (var connection = new SqlConnection(_connectionString))
                 {
                     connection.Open();
-
+                    
                     // Crear tabla de tratamientos para el procedimiento
                     var tratamientosTable = new DataTable();
+
                     tratamientosTable.Columns.Add("id_tipo_cobro", typeof(int));
                     tratamientosTable.Columns.Add("fecha_inicio", typeof(DateTime));
                     tratamientosTable.Columns.Add("costo", typeof(decimal));

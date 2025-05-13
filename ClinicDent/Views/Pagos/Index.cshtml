@@ -1,57 +1,32 @@
-﻿@model IEnumerable<ClinicDent.Models.Pagos>
+﻿@model IEnumerable<ClinicDent.Models.PagoViewModel>
 
-@{
-    ViewBag.Title = "Index";
-}
+<h2>Pagos</h2>
 
-<h2>Index</h2>
-
-<p>
-    @Html.ActionLink("Create New", "Create")
-</p>
 <table class="table">
     <tr>
-        <th>
-            @Html.DisplayNameFor(model => model.fecha_pago)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.monto_total)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.metodo_pago)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.tipo_pago)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.Consulta.diagnostico)
-        </th>
+        <th>Paciente</th>
+        <th>Fecha Pago</th>
+        <th>Monto Total</th>
+        <th>Método Pago</th>
+        <th>Tipo Pago</th>
+        <th>Estado</th>
+        <th>Cuotas</th>
         <th></th>
     </tr>
-
-@foreach (var item in Model) {
-    <tr>
-        <td>
-            @Html.DisplayFor(modelItem => item.fecha_pago)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.monto_total)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.metodo_pago)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.tipo_pago)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.Consulta.diagnostico)
-        </td>
-        <td>
-            @Html.ActionLink("Edit", "Edit", new { id=item.id_pago }) |
-            @Html.ActionLink("Details", "Details", new { id=item.id_pago }) |
-            @Html.ActionLink("Delete", "Delete", new { id=item.id_pago })
-        </td>
-    </tr>
-}
-
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>@Html.DisplayFor(modelItem => item.Paciente)</td>
+            <td>@Html.DisplayFor(modelItem => item.FechaPago)</td>
+            <td>@Html.DisplayFor(modelItem => item.MontoTotal)</td>
+            <td>@Html.DisplayFor(modelItem => item.MetodoPago)</td>
+            <td>@Html.DisplayFor(modelItem => item.TipoPago)</td>
+            <td>@Html.DisplayFor(modelItem => item.EstadoPago)</td>
+            <td>@item.CuotasPagadas/@item.TotalCuotas</td>
+            <td>
+                @Html.ActionLink("Detalles", "Details", new { id = item.IdPago }) |
+                @Html.ActionLink("Eliminar", "Delete", new { id = item.IdPago })
+            </td>
+        </tr>
+    }
 </table>
