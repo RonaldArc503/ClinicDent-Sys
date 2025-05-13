@@ -65,29 +65,8 @@ namespace ClinicDent.Controllers
         }
 
         // GET: Pacientes/Details/5
-        public ActionResult Details(int? id)
-        {
-            if (id == null)
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            }
-            Pacientes paciente = db.Pacientes.Find(id);
-            if (paciente == null)
-            {
-                return HttpNotFound();
-            }
+      
 
-            // Obtener las próximas citas del paciente (desde hoy en adelante)
-            var proximasCitas = db.Citas
-                .Include(c => c.Dentistas)
-                .Where(c => c.id_paciente == id && c.fecha_hora >= DateTime.Now)
-                .OrderBy(c => c.fecha_hora)
-                .ToList();
-
-            ViewBag.ProximasCitas = proximasCitas;
-
-            return View(paciente);
-        }
 
         // GET: Pacientes/Create
         public ActionResult Create()
@@ -172,6 +151,63 @@ namespace ClinicDent.Controllers
                 db.Dispose();
             }
             base.Dispose(disposing);
+        }
+
+
+        public ActionResult Details(int? id)
+        {
+            if (id == null)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
+
+            // Cargar datos del paciente con relaciones
+            var paciente = db.Pacientes
+                .Include(p => p.Citas.Select(c => c.Dentistas))
+                .Include(p => p.Consulta.Select(c => c.Dentistas))
+                .Include(p => p.Consulta.Select(c => c.Citas))
+                .FirstOrDefault(p => p.id_paciente == id);
+
+            if (paciente == null)
+            {
+                return HttpNotFound();
+            }
+
+            // Obtener datos adicionales
+            ViewBag.ProximasCitas = db.Citas
+                .Include(c => c.Dentistas)
+                .Where(c => c.id_paciente == id && c.fecha_hora >= DateTime.Now && c.estado != "Cancelada")
+                .OrderBy(c => c.fecha_hora)
+                .ToList();
+
+            ViewBag.HistorialCitas = db.Citas
+                .Include(c => c.Dentistas)
+                .Where(c => c.id_paciente == id && c.fecha_hora < DateTime.Now)
+                .OrderByDescending(c => c.fecha_hora)
+                .Take(10)
+                .ToList();
+
+            ViewBag.ConsultasRecientes = db.Consulta
+                .Include(c => c.Dentistas)
+                .Where(c => c.id_paciente == id)
+                .OrderByDescending(c => c.fecha_consulta)
+                .Take(5)
+                .ToList();
+
+            ViewBag.Tratamientos = db.Consultas_Tratamientos
+                .Include(ct => ct.Tratamientos.Tipo_Cobro)
+                .Include(ct => ct.Consulta)
+                .Where(ct => ct.Consulta.id_paciente == id)
+                .OrderByDescending(ct => ct.Consulta.fecha_consulta)
+                .ToList();
+
+            ViewBag.Pagos = db.Pagos
+                .Include(p => p.Pagos_Cuotas)
+                .Where(p => p.Consulta.id_paciente == id)
+                .OrderByDescending(p => p.fecha_pago)
+                .ToList();
+
+            return View(paciente);
         }
     }
 }

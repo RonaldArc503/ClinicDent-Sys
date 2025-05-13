@@ -6,148 +6,225 @@
     <title>@ViewBag.Title - Clínica</title>
     @Styles.Render("~/Content/css")
     @Scripts.Render("~/bundles/modernizr")
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"> <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.11.6/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 
     <style>
         .sidebar {
-            width: 250px;
+            width: 60px;
             min-height: 100vh;
             background-color: #116AEF;
             color: white;
+            transition: width 0.3s ease;
+            position: relative;
+            overflow: hidden;
         }
+
+            .sidebar.expanded {
+                width: 250px;
+            }
 
             .sidebar .nav-link {
                 color: white;
+                display: flex;
+                align-items: center;
+                padding: 12px 15px;
+                margin: 2px 5px;
+                border-radius: 5px;
+                white-space: nowrap;
             }
 
                 .sidebar .nav-link:hover {
                     background-color: #0d7bcc;
-                    border-radius: 5px;
                 }
 
-            .sidebar .nav-link {
-                background-color: #0d5bcc;
-                color: white;
-                width: 100%;
+                .sidebar .nav-link.active {
+                    background-color: #0d5bcc;
+                }
+
+        .nav-text {
+            margin-left: 10px;
+            display: none;
+        }
+
+        .sidebar.expanded .nav-text {
+            display: inline;
+        }
+
+        .sidebar .icon {
+            font-size: 1.2rem;
+            width: 20px;
+            text-align: center;
+        }
+
+        .sidebar-header {
+            text-align: center;
+            padding: 20px 0;
+            white-space: nowrap;
+        }
+
+            .sidebar-header i.fa-tooth {
                 display: block;
-                padding: 12px 40px;
-                text-align: left;
-                margin-top: 2px;
+                margin: 0 auto;
+                font-size: 2.3rem; 
             }
 
+            .sidebar-header i {
+                display: block;
+                margin: 0 auto;
+            }
 
+            .sidebar-header span {
+                display: none;
+            }
+
+        .sidebar.expanded .sidebar-header span {
+            display: inline;
+        }
 
         .content {
             flex-grow: 1;
             padding: 20px;
+            transition: margin-left 0.3s ease;
         }
 
-        .icon {
-            margin-right: 8px;
-        }
-
-        /* Estilo del menú desplegable */
+        /* Dropdown menu styles */
         #citasDropdown + .dropdown-menu {
             min-width: 250px;
             background-color: #116AEF;
             color: white;
-            border: none; /* Opcional: elimina el borde del dropdown */
+            border: none;
         }
 
-            /* Estilo de los elementos dentro del dropdown */
             #citasDropdown + .dropdown-menu .dropdown-item {
                 color: white;
                 background-color: #116AEF;
+                display: flex;
+                align-items: center;
+                padding: 10px 15px;
             }
 
-                /* Estilo cuando pasas el mouse */
                 #citasDropdown + .dropdown-menu .dropdown-item:hover {
                     background-color: #0d7bcc;
                     color: white;
                     border-radius: 5px;
                 }
 
+        .dropdown-menu .icon {
+            margin-right: 10px;
+        }
 
-
+        /* Toggle button */
+        .toggle-btn {
+            position: absolute;
+            top: 10px;
+            right: -30px;
+            background-color: #116AEF;
+            color: white;
+            border: none;
+            padding: 5px;
+            cursor: pointer;
+            border-radius: 0 5px 5px 0;
+        }
     </style>
 </head>
 <body>
     <div class="d-flex">
-        <!-- Barra de navegación a la izquierda -->
+        <!-- Sidebar -->
         <nav class="sidebar d-flex flex-column">
-            <h4 class="text-center"><i class="fa-solid fa-tooth mt-5"></i> CLINICA DENTAL</h4>
-            <ul class="nav flex-column mt-5">
+            <button class="toggle-btn" onclick="toggleSidebar()">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="sidebar-header">
+                <i class="fa-solid fa-tooth mt-3"></i>
+                <span>CLINICA DENTAL</span>
+            </div>
+            <ul class="nav flex-column mt-3">
                 <li class="nav-item">
                     <a href="@Url.Action("Index", "Home")" class="nav-link">
-                        <i class="fa-solid fa-house icon"></i> Inicio
+                        <i class="fa-solid fa-house icon"></i>
+                        <span class="nav-text">Inicio</span>
                     </a>
                 </li>
                 <li class="nav-item">
                     <a href="@Url.Action("Index", "Pacientes")" class="nav-link">
-                        <i class="fa-solid fa-user icon"></i> Pacientes
+                        <i class="fa-solid fa-user icon"></i>
+                        <span class="nav-text">Pacientes</span>
                     </a>
                 </li>
                 <li class="nav-item">
                     <a href="@Url.Action("Index", "Dentistas")" class="nav-link">
-                        <i class="fa-solid fa-tooth icon"></i> Dentistas
+                        <i class="fa-solid fa-tooth icon"></i>
+                        <span class="nav-text">Dentistas</span>
                     </a>
                 </li>
-
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="citasDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="fa-solid fa-calendar-day icon"></i> Citas
+                        <i class="fa-solid fa-calendar-day icon"></i>
+                        <span class="nav-text">Citas</span>
                     </a>
                     <ul class="dropdown-menu" aria-labelledby="citasDropdown">
                         <li>
-                            <a class="dropdown-item" href="@Url.Action("Index", "Citas")"><i class="fa-solid fa-calendar-check icon"></i> Citas</a>
+                            <a class="dropdown-item" href="@Url.Action("Index", "Citas")">
+                                <i class="fa-solid fa-calendar-check icon"></i>
+                                <span>Citas</span>
+                            </a>
                         </li>
                         <li>
-                            <a class="dropdown-item" href="@Url.Action("Calendario", "Citas")"><i class="fa-solid fa-calendar-alt icon"></i> Calendario</a>
+                            <a class="dropdown-item" href="@Url.Action("Calendario", "Citas")">
+                                <i class="fa-solid fa-calendar-alt icon"></i>
+                                <span>Calendario</span>
+                            </a>
                         </li>
                     </ul>
                 </li>
                 <li class="nav-item">
                     <a href="@Url.Action("Index", "Consultas")" class="nav-link">
-                        <i class="fa-solid fa-tooth icon"></i> Consultas
+                        <i class="fa-solid fa-tooth icon"></i>
+                        <span class="nav-text">Consultas</span>
                     </a>
                 </li>
                 <li class="nav-item">
                     <a href="@Url.Action("Index", "Pagos")" class="nav-link">
-                        <i class="fa-solid fa-credit-card icon"></i> Pagos e Historial
+                        <i class="fa-solid fa-credit-card icon"></i>
+                        <span class="nav-text">Pagos e Historial</span>
                     </a>
                 </li>
                 <li class="nav-item">
                     <a href="@Url.Action("Index", "Tratamientos")" class="nav-link">
-                        <i class="fa-solid fa-syringe icon"></i> Tratamientos
+                        <i class="fa-solid fa-syringe icon"></i>
+                        <span class="nav-text">Tratamientos</span>
                     </a>
                 </li>
                 <li class="nav-item">
                     <a href="@Url.Action("Index", "Usuarios")" class="nav-link">
-                        <i class="fa-solid fa-users icon"></i> Usuarios
+                        <i class="fa-solid fa-users icon"></i>
+                        <span class="nav-text">Usuarios</span>
                     </a>
                 </li>
                 <li class="nav-item">
                     <a href="@Url.Action("Index", "Historial_Clinico")" class="nav-link">
-                        <i class="fa-solid fa-file-medical icon"></i> Historial_Clinico
+                        <i class="fa-solid fa-file-medical icon"></i>
+                        <span class="nav-text">Historial Clínico</span>
                     </a>
                 </li>
                 <li class="nav-item">
                     <a href="@Url.Action("Index", "Historial_Pagos")" class="nav-link">
-                        <i class="fa-solid fa-money-bill icon"></i> Historial_Pagos
+                        <i class="fa-solid fa-money-bill icon"></i>
+                        <span class="nav-text">Historial Pagos</span>
                     </a>
                 </li>
             </ul>
         </nav>
 
-        <!-- Contenido principal -->
+        <!-- Main content -->
         <div class="content">
             <div class="container">
                 @RenderBody()
                 <hr>
                 <footer>
-                    <p>&copy; @DateTime.Now.Year - Clínica Dental</p>
+                    <p>© @DateTime.Now.Year - Clínica Dental</p>
                 </footer>
             </div>
         </div>
@@ -156,5 +233,20 @@
     @Scripts.Render("~/bundles/jquery")
     @Scripts.Render("~/bundles/bootstrap")
     @RenderSection("scripts", required: false)
+
+    <script>
+        function toggleSidebar() {
+            document.querySelector('.sidebar').classList.toggle('expanded');
+        }
+
+        // Optional: Expand on hover
+        const sidebar = document.querySelector('.sidebar');
+        sidebar.addEventListener('mouseenter', () => {
+            sidebar.classList.add('expanded');
+        });
+        sidebar.addEventListener('mouseleave', () => {
+            sidebar.classList.remove('expanded');
+        });
+    </script>
 </body>
 </html>

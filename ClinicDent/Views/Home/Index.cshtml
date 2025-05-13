@@ -1,33 +1,157 @@
-﻿@{
-    ViewBag.Title = "Home Page";
-}
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inicio - Clínica Dental</title>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.production.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/babel-standalone@7.22.9/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    <div id="root"></div>
 
-<main>
-    <section class="row" aria-labelledby="aspnetTitle">
-        <h1 id="title">ASP.NET</h1>
-        <p class="lead">ASP.NET is a free web framework for building great Web sites and Web applications using HTML, CSS and JavaScript.</p>
-        <p><a href="https://asp.net" class="btn btn-primary btn-md">Learn more &raquo;</a></p>
-    </section>
+    <script >
+        const { useState, useEffect } = React;
 
-    <div class="row">
-        <section class="col-md-4" aria-labelledby="gettingStartedTitle">
-            <h2 id="gettingStartedTitle">Getting started</h2>
-            <p>
-                ASP.NET MVC gives you a powerful, patterns-based way to build dynamic websites that
-                enables a clean separation of concerns and gives you full control over markup
-                for enjoyable, agile development.
-            </p>
-            <p><a class="btn btn-outline-dark" href="https://go.microsoft.com/fwlink/?LinkId=301865">Learn more &raquo;</a></p>
-        </section>
-        <section class="col-md-4" aria-labelledby="librariesTitle">
-            <h2 id="librariesTitle">Get more libraries</h2>
-            <p>NuGet is a free Visual Studio extension that makes it easy to add, remove, and update libraries and tools in Visual Studio projects.</p>
-            <p><a class="btn btn-outline-dark" href="https://go.microsoft.com/fwlink/?LinkId=301866">Learn more &raquo;</a></p>
-        </section>
-        <section class="col-md-4" aria-labelledby="hostingTitle">
-            <h2 id="hostingTitle">Web Hosting</h2>
-            <p>You can easily find a web hosting company that offers the right mix of features and price for your applications.</p>
-            <p><a class="btn btn-outline-dark" href="https://go.microsoft.com/fwlink/?LinkId=301867">Learn more &raquo;</a></p>
-        </section>
-    </div>
-</main>
+    
+        const mockData = {
+          citasHoy: [
+            { id_cita: 1, fecha_hora: "2025-05-12 08:00:00", paciente: "Juan Pérez", dentista: "Dra. García", estado: "Pendiente" },
+            { id_cita: 2, fecha_hora: "2025-05-12 09:00:00", paciente: "Laura Díaz", dentista: "Dr. Ruiz", estado: "Completada" },
+          ],
+          proximosPacientes: [
+            { fecha_hora: "2025-05-12 10:00:00", paciente: "Andrés Morales", dentista: "Dra. Sánchez" },
+            { fecha_hora: "2025-05-12 11:30:00", paciente: "Camila López", dentista: "Dr. Martínez" },
+          ],
+          alertas: [
+            { tipo: "inventario", mensaje: "Material 'Anestesia' bajo en stock" },
+            { tipo: "pago", mensaje: "Pago pendiente de paciente: Karla Fuentes" },
+          ],
+        };
+
+        function App() {
+          const [citas, setCitas] = useState([]);
+          const [proximos, setProximos] = useState([]);
+          const [alertas, setAlertas] = useState([]);
+
+          useEffect(() => {
+             Simulate fetching data from ClinicaDental1 database
+             Example SQL for citasHoy:
+             SELECT c.id_cita, c.fecha_hora, p.nombres + ' ' + p.apellidos AS paciente,
+                    d.nombre + ' ' + d.apellido AS dentista, c.estado
+             FROM Citas c
+             JOIN Pacientes p ON c.id_paciente = p.id_paciente
+             JOIN Dentistas d ON c.id_dentista = d.id_dentista
+             WHERE CAST(c.fecha_hora AS DATE) = CAST(GETDATE() AS DATE);
+            setCitas(mockData.citasHoy);
+
+             Example SQL for proximosPacientes:
+             SELECT c.fecha_hora, p.nombres + ' ' + p.apellidos AS paciente,
+                    d.nombre + ' ' + d.apellido AS dentista
+             FROM Citas c
+             JOIN Pacientes p ON c.id_paciente = p.id_paciente
+             JOIN Dentistas d ON c.id_dentista = d.id_dentista
+             WHERE c.fecha_hora > GETDATE() AND c.estado = 'Confirmada'
+             ORDER BY c.fecha_hora;
+            setProximos(mockData.proximosPacientes);
+
+             Example SQL for alertas:
+             SELECT 'inventario' AS tipo, 'Material ''' + nombre + ''' bajo en stock' AS mensaje
+             FROM Materiales WHERE cantidad <= minimo_stock AND estado = 'Activo'
+             UNION
+             SELECT 'pago' AS tipo, 'Pago pendiente de paciente: ' + p.nombres + ' ' + p.apellidos AS mensaje
+             FROM Pagos_Cuotas pc
+             JOIN Pagos pg ON pc.id_pago = pg.id_pago
+             JOIN Consulta c ON pg.id_consulta = c.id_consulta
+             JOIN Pacientes p ON c.id_paciente = p.id_paciente
+             WHERE pc.estado IN ('Pendiente', 'Vencida');
+            setAlertas(mockData.alertas);
+          }, []);
+
+          return (
+            <div className="min-h-screen bg-gray-100">
+              <header className="bg-blue-600 text-white p-6 text-center">
+                <h1 className="text-2xl font-bold">Bienvenida, Recepcionista</h1>
+                <p>Panel principal de la Clínica Dental</p>
+              </header>
+
+              <div className="container mx-auto p-6 space-y-6">
+                {/* Citas del Día */}
+                <div className="bg-white p-6 rounded-lg shadow-md">
+                  <h3 className="text-lg font-semibold">
+                    Citas del día: <span className="text-blue-800">{citas.length}</span>
+                  </h3>
+                  <div className="overflow-x-auto">
+                    <table className="w-full mt-2 border-collapse">
+                      <thead>
+                        <tr className="bg-gray-200">
+                          <th className="border p-2 text-left">Hora</th>
+                          <th className="border p-2 text-left">Paciente</th>
+                          <th className="border p-2 text-left">Dentista</th>
+                          <th className="border p-2 text-left">Estado</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {citas.map((cita) => (
+                          <tr key={cita.id_cita}>
+                            <td className="border p-2">{new Date(cita.fecha_hora).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</td>
+                            <td className="border p-2">{cita.paciente}</td>
+                            <td className="border p-2">{cita.dentista}</td>
+                            <td className="border p-2">{cita.estado}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {/* Próximos Pacientes */}
+                <div className="bg-white p-6 rounded-lg shadow-md">
+                  <h3 className="text-lg font-semibold">Pacientes próximos</h3>
+                  <ul className="mt-2 space-y-2">
+                    {proximos.map((paciente, index) => (
+                      <li key={index}>
+                        <strong>{new Date(paciente.fecha_hora).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} -</strong> {paciente.paciente} (con {paciente.dentista})
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/* Accesos Rápidos */}
+                <div className="bg-white p-6 rounded-lg shadow-md">
+                  <h3 className="text-lg font-semibold">Accesos rápidos</h3>
+                  <div className="mt-4 flex space-x-4">
+                    <button className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                      ➕ Agendar nueva cita
+                    </button>
+                    <button className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                      📋 Ver todos los pacientes
+                    </button>
+                    <button className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                      📦 Inventario
+                    </button>
+                  </div>
+                </div>
+
+                {/* Alertas */}
+                <div className="bg-white p-6 rounded-lg shadow-md">
+                  <h3 className="text-lg font-semibold">Alertas</h3>
+                  <ul className="mt-2 space-y-2">
+                    {alertas.map((alerta, index) => (
+                      <li key={index} className="flex items-center">
+                        <span className="mr-2">{alerta.tipo === 'inventario' ? '📉' : '💳'}</span> {alerta.mensaje}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

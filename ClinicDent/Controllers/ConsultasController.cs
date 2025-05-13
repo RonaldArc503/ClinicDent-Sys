@@ -6,14 +6,16 @@ using System.Linq;
 using System.Net;
 using System.Web;
 using System.Web.Mvc;
-
+using System.Data.SqlClient;
 using ClinicDent.Models;
+
 
 namespace ClinicDent.Controllers
 {
     public class ConsultasController : Controller
     {
         private ClinicaDentalLocal0 db = new ClinicaDentalLocal0();
+        private readonly string _connectionString = System.Configuration.ConfigurationManager.ConnectionStrings["ClinicaDentalLocal0Sql"].ConnectionString;
 
         // GET: Consultas
         public ActionResult Index(string searchString, string filterBy, string fechaFilter)
@@ -92,98 +94,177 @@ namespace ClinicDent.Controllers
         // GET: Consultas/Create
         public ActionResult Create(int? idCita, string fechaConsulta, int? idDentista, int? idPaciente)
         {
-            var citasPendientesCanceladas = db.Citas
-                .Where(c => c.estado == "Pendiente" || c.estado == "Cancelada")
-                .Include(c => c.Pacientes)
-                .ToList()
-                .Select(c => new
-                {
-                    c.id_cita,
-                    Display = $"{c.id_cita} - {c.Pacientes.nombres} - {c.fecha_hora.ToString("dd MMM yyyy HH:mm")}"
-                });
+            PopulateDropdowns(idCita, idDentista, idPaciente);
 
-            ViewBag.id_cita = new SelectList(citasPendientesCanceladas, "id_cita", "Display", idCita);
-            ViewBag.id_dentista = new SelectList(db.Dentistas, "id_dentista", "nombre", idDentista);
-            ViewBag.id_paciente = new SelectList(db.Pacientes, "id_paciente", "nombres", idPaciente);
-
-            var model = new Consulta();
+            var model = new ConsultaConTratamientoViewModel();
 
             if (idCita != null)
             {
                 var cita = db.Citas.Find(idCita);
                 if (cita != null)
                 {
-                    model.id_cita = cita.id_cita;
-                    model.fecha_consulta = cita.fecha_hora;
+                    model.IdCita = cita.id_cita;
+                    model.FechaConsulta = cita.fecha_hora;
                     ViewBag.FechaConsulta = cita.fecha_hora.ToString("dd MMM. yyyy HH:mm", new System.Globalization.CultureInfo("es-ES"));
                     if (idDentista != null)
                     {
-                        model.id_dentista = idDentista.Value;
+                        model.IdDentista = idDentista.Value;
                     }
                     if (idPaciente != null)
                     {
-                        model.id_paciente = idPaciente.Value;
+                        model.IdPaciente = idPaciente.Value;
                     }
                 }
             }
             else
             {
-                model.fecha_consulta = DateTime.Now;
+                model.FechaConsulta = DateTime.Now;
             }
 
             return View(model);
         }
 
         // POST: Consultas/Create
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "id_consulta,id_cita,id_dentista,id_paciente,fecha_consulta,diagnostico,observaciones,recomendaciones,requiere_tratamiento")] Consulta consulta)
+       
+        public ActionResult Create(ConsultaConTratamientoViewModel model)
         {
-            // If id_cita is not selected or invalid, set it to null (sin cita)
-            if (consulta.id_cita == null || consulta.id_cita == 0)
+            try
             {
-                consulta.id_cita = null;
-            }
-            else
-            {
-                // Validate that the selected cita is not already associated with another consulta
-                if (db.Consulta.Any(c => c.id_cita == consulta.id_cita))
+                // Validaciones básicas
+                if (model.IdCita == 0) model.IdCita = null;
+
+                if (model.IdCita.HasValue && db.Consulta.Any(c => c.id_cita == model.IdCita))
                 {
-                    ModelState.AddModelError("id_cita", "Esta cita ya tiene una consulta asociada.");
+                    ModelState.AddModelError("IdCita", "Esta cita ya tiene una consulta asociada.");
+                }
+
+                if (model.FechaConsulta == default(DateTime))
+                {
+                    ModelState.AddModelError("FechaConsulta", "La fecha de consulta es requerida.");
+                }
+
+                // Validación del tratamiento
+                if (model.RequiereTratamiento)
+                {
+                    if (model.Tratamiento == null)
+                    {
+                        ModelState.AddModelError("", "La información del tratamiento es requerida.");
+                    }
+                    else
+                    {
+                        if (model.Tratamiento.IdTipoCobro == 0)
+                            ModelState.AddModelError("Tratamiento.IdTipoCobro", "Seleccione un tipo de tratamiento.");
+                        if (model.Tratamiento.FechaInicio == default(DateTime))
+                            ModelState.AddModelError("Tratamiento.FechaInicio", "La fecha de inicio es requerida.");
+                        if (model.Tratamiento.Costo <= 0)
+                            ModelState.AddModelError("Tratamiento.Costo", "Ingrese un costo válido.");
+                        if (string.IsNullOrEmpty(model.Tratamiento.DientesSeleccionados) || model.Tratamiento.DientesSeleccionados == "{}")
+                            ModelState.AddModelError("Tratamiento.DientesSeleccionados", "Seleccione los dientes afectados.");
+                        if (model.Tratamiento.Cantidad <= 0)
+                            ModelState.AddModelError("Tratamiento.Cantidad", "La cantidad debe ser mayor a 0.");
+                        if (model.Tratamiento.Total <= 0)
+                            ModelState.AddModelError("Tratamiento.Total", "El total debe ser mayor a 0.");
+                    }
+                }
+
+                if (!ModelState.IsValid)
+                {
+                    var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
+                    return Json(new { success = false, message = "Errores en el formulario: " + string.Join("; ", errors) });
+                }
+
+                using (var connection = new SqlConnection(_connectionString))
+                {
+                    connection.Open();
+
+                    // Crear tabla de tratamientos para el procedimiento
+                    var tratamientosTable = new DataTable();
+                    tratamientosTable.Columns.Add("id_tipo_cobro", typeof(int));
+                    tratamientosTable.Columns.Add("fecha_inicio", typeof(DateTime));
+                    tratamientosTable.Columns.Add("costo", typeof(decimal));
+                    tratamientosTable.Columns.Add("duracion_estimada", typeof(int));
+                    tratamientosTable.Columns.Add("seguimiento", typeof(bool));
+                    tratamientosTable.Columns.Add("dientes_seleccionados", typeof(string));
+                    tratamientosTable.Columns.Add("cantidad", typeof(int));
+                    tratamientosTable.Columns.Add("total", typeof(decimal));
+
+                    // Agregar el tratamiento al DataTable (si aplica)
+                    if (model.RequiereTratamiento && model.Tratamiento != null)
+                    {
+                        tratamientosTable.Rows.Add(
+                            model.Tratamiento.IdTipoCobro,
+                            model.Tratamiento.FechaInicio,
+                            model.Tratamiento.Costo,
+                            model.Tratamiento.DuracionEstimada,
+                            model.Tratamiento.Seguimiento,
+                            model.Tratamiento.DientesSeleccionados,
+                            model.Tratamiento.Cantidad,
+                            model.Tratamiento.Total
+                        );
+                    }
+
+                    using (var command = new SqlCommand("CrearConsultaConTratamientos", connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+
+                        // Parámetros de la consulta
+                        command.Parameters.AddWithValue("@id_cita", model.IdCita ?? (object)DBNull.Value);
+                        command.Parameters.AddWithValue("@id_dentista", model.IdDentista);
+                        command.Parameters.AddWithValue("@id_paciente", model.IdPaciente);
+                        command.Parameters.AddWithValue("@fecha_consulta", model.FechaConsulta);
+                        command.Parameters.AddWithValue("@diagnostico", model.Diagnostico ?? (object)DBNull.Value);
+                        command.Parameters.AddWithValue("@observaciones", model.Observaciones ?? (object)DBNull.Value);
+                        command.Parameters.AddWithValue("@recomendaciones", model.Recomendaciones ?? (object)DBNull.Value);
+                        command.Parameters.AddWithValue("@requiere_tratamiento", model.RequiereTratamiento);
+                        command.Parameters.AddWithValue("@fecha_registro", DateTime.Today);
+
+                        // Parámetro de la tabla de tratamientos
+                        var tratamientosParam = command.Parameters.AddWithValue("@tratamientos", tratamientosTable);
+                        tratamientosParam.SqlDbType = SqlDbType.Structured;
+                        tratamientosParam.TypeName = "dbo.TratamientoType";
+
+                        // Ejecutar el procedimiento y obtener el id_consulta generado
+                        var idConsulta = command.ExecuteScalar();
+
+                        // Verificar si se retornó un id_consulta
+                        if (idConsulta != null)
+                        {
+                            return Json(new { success = true, message = "Consulta creada exitosamente con ID: " + idConsulta });
+                        }
+                        else
+                        {
+                            return Json(new { success = false, message = "No se pudo obtener el ID de la consulta creada." });
+                        }
+                    }
                 }
             }
-
-            // Validate fecha_consulta to ensure it is not default
-            if (consulta.fecha_consulta == default(DateTime))
+            catch (SqlException ex)
             {
-                ModelState.AddModelError("fecha_consulta", "Por favor, especifique una fecha y hora válidas para la consulta.");
-            }
+                System.Diagnostics.Debug.WriteLine($"Error SQL al crear consulta: {ex.Message}, Número: {ex.Number}");
+                string errorMessage = "Ocurrió un error al guardar la consulta.";
 
-            if (ModelState.IsValid)
-            {
-                db.Consulta.Add(consulta);
-                db.SaveChanges();
-                return RedirectToAction("Index");
-            }
-
-            // Reinitialize ViewBag for dropdowns
-            var citasPendientesCanceladas = db.Citas
-                .Where(c => c.estado == "Pendiente" || c.estado == "Cancelada")
-                .Include(c => c.Pacientes)
-                .ToList()
-                .Select(c => new
+                // Manejo de errores específicos
+                if (ex.Number == 547) // Violación de clave foránea
                 {
-                    c.id_cita,
-                    Display = $"{c.id_cita} - {c.Pacientes.nombres} - {c.fecha_hora.ToString("dd MMM yyyy HH:mm")}"
-                });
+                    if (ex.Message.Contains("FK__Consulta__id_pac"))
+                        errorMessage = "El paciente seleccionado no existe.";
+                    else if (ex.Message.Contains("FK__Consulta__id_den"))
+                        errorMessage = "El dentista seleccionado no existe.";
+                    else if (ex.Message.Contains("FK__Tratamie__id_tip"))
+                        errorMessage = "El tipo de cobro seleccionado no es válido.";
+                }
 
-            ViewBag.id_cita = new SelectList(citasPendientesCanceladas, "id_cita", "Display", consulta.id_cita);
-            ViewBag.id_dentista = new SelectList(db.Dentistas, "id_dentista", "nombre", consulta.id_dentista);
-            ViewBag.id_paciente = new SelectList(db.Pacientes, "id_paciente", "nombres", consulta.id_paciente);
-
-            return View(consulta);
+                return Json(new { success = false, message = errorMessage + " Detalles: " + ex.Message });
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error general al crear consulta: {ex}");
+                return Json(new { success = false, message = "Ocurrió un error inesperado al guardar la consulta. Detalles: " + ex.Message });
+            }
         }
-
         // GET: Consultas/Edit/5
         public ActionResult Edit(int? id)
         {
@@ -197,19 +278,7 @@ namespace ClinicDent.Controllers
                 return HttpNotFound();
             }
 
-            var citasPendientesCanceladas = db.Citas
-                .Where(c => c.estado == "Pendiente" || c.estado == "Cancelada")
-                .Include(c => c.Pacientes)
-                .ToList()
-                .Select(c => new
-                {
-                    c.id_cita,
-                    Display = $"{c.id_cita} - {c.Pacientes.nombres} - {c.fecha_hora.ToString("dd MMM yyyy HH:mm")}"
-                });
-
-            ViewBag.id_cita = new SelectList(citasPendientesCanceladas, "id_cita", "Display", consulta.id_cita);
-            ViewBag.id_dentista = new SelectList(db.Dentistas, "id_dentista", "nombre", consulta.id_dentista);
-            ViewBag.id_paciente = new SelectList(db.Pacientes, "id_paciente", "nombres", consulta.id_paciente);
+            PopulateDropdowns(consulta.id_cita, consulta.id_dentista, consulta.id_paciente);
             return View(consulta);
         }
 
@@ -218,21 +287,18 @@ namespace ClinicDent.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Edit([Bind(Include = "id_consulta,id_cita,id_dentista,id_paciente,fecha_consulta,diagnostico,observaciones,recomendaciones,requiere_tratamiento")] Consulta consulta)
         {
-            // If id_cita is not selected or invalid, set it to null (sin cita)
             if (consulta.id_cita == null || consulta.id_cita == 0)
             {
                 consulta.id_cita = null;
             }
             else
             {
-                // Validate that the selected cita is not already associated with another consulta (except this one)
                 if (db.Consulta.Any(c => c.id_cita == consulta.id_cita && c.id_consulta != consulta.id_consulta))
                 {
                     ModelState.AddModelError("id_cita", "Esta cita ya tiene una consulta asociada.");
                 }
             }
 
-            // Validate fecha_consulta to ensure it is not default
             if (consulta.fecha_consulta == default(DateTime))
             {
                 ModelState.AddModelError("fecha_consulta", "Por favor, especifique una fecha y hora válidas para la consulta.");
@@ -245,21 +311,15 @@ namespace ClinicDent.Controllers
                 return RedirectToAction("Index");
             }
 
-            // Reinitialize ViewBag for dropdowns
-            var citasPendientesCanceladas = db.Citas
-                .Where(c => c.estado == "Pendiente" || c.estado == "Cancelada")
-                .Include(c => c.Pacientes)
-                .ToList()
-                .Select(c => new
-                {
-                    c.id_cita,
-                    Display = $"{c.id_cita} - {c.Pacientes.nombres} - {c.fecha_hora.ToString("dd MMM yyyy HH:mm")}"
-                });
-
-            ViewBag.id_cita = new SelectList(citasPendientesCanceladas, "id_cita", "Display", consulta.id_cita);
-            ViewBag.id_dentista = new SelectList(db.Dentistas, "id_dentista", "nombre", consulta.id_dentista);
-            ViewBag.id_paciente = new SelectList(db.Pacientes, "id_paciente", "nombres", consulta.id_paciente);
+            PopulateDropdowns(consulta.id_cita, consulta.id_dentista, consulta.id_paciente);
             return View(consulta);
+        }
+
+        // GET: Consultas/RenderOdontogramaPartial
+        public ActionResult RenderOdontogramaPartial(int index)
+        {
+            ViewBag.Index = index;
+            return PartialView("_OdontogramaPartial");
         }
 
         // GET: Consultas/Delete/5
@@ -286,6 +346,24 @@ namespace ClinicDent.Controllers
             db.Consulta.Remove(consulta);
             db.SaveChanges();
             return RedirectToAction("Index");
+        }
+
+        private void PopulateDropdowns(int? idCita = null, int? idDentista = null, int? idPaciente = null)
+        {
+            var citasPendientesCanceladas = db.Citas
+                .Where(c => c.estado == "Pendiente" || c.estado == "Cancelada")
+                .Include(c => c.Pacientes)
+                .ToList()
+                .Select(c => new
+                {
+                    c.id_cita,
+                    Display = $"{c.id_cita} - {c.Pacientes.nombres} - {c.fecha_hora.ToString("dd MMM yyyy HH:mm")}"
+                });
+
+            ViewBag.Citas = new SelectList(citasPendientesCanceladas, "id_cita", "Display", idCita);
+            ViewBag.Dentistas = new SelectList(db.Dentistas, "id_dentista", "nombre", idDentista);
+            ViewBag.Pacientes = new SelectList(db.Pacientes, "id_paciente", "nombres", idPaciente);
+            ViewBag.TiposCobro = new SelectList(db.Tipo_Cobro, "id_tipo_cobro", "nombre");
         }
 
         protected override void Dispose(bool disposing)

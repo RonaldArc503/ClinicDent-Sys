@@ -23,10 +23,10 @@ namespace ClinicDent.Models
         public int id_tratamiento { get; set; }
         public int id_tipo_cobro { get; set; }
         public System.DateTime fecha_inicio { get; set; }
-        public string odontograma { get; set; }
         public decimal costo { get; set; }
         public int duracion_estimada { get; set; }
         public bool seguimiento { get; set; }
+        public string dientes_seleccionados { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Consultas_Tratamientos> Consultas_Tratamientos { get; set; }
