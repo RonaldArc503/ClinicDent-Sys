@@ -9,7 +9,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
 
 <style>
-    /* Contenedor Principal */
+    /* Contenedor Principal - Consulta */
     .consulta-container {
         max-width: 800px;
         margin: 20px auto;
@@ -18,6 +18,17 @@
         border-radius: 15px;
         box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
         border-left: 5px solid #17a2b8;
+        font-family: Arial, sans-serif;
+    }
+
+    /* Contenedor Principal - Receta */
+    .receta-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #ffffff;
+        font-family: Arial, sans-serif;
+        padding-left: 150px;
     }
 
     /* Clase para ocultar en PDF */
@@ -25,34 +36,55 @@
         display: none;
     }
 
-    /* Encabezado */
+    /* Encabezado - Consulta */
     .consulta-header {
         text-align: center;
         margin-bottom: 30px;
         color: #2c3e50;
     }
 
-    .consulta-header h1 {
-        font-size: 28px;
-        font-weight: 700;
-        margin: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        .consulta-header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+            .consulta-header h1 i {
+                margin-right: 12px;
+                color: #17a2b8;
+            }
+
+        .consulta-header p {
+            font-size: 16px;
+            color: #6c757d;
+            margin: 5px 0 0;
+        }
+
+    /* Encabezado - Receta */
+    .receta-header {
+        text-align: center;
+        margin-bottom: 20px;
+        border-bottom: 1px solid #ccc;
+        padding-bottom: 10px;
     }
 
-    .consulta-header h1 i {
-        margin-right: 12px;
-        color: #17a2b8;
-    }
+        .receta-header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #2c3e50;
+            margin: 0;
+        }
 
-    .consulta-header p {
-        font-size: 16px;
-        color: #6c757d;
-        margin: 5px 0 0;
-    }
+        .receta-header p {
+            font-size: 14px;
+            color: #6c757d;
+            margin: 5px 0;
+        }
 
-    /* Secciones */
+    /* Secciones - Consulta */
     .section {
         margin-bottom: 25px;
         page-break-inside: avoid;
@@ -69,12 +101,12 @@
         align-items: center;
     }
 
-    .section-title i {
-        margin-right: 10px;
-        color: #17a2b8;
-    }
+        .section-title i {
+            margin-right: 10px;
+            color: #17a2b8;
+        }
 
-    /* Lista de Detalles */
+    /* Lista de Detalles - Consulta */
     .details-list {
         display: grid;
         grid-template-columns: 1fr 2fr;
@@ -82,26 +114,95 @@
         font-size: 16px;
     }
 
-    .details-list dt {
-        font-weight: 600;
-        color: #495057;
-        display: flex;
-        align-items: center;
+        .details-list dt {
+            font-weight: 600;
+            color: #495057;
+            display: flex;
+            align-items: center;
+        }
+
+            .details-list dt i {
+                margin-right: 8px;
+                color: #6c757d;
+                width: 20px;
+                text-align: center;
+            }
+
+        .details-list dd {
+            color: #2c3e50;
+            margin: 0;
+        }
+
+    /* Información de la Receta */
+    .receta-info {
+        margin: 20px 0;
+        font-size: 16px;
+        color: #2c3e50;
     }
 
-    .details-list dt i {
-        margin-right: 8px;
-        color: #6c757d;
-        width: 20px;
+        .receta-info p {
+            margin: 5px 0;
+        }
+
+        .receta-info strong {
+            color: #495057;
+        }
+
+    /* Contenido de la Receta */
+    .receta-contenido {
+        margin: 20px 0;
+        padding: 15px;
+        border: 1px solid #e9ecef;
+        border-radius: 5px;
+        white-space: pre-line;
+        line-height: 1.6;
+        font-size: 16px;
+        color: #2c3e50;
+    }
+
+    /* Título de la Receta */
+    .receta-title {
+        font-size: 20px;
+        font-weight: 700;
+        color: #2c3e50;
+        margin: 20px 0 10px;
         text-align: center;
     }
 
-    .details-list dd {
-        color: #2c3e50;
-        margin: 0;
+    /* Profesional y Firma */
+    .receta-footer {
+        margin-top: 40px;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
     }
 
-    /* Botones */
+    .receta-datos-profesional {
+        font-size: 14px;
+        color: #2c3e50;
+    }
+
+        .receta-datos-profesional p {
+            margin: 5px 0;
+        }
+
+    .receta-firma {
+        text-align: center;
+        width: 250px;
+    }
+
+        .receta-firma hr {
+            border-top: 1px solid #000;
+            width: 200px;
+        }
+
+        .receta-firma p {
+            margin-top: 5px;
+            font-size: 14px;
+            color: #2c3e50;
+        }
+
+    /* Botones - Consulta */
     .action-buttons {
         display: flex;
         gap: 15px;
@@ -126,11 +227,11 @@
         border: none;
     }
 
-    .btn-edit:hover {
-        background-color: #138496;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
+        .btn-edit:hover {
+            background-color: #138496;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
 
     .btn-back {
         background-color: #6c757d;
@@ -138,11 +239,11 @@
         border: none;
     }
 
-    .btn-back:hover {
-        background-color: #5a6268;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
+        .btn-back:hover {
+            background-color: #5a6268;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
 
     .btn-pdf {
         background-color: #dc3545;
@@ -150,18 +251,58 @@
         border: none;
     }
 
-    .btn-pdf:hover {
-        background-color: #c82333;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        .btn-pdf:hover {
+            background-color: #c82333;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+    .btn-recipe {
+        background-color: #28a745;
+        color: white;
+        border: none;
     }
+
+        .btn-recipe:hover {
+            background-color: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
 
     .btn i {
         margin-right: 8px;
     }
 
-    /* Estilos para impresión/PDF */
-   
+    .clearfix {
+        clear: both;
+    }
+
+    /* Estilo para el contenedor de receta (oculto pero accesible para PDF) */
+    #receta-content {
+        width: 100%;
+        max-width: 170mm;
+        margin: 0 auto; /* Cambia esto */
+        margin-left: 60mm; /* Ajusta este valor para mover hacia la derecha */
+        margin-right: 10mm;
+        visibility: hidden;
+        opacity: 0;
+    }
+
+    /* Estilos específicos para PDF */
+    .pdf-page {
+        width: 210mm;
+        min-height: 297mm;
+        padding: 20mm;
+        margin: 0 auto;
+        background: white;
+        box-sizing: border-box;
+    }
+
+    .pdf-content {
+        width: 100%;
+        max-width: 170mm;
+        margin: 0 auto;
+    }
 </style>
 
 <!-- Contenido Principal -->
@@ -234,7 +375,7 @@
                 @Html.DisplayFor(model => model.observaciones)
             </dd>
             <dt>
-                <i class="fas fa-comment-medical"></i> Recomendaciones
+                <i class="fas fa-comment-medical"></i> Receta Recomendada
             </dt>
             <dd>
                 @Html.DisplayFor(model => model.recomendaciones)
@@ -295,59 +436,215 @@
         <button class="btn btn-pdf" onclick="generatePDF()">
             <i class="fas fa-file-pdf"></i> Generar PDF
         </button>
+        <button class="btn btn-recipe" onclick="generateRecipePDF()">
+            <i class="fas fa-prescription-bottle-alt"></i> Receta Médica
+        </button>
+    </div>
+</div>
+
+<!-- Contenedor oculto para la receta médica -->
+<div id="receta-content">
+    <div class="receta-container">
+        <!-- Cabecera para PDF -->
+        <div class="receta-header">
+            <h1>Clínica Dental Sonrisa Feliz</h1>
+            <p>Av. Principal 123, Ciudad, País</p>
+            <p>Tel: (123) 456-7890 | Email: contacto@sonrisafeliz.com</p>
+            <p>Generado el: @DateTime.Now.ToString("dd/MM/yyyy HH:mm")</p>
+        </div>
+
+        <!-- Título de la Receta -->
+        <div class="receta-title">
+            Receta Médica
+        </div>
+
+        <!-- Contenido de la Receta -->
+        <div class="receta-contenido">
+            <strong>Prescripción:</strong><br />
+            @Html.DisplayFor(model => model.recomendaciones)
+        </div>
+
+        <!-- Información del Paciente -->
+        <div class="receta-info">
+            <p><strong>Paciente:</strong> @Html.DisplayFor(model => model.Pacientes.nombres)</p>
+            <p><strong>Edad:</strong> @(DateTime.Now.Year - Model.Pacientes.fecha_nacimiento.Year) años</p>
+            <p><strong>Teléfono:</strong> @Html.DisplayFor(model => model.Pacientes.telefono)</p>
+            <p><strong>Fecha de Consulta:</strong> @Model.fecha_consulta.ToString("dd/MM/yyyy HH:mm")</p>
+        </div>
+
+        <!-- Profesional y Firma -->
+        <div class="receta-footer">
+            <div class="receta-datos-profesional">
+                <p><strong>Profesional:</strong> @Html.DisplayFor(model => model.Dentistas.nombre)</p>
+                <p><strong>Especialidad:</strong> @Html.DisplayFor(model => model.Dentistas.especialidad)</p>
+                <p><strong>Licencia:</strong> 12345-CO</p>
+            </div>
+            <div class="receta-firma pdf-only">
+                <hr>
+                <p>Firma y Sello del Profesional</p>
+            </div>
+        </div>
+        <div class="clearfix"></div>
     </div>
 </div>
 
 @section Scripts {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script>
+        // Sanitize filename to avoid invalid characters
+        const pacienteNombre = '@HttpUtility.JavaScriptStringEncode(Model.Pacientes.nombres.Replace(" ", "_"))';
+
+        function generateRecipePDF() {
+            try {
+                const element = document.getElementById('receta-content');
+                if (!element) {
+                    console.error('Elemento no encontrado');
+                    return;
+                }
+
+                // Crear estructura especial para PDF
+                const pdfContainer = document.createElement('div');
+                pdfContainer.className = 'pdf-page';
+
+                const pdfContent = document.createElement('div');
+                pdfContent.className = 'pdf-content';
+
+                // Clonar y preparar el contenido
+                const contentClone = element.cloneNode(true);
+                contentClone.style.display = 'block';
+                contentClone.style.position = 'relative';
+                contentClone.style.left = '0';
+                contentClone.style.top = '0';
+                contentClone.style.visibility = 'visible';
+                contentClone.style.opacity = '1';
+                contentClone.style.width = '100%';
+                contentClone.style.margin = '0';
+                contentClone.style.padding = '0';
+
+                // Mostrar elementos ocultos para PDF
+                const pdfOnlyElements = contentClone.querySelectorAll('.pdf-only');
+                pdfOnlyElements.forEach(el => el.style.display = 'block');
+
+                // Construir estructura
+                pdfContent.appendChild(contentClone);
+                pdfContainer.appendChild(pdfContent);
+
+                // Agregar temporalmente al documento
+                document.body.appendChild(pdfContainer);
+
+                // Configuración de PDF
+                const opt = {
+                    margin: 0,
+                    filename: 'receta_' + pacienteNombre + '.pdf',
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: {
+                        scale: 2,
+                        logging: true,
+                        useCORS: true,
+                        letterRendering: true,
+                        windowWidth: 1200,
+                        scrollX: 0,
+                        scrollY: 0
+                    },
+                    jsPDF: {
+                        unit: 'mm',
+                        format: 'a4',
+                        orientation: 'portrait'
+                    },
+                    pagebreak: { avoid: '.receta-footer' }
+                };
+
+                // Generar PDF
+                html2pdf().set(opt).from(pdfContainer).save().then(() => {
+                    document.body.removeChild(pdfContainer);
+                }).catch(err => {
+                    console.error('Error:', err);
+                    if (pdfContainer.parentNode) {
+                        document.body.removeChild(pdfContainer);
+                    }
+                });
+
+            } catch (error) {
+                console.error('Error general:', error);
+            }
+        }
+
         function generatePDF() {
-            // Elemento a convertir
-            const element = document.getElementById('consulta-content');
+            try {
+                const element = document.getElementById('consulta-content');
+                if (!element) {
+                    console.error('Elemento no encontrado');
+                    return;
+                }
 
-            // Clonar el elemento para modificar estilos sin afectar la vista web
-            const clone = element.cloneNode(true);
+                // Crear estructura especial para PDF
+                const pdfContainer = document.createElement('div');
+                pdfContainer.className = 'pdf-page';
 
-            // Aplicar estilos específicos para PDF
-            clone.style.borderLeft = 'none';
-            clone.style.boxShadow = 'none';
-            clone.style.borderRadius = '0';
-            clone.style.padding = '10px';
-            clone.style.margin = '0';
-            clone.style.maxWidth = '100%';
+                const pdfContent = document.createElement('div');
+                pdfContent.className = 'pdf-content';
 
-            // Mostrar elementos ocultos para PDF
-            const pdfOnlyElements = clone.querySelectorAll('.pdf-only');
-            pdfOnlyElements.forEach(el => el.style.display = 'block');
+                // Clonar y preparar el contenido
+                const contentClone = element.cloneNode(true);
+                contentClone.style.display = 'block';
+                contentClone.style.position = 'relative';
+                contentClone.style.left = '0';
+                contentClone.style.top = '0';
+                contentClone.style.visibility = 'visible';
+                contentClone.style.opacity = '1';
+                contentClone.style.width = '100%';
+                contentClone.style.margin = '0';
+                contentClone.style.padding = '0';
 
-            // Ocultar botones en el PDF
-            const buttons = clone.querySelector('.action-buttons');
-            if (buttons) buttons.style.display = 'none';
+                // Mostrar elementos ocultos para PDF
+                const pdfOnlyElements = contentClone.querySelectorAll('.pdf-only');
+                pdfOnlyElements.forEach(el => el.style.display = 'block');
 
-            // Configuración para el PDF
-            const opt = {
-                margin: [10, 10, 10, 10], // [top, left, bottom, right] en mm
-                filename: 'consulta_' + @Model.id_consulta + '_' + new Date().toISOString().slice(0, 10) + '.pdf',
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: {
-                    scale: 2,
-                    logging: true,
-                    useCORS: true,
-                    letterRendering: true,
-                    scrollX: 0,
-                    scrollY: 0
-                },
-                jsPDF: {
-                    unit: 'mm',
-                    format: 'a4',
-                    orientation: 'portrait',
-                    compress: true
-                },
-                pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
-            };
+                // Ocultar botones
+                const buttons = contentClone.querySelector('.action-buttons');
+                if (buttons) buttons.style.display = 'none';
 
-            // Crear PDF
-            html2pdf().set(opt).from(clone).save();
+                // Construir estructura
+                pdfContent.appendChild(contentClone);
+                pdfContainer.appendChild(pdfContent);
+
+                // Agregar temporalmente al documento
+                document.body.appendChild(pdfContainer);
+
+                // Configuración de PDF
+                const opt = {
+                    margin: 0,
+                    filename: 'consulta_' + @Model.id_consulta + '.pdf',
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: {
+                        scale: 2,
+                        logging: true,
+                        useCORS: true,
+                        letterRendering: true,
+                        windowWidth: 1200,
+                        scrollX: 0,
+                        scrollY: 0
+                    },
+                    jsPDF: {
+                        unit: 'mm',
+                        format: 'a4',
+                        orientation: 'portrait'
+                    }
+                };
+
+                // Generar PDF
+                html2pdf().set(opt).from(pdfContainer).save().then(() => {
+                    document.body.removeChild(pdfContainer);
+                }).catch(err => {
+                    console.error('Error:', err);
+                    if (pdfContainer.parentNode) {
+                        document.body.removeChild(pdfContainer);
+                    }
+                });
+
+            } catch (error) {
+                console.error('Error general:', error);
+            }
         }
     </script>
 }

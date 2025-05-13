@@ -192,6 +192,7 @@
     <Compile Include="Models\Pacientes.cs">
       <DependentUpon>ModelLocal1.tt</DependentUpon>
     </Compile>
+    <Compile Include="Models\PagoViewModel.cs" />
     <Compile Include="Models\Pagos.cs">
       <DependentUpon>ModelLocal1.tt</DependentUpon>
     </Compile>
