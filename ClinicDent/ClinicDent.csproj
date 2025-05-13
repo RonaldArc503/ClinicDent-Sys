@@ -154,6 +154,7 @@
     <Compile Include="Models\Consulta.cs">
       <DependentUpon>ModelLocal1.tt</DependentUpon>
     </Compile>
+    <Compile Include="Models\ConsultaConTratamientoViewModel.cs" />
     <Compile Include="Models\Consultas_Tratamientos.cs">
       <DependentUpon>ModelLocal1.tt</DependentUpon>
     </Compile>

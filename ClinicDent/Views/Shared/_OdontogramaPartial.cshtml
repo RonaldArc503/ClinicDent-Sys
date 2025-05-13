@@ -1,4 +1,9 @@
 ﻿@* Views/Shared/_OdontogramaPartial.cshtml *@
+@model dynamic
+
+@{
+    var index = ViewBag.Index;
+}
 
 <style>
     /* Estilo general del odontograma */
@@ -257,7 +262,7 @@
         z-index: 3;
     }
 
-  
+
 
     .leyenda {
         margin-top: 30px;
@@ -342,7 +347,7 @@
     <div class="cuadrante">
         <!-- Cuadrante superior: 18-11 y 21-28 -->
         <div class="fila">
-            
+
             <div class="grupo-dientes">
                 @for (int i = 18; i >= 11; i--)
                 {
@@ -378,12 +383,12 @@
                     </div>
                 }
             </div>
-          
+
         </div>
 
         <!-- Cuadrante temporal superior: 55-51 y 61-65 -->
         <div class="fila">
-           
+
             <div class="grupo-dientes">
                 @for (int i = 55; i >= 51; i--)
                 {
@@ -419,12 +424,12 @@
                     </div>
                 }
             </div>
-           
+
         </div>
 
         <!-- Cuadrante temporal inferior: 85-81 y 71-75 -->
         <div class="fila">
-           
+
             <div class="grupo-dientes">
                 @for (int i = 85; i >= 81; i--)
                 {
@@ -460,12 +465,12 @@
                     </div>
                 }
             </div>
-          
+
         </div>
 
         <!-- Cuadrante inferior: 48-41 y 31-38 -->
         <div class="fila">
-           
+
             <div class="grupo-dientes">
                 @for (int i = 48; i >= 41; i--)
                 {
@@ -501,7 +506,7 @@
                     </div>
                 }
             </div>
-        
+
         </div>
     </div>
 
@@ -533,161 +538,162 @@
 
 
 <script>
+    // Variables específicas para este odontograma
+    const odontogramaId = 'odontograma_@index';
     let opcionSeleccionada = 'normal';
-    let tratamientoActivo = null;
     let estadoOdontograma = {};
 
-    // Función para inicializar el odontograma con datos existentes
-    function inicializarOdontograma(datos) {
-        if (datos && datos !== '') {
-            try {
-                estadoOdontograma = JSON.parse(datos);
+    // Función para inicializar el odontograma
+    function initOdontograma() {
+        console.log('Inicializando odontograma:', odontogramaId);
 
-                // Aplicar el estado a la interfaz
-                Object.keys(estadoOdontograma).forEach(dienteId => {
-                    const dienteContainer = document.querySelector(`.diente-container[data-diente-id="${dienteId}"]`);
-                    if (!dienteContainer) return;
-
-                    // Aplicar tratamientos a las partes
-                    const partes = estadoOdontograma[dienteId].partes || {};
-                    Object.keys(partes).forEach(parte => {
-                        const elementoParte = dienteContainer.querySelector(`.diente-parte[data-parte="${parte}"]`);
-                        if (elementoParte) {
-                            elementoParte.classList.add(`tratamiento-${partes[parte]}`);
-                        }
-                    });
-
-                    // Aplicar marcas (faltante/extraer)
-                    const marca = estadoOdontograma[dienteId].marca;
-                    if (marca) {
-                        const marcaElemento = dienteContainer.querySelector(`.marca-${marca}`);
-                        if (marcaElemento) {
-                            marcaElemento.style.display = 'block';
-                        }
-                    }
-                });
-            } catch (e) {
-                console.error('Error al parsear datos del odontograma:', e);
-            }
-        }
-    }
-
-    // Función para manejar la selección de opciones
-    function seleccionarOpcion(opcion, event) {
-        event.preventDefault();
-        opcionSeleccionada = opcion;
-        document.querySelectorAll('.btn-opcion').forEach(btn => {
-            btn.classList.remove('active');
-        });
-        event.target.classList.add('active');
-        tratamientoActivo = opcion === 'caries' ? 'caries' :
-            opcion === 'relleno' ? 'relleno' : null;
-    }
-
-    // Función para manejar clics en partes del diente
-    function manejarClickParte(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        const dienteContainer = this.closest('.diente-container');
-        const dienteId = dienteContainer.dataset.dienteId;
-        const parte = this.dataset.parte;
-
-        // Si el diente está marcado como faltante o para extraer, no permitir cambios
-        if (dienteContainer.querySelector('.diente-marca[style*="display: block"]')) {
-            return;
-        }
-
-        // Inicializar estructura para el diente si no existe
-        if (!estadoOdontograma[dienteId]) {
-            estadoOdontograma[dienteId] = { partes: {}, marca: null };
-        }
-
-        // Aplicar o quitar tratamiento según la opción seleccionada
-        if (tratamientoActivo) {
-            if (this.classList.contains(`tratamiento-${tratamientoActivo}`)) {
-                this.classList.remove(`tratamiento-${tratamientoActivo}`);
-                delete estadoOdontograma[dienteId].partes[parte];
-            } else {
-                this.classList.add(`tratamiento-${tratamientoActivo}`);
-                estadoOdontograma[dienteId].partes[parte] = tratamientoActivo;
-            }
-        } else {
-            // Opción "normal" - quitar cualquier tratamiento
-            this.classList.remove('tratamiento-caries', 'tratamiento-relleno');
-            delete estadoOdontograma[dienteId].partes[parte];
-        }
-
-        actualizarDientesSeleccionados();
-    }
-
-    // Función para manejar doble clic en el centro del diente
-    function manejarDobleClickCentro(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        if (opcionSeleccionada !== 'faltante' && opcionSeleccionada !== 'extraer') {
-            return;
-        }
-
-        const dienteContainer = this.closest('.diente-container');
-        const dienteId = dienteContainer.dataset.dienteId;
-        const marcaFaltante = dienteContainer.querySelector('.marca-faltante');
-        const marcaExtraer = dienteContainer.querySelector('.marca-extraer');
-
-        // Inicializar estructura para el diente si no existe
-        if (!estadoOdontograma[dienteId]) {
-            estadoOdontograma[dienteId] = { partes: {}, marca: null };
-        }
-
-        // Verificar si ya hay una marca activa
-        const marcaActiva = marcaFaltante.style.display === 'block' ? 'faltante' :
-            marcaExtraer.style.display === 'block' ? 'extraer' : null;
-
-        // Ocultar ambas marcas primero
-        marcaFaltante.style.display = 'none';
-        marcaExtraer.style.display = 'none';
-        estadoOdontograma[dienteId].marca = null;
-
-        // Limpiar cualquier tratamiento en las partes
-        dienteContainer.querySelectorAll('.diente-parte').forEach(parte => {
-            parte.classList.remove('tratamiento-caries', 'tratamiento-relleno');
-        });
-        estadoOdontograma[dienteId].partes = {};
-
-        // Si la marca activa no coincide con la opción seleccionada, aplicar la nueva marca
-        if (marcaActiva !== opcionSeleccionada) {
-            const marca = opcionSeleccionada === 'faltante' ? marcaFaltante : marcaExtraer;
-            marca.style.display = 'block';
-            estadoOdontograma[dienteId].marca = opcionSeleccionada;
-        }
-
-        actualizarDientesSeleccionados();
-    }
-
-    // Función para actualizar el campo oculto con el estado actual
-    function actualizarDientesSeleccionados() {
-        const jsonEstado = JSON.stringify(estadoOdontograma);
-        document.getElementById('dientesSeleccionados').value = jsonEstado;
-    }
-
-    // Inicialización cuando el DOM está listo
-    document.addEventListener('DOMContentLoaded', function () {
         // Obtener datos iniciales si existen
-        const datosIniciales = document.getElementById('dientesSeleccionados').value;
-        inicializarOdontograma(datosIniciales);
+        const inputDientes = document.getElementById(`dientesSeleccionados_@index`);
+        if (inputDientes && inputDientes.value) {
+            try {
+                estadoOdontograma = JSON.parse(inputDientes.value);
+            } catch (e) {
+                console.error('Error al parsear datos iniciales:', e);
+                estadoOdontograma = {};
+            }
+        }
 
-        // Configurar event listeners
-        document.querySelectorAll('.diente-parte').forEach(parte => {
-            parte.addEventListener('click', manejarClickParte);
-        });
-
-        document.querySelectorAll('.diente-parte-centro').forEach(centro => {
-            centro.addEventListener('dblclick', manejarDobleClickCentro);
-        });
-
-        document.querySelectorAll('.btn-opcion').forEach(boton => {
-            boton.addEventListener('click', function (e) {
-                seleccionarOpcion(this.dataset.opcion, e);
+        // Configurar botones de opción
+        const opciones = document.querySelectorAll(`#${odontogramaId} .btn-opcion`);
+        opciones.forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                opciones.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                opcionSeleccionada = this.dataset.opcion;
+                console.log('Opción seleccionada:', opcionSeleccionada);
             });
         });
-    });
+
+        // Configurar clics en partes del diente
+        document.querySelectorAll(`#${odontogramaId} .diente-parte`).forEach(parte => {
+            parte.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                const dienteContainer = this.closest('.diente-container');
+                const dienteId = dienteContainer.dataset.dienteId;
+                const parteNombre = this.dataset.parte;
+
+                // Si el diente está marcado, no permitir cambios
+                if (dienteContainer.querySelector('.diente-marca[style*="display: block"]')) {
+                    return;
+                }
+
+                // Inicializar estructura si no existe
+                if (!estadoOdontograma[dienteId]) {
+                    estadoOdontograma[dienteId] = { partes: {}, marca: null };
+                }
+
+                // Manejar según la opción seleccionada
+                if (opcionSeleccionada === 'caries' || opcionSeleccionada === 'relleno') {
+                    if (this.classList.contains(`tratamiento-${opcionSeleccionada}`)) {
+                        this.classList.remove(`tratamiento-${opcionSeleccionada}`);
+                        delete estadoOdontograma[dienteId].partes[parteNombre];
+                    } else {
+                        this.classList.add(`tratamiento-${opcionSeleccionada}`);
+                        estadoOdontograma[dienteId].partes[parteNombre] = opcionSeleccionada;
+                    }
+                } else if (opcionSeleccionada === 'normal') {
+                    this.classList.remove('tratamiento-caries', 'tratamiento-relleno');
+                    delete estadoOdontograma[dienteId].partes[parteNombre];
+                }
+
+                actualizarDientesSeleccionados();
+            });
+        });
+
+        // Configurar doble clic en centro del diente
+        document.querySelectorAll(`#${odontogramaId} .diente-parte-centro`).forEach(centro => {
+            centro.addEventListener('dblclick', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                if (opcionSeleccionada !== 'faltante' && opcionSeleccionada !== 'extraer') {
+                    return;
+                }
+
+                const dienteContainer = this.closest('.diente-container');
+                const dienteId = dienteContainer.dataset.dienteId;
+                const marcaFaltante = dienteContainer.querySelector('.marca-faltante');
+                const marcaExtraer = dienteContainer.querySelector('.marca-extraer');
+
+                // Inicializar estructura si no existe
+                if (!estadoOdontograma[dienteId]) {
+                    estadoOdontograma[dienteId] = { partes: {}, marca: null };
+                }
+
+                // Verificar marca actual
+                const marcaActual = marcaFaltante.style.display === 'block' ? 'faltante' :
+                                  marcaExtraer.style.display === 'block' ? 'extraer' : null;
+
+                // Ocultar ambas marcas
+                marcaFaltante.style.display = 'none';
+                marcaExtraer.style.display = 'none';
+                estadoOdontograma[dienteId].marca = null;
+
+                // Limpiar tratamientos
+                dienteContainer.querySelectorAll('.diente-parte').forEach(parte => {
+                    parte.classList.remove('tratamiento-caries', 'tratamiento-relleno');
+                });
+                estadoOdontograma[dienteId].partes = {};
+
+                // Aplicar nueva marca si es diferente
+                if (marcaActual !== opcionSeleccionada) {
+                    const marca = opcionSeleccionada === 'faltante' ? marcaFaltante : marcaExtraer;
+                    marca.style.display = 'block';
+                    estadoOdontograma[dienteId].marca = opcionSeleccionada;
+                }
+
+                actualizarDientesSeleccionados();
+            });
+        });
+
+        // Aplicar estado inicial
+        aplicarEstadoInicial();
+    }
+
+    // Función para aplicar el estado inicial
+    function aplicarEstadoInicial() {
+        Object.keys(estadoOdontograma).forEach(dienteId => {
+            const dienteContainer = document.querySelector(`#${odontogramaId} .diente-container[data-diente-id="${dienteId}"]`);
+            if (!dienteContainer) return;
+
+            // Aplicar tratamientos a partes
+            const partes = estadoOdontograma[dienteId].partes || {};
+            Object.keys(partes).forEach(parte => {
+                const elementoParte = dienteContainer.querySelector(`.diente-parte[data-parte="${parte}"]`);
+                if (elementoParte) {
+                    elementoParte.classList.add(`tratamiento-${partes[parte]}`);
+                }
+            });
+
+            // Aplicar marca
+            const marca = estadoOdontograma[dienteId].marca;
+            if (marca) {
+                const marcaElemento = dienteContainer.querySelector(`.marca-${marca}`);
+                if (marcaElemento) {
+                    marcaElemento.style.display = 'block';
+                }
+            }
+        });
+    }
+
+    // Función para actualizar el campo oculto
+    function actualizarDientesSeleccionados() {
+        const jsonEstado = JSON.stringify(estadoOdontograma);
+        document.getElementById(`dientesSeleccionados_@index`).value = jsonEstado;
+        console.log('Dientes actualizados:', jsonEstado);
+    }
+
+    // Inicializar cuando el contenido esté listo
+    document.addEventListener('DOMContentLoaded', initOdontograma);
+
+    // También inicializar si el partial se carga dinámicamente
+    initOdontograma();
 </script>
