@@ -18,7 +18,6 @@ namespace ClinicDent.Models
         public int CuotasPendientes { get; set; }
         public int CuotasVencidas { get; set; }
     }
-
     public class PagoCreateViewModel
     {
         public int IdConsulta { get; set; }

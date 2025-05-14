@@ -1,119 +1,57 @@
-﻿@model ClinicDent.Models.PagoCreateViewModel
+﻿@model IEnumerable<ClinicDent.Models.PagoViewModel>
 
 @{
-    ViewBag.Title = "Create";
+    ViewBag.Title = "Pagos";
 }
 
-<h2>Create</h2>
+<h2>Pagos</h2>
 
-@using (Html.BeginForm())
+@if (ViewBag.ErrorMessage != null)
 {
-    @Html.AntiForgeryToken()
-    
-    <div class="form-horizontal">
-        <h4>Pagos</h4>
-        <hr />
-        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
-        
-        <div class="form-group">
-            @Html.LabelFor(model => model.IdConsulta, "Consulta", htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.DropDownList("IdConsulta", null, htmlAttributes: new { @class = "form-control" })
-                @Html.ValidationMessageFor(model => model.IdConsulta, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.FechaPago, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.FechaPago, new { htmlAttributes = new { @class = "form-control", type = "datetime-local" } })
-                @Html.ValidationMessageFor(model => model.FechaPago, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.MontoTotal, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.MontoTotal, new { htmlAttributes = new { @class = "form-control", type = "number", step = "0.01" } })
-                @Html.ValidationMessageFor(model => model.MontoTotal, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.MetodoPago, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.DropDownList("MetodoPago", (SelectList)ViewBag.MetodoPago, htmlAttributes: new { @class = "form-control" })
-                @Html.ValidationMessageFor(model => model.MetodoPago, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.TipoPago, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.DropDownList("TipoPago", (SelectList)ViewBag.TipoPago, htmlAttributes: new { @class = "form-control", id = "TipoPago" })
-                @Html.ValidationMessageFor(model => model.TipoPago, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group" id="cuotasSection" style="display: none;">
-            <label class="control-label col-md-2">Cuotas</label>
-            <div class="col-md-10">
-                <div id="cuotasContainer"></div>
-                <button type="button" onclick="agregarCuota()" class="btn btn-secondary">Agregar Cuota</button>
-            </div>
-        </div>
-
-        <div class="form-group">
-            <div class="col-md-offset-2 col-md-10">
-                <input type="submit" value="Create" class="btn btn-default" />
-            </div>
-        </div>
-    </div>
+    <div class="alert alert-danger">@ViewBag.ErrorMessage</div>
 }
 
-<div>
-    @Html.ActionLink("Back to List", "Index")
-</div>
+<p>
+    @Html.ActionLink("Crear Nuevo Pago", "Create", null, new { @class = "btn btn-primary" })
+</p>
+
+<table class="table table-striped table-hover">
+    <thead>
+        <tr>
+            <th>Paciente</th>
+            <th>Fecha Pago</th>
+            <th>Monto Total</th>
+            <th>Método Pago</th>
+            <th>Tipo Pago</th>
+            <th>Estado</th>
+            <th>Cuotas</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@Html.DisplayFor(modelItem => item.Paciente)</td>
+                <td>@item.FechaPago.ToString("dd/MM/yyyy HH:mm")</td>
+                <td>@Html.DisplayFor(modelItem => item.MontoTotal)</td>
+                <td>@Html.DisplayFor(modelItem => item.MetodoPago)</td>
+                <td>@Html.DisplayFor(modelItem => item.TipoPago)</td>
+                <td>@Html.DisplayFor(modelItem => item.EstadoPago)</td>
+                <td>@item.CuotasPagadas/@item.TotalCuotas</td>
+                <td>
+                    @Html.ActionLink("Detalles", "Details", new { id = item.IdPago }) |
+                    @if (item.TipoPago == "Cuotas" && item.TotalCuotas > 0)
+                    {
+                        @Html.ActionLink("Cuotas", "Cuotas", new { id = item.IdPago }, new { @class = "text-info" }) <text>|</text>
+                    }
+                    @Html.ActionLink("Eliminar", "Delete", new { id = item.IdPago }, new { onclick = "return confirm('¿Estás seguro de eliminar este pago?');" })
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
 
 @section Scripts {
     @Scripts.Render("~/bundles/jqueryval")
-    <script>
-        let cuotaIndex = 0;
-
-        // Mostrar/ocultar sección de cuotas según tipo_pago
-        $(document).ready(function () {
-            $("#TipoPago").change(function () {
-                if ($(this).val() === "Cuotas") {
-                    $("#cuotasSection").show();
-                } else {
-                    $("#cuotasSection").hide();
-                    $("#cuotasContainer").empty();
-                    cuotaIndex = 0;
-                }
-            });
-        });
-
-        function agregarCuota() {
-            const container = document.getElementById('cuotasContainer');
-            const cuotaHtml = `
-                <div class="cuota form-group">
-                    <div class="row">
-                        <div class="col-md-4">
-                            <label>Fecha:</label>
-                            <input type="datetime-local" name="Cuotas[${cuotaIndex}].FechaInicio" class="form-control" required />
-                        </div>
-                        <div class="col-md-4">
-                            <label>Monto:</label>
-                            <input type="number" step="0.01" name="Cuotas[${cuotaIndex}].Costo" class="form-control" required />
-                        </div>
-                        <div class="col-md-2">
-                            <label>&nbsp;</label>
-                            <button type="button" class="btn btn-danger" onclick="this.parentElement.parentElement.parentElement.remove()">Eliminar</button>
-                        </div>
-                    </div>
-                </div>`;
-            container.insertAdjacentHTML('beforeend', cuotaHtml);
-            cuotaIndex++;
-        }
-    </script>
 }

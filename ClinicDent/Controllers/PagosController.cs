@@ -17,8 +17,17 @@ namespace ClinicDent.Controllers
         // GET: Pagos
         public ActionResult Index()
         {
-            var pagos = db.Database.SqlQuery<PagoViewModel>("SELECT * FROM VistaPagos").ToList();
-            return View(pagos);
+            try
+            {
+                var pagos = db.Database.SqlQuery<PagoViewModel>("SELECT * FROM VistaPagos").ToList();
+                return View(pagos);
+            }
+            catch (SqlException ex)
+            {
+                // Log the error (in a real app, use a logging framework)
+                ModelState.AddModelError("", $"Error al cargar los pagos: {ex.Message}");
+                return View(new List<PagoViewModel>());
+            }
         }
 
         // GET: Pagos/Details/5
@@ -39,7 +48,14 @@ namespace ClinicDent.Controllers
         // GET: Pagos/Create
         public ActionResult Create()
         {
-            ViewBag.IdConsulta = new SelectList(db.Consulta, "id_consulta", "diagnostico");
+            var consultas = from c in db.Consulta
+                            join p in db.Pacientes on c.id_paciente equals p.id_paciente
+                            select new
+                            {
+                                c.id_consulta,
+                                DisplayText = p.nombres + " " + p.apellidos + " - " + c.diagnostico
+                            };
+            ViewBag.IdConsulta = new SelectList(consultas, "id_consulta", "DisplayText");
             ViewBag.MetodoPago = new SelectList(new[] { "Efectivo", "Tarjeta", "Transferencia" });
             ViewBag.TipoPago = new SelectList(new[] { "Unico", "Cuotas" });
             return View(new PagoCreateViewModel());
@@ -68,11 +84,9 @@ namespace ClinicDent.Controllers
                             command.Parameters.Add(new SqlParameter("@metodo_pago", model.MetodoPago));
                             command.Parameters.Add(new SqlParameter("@tipo_pago", model.TipoPago));
 
-                            // Crear tabla para cuotas
                             var cuotasTable = new DataTable();
                             cuotasTable.Columns.Add("fecha_inicio", typeof(DateTime));
                             cuotasTable.Columns.Add("costo", typeof(decimal));
-                            // Columnas adicionales de TratamientoType (no usadas, pero requeridas)
                             cuotasTable.Columns.Add("id_tipo_cobro", typeof(int));
                             cuotasTable.Columns.Add("duracion_estimada", typeof(int));
                             cuotasTable.Columns.Add("seguimiento", typeof(bool));
@@ -87,13 +101,7 @@ namespace ClinicDent.Controllers
                                     cuotasTable.Rows.Add(
                                         cuota.FechaInicio,
                                         cuota.Costo,
-                                        null, // id_tipo_cobro
-                                        null, // duracion_estimada
-                                        null, // seguimiento
-                                        null, // dientes_seleccionados
-                                        null, // cantidad
-                                        null  // total
-                                    );
+                                        null, null, null, null, null, null);
                                 }
                             }
 
@@ -119,41 +127,35 @@ namespace ClinicDent.Controllers
                 }
             }
 
-            ViewBag.IdConsulta = new SelectList(db.Consulta, "id_consulta", "diagnostico", model.IdConsulta);
+            var consultas = from c in db.Consulta
+                            join p in db.Pacientes on c.id_paciente equals p.id_paciente
+                            select new
+                            {
+                                c.id_consulta,
+                                DisplayText = p.nombres + " " + p.apellidos + " - " + c.diagnostico
+                            };
+            ViewBag.IdConsulta = new SelectList(consultas, "id_consulta", "DisplayText", model.IdConsulta);
             ViewBag.MetodoPago = new SelectList(new[] { "Efectivo", "Tarjeta", "Transferencia" }, model.MetodoPago);
             ViewBag.TipoPago = new SelectList(new[] { "Unico", "Cuotas" }, model.TipoPago);
             return View(model);
         }
 
-        // GET: Pagos/Edit/5
-        public ActionResult Edit(int? id)
+        // GET: Pagos/Cuotas/5
+        public ActionResult Cuotas(int? id)
         {
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Pagos pago = db.Pagos.Find(id);
-            if (pago == null)
+            var cuotas = db.Database.SqlQuery<Pagos_Cuotas>(
+                "SELECT * FROM Pagos_Cuotas WHERE id_pago = @id",
+                new SqlParameter("@id", id)).ToList();
+            if (!cuotas.Any())
             {
                 return HttpNotFound();
             }
-            ViewBag.IdConsulta = new SelectList(db.Consulta, "id_consulta", "diagnostico", pago.id_consulta);
-            return View(pago);
-        }
-
-        // POST: Pagos/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "id_pago,id_consulta,fecha_pago,monto_total,metodo_pago,tipo_pago")] Pagos pago)
-        {
-            if (ModelState.IsValid)
-            {
-                db.Entry(pago).State = EntityState.Modified;
-                db.SaveChanges();
-                return RedirectToAction("Index");
-            }
-            ViewBag.IdConsulta = new SelectList(db.Consulta, "id_consulta", "diagnostico", pago.id_consulta);
-            return View(pago);
+            ViewBag.IdPago = id;
+            return View(cuotas);
         }
 
         // GET: Pagos/UpdateCuota/5
@@ -238,10 +240,23 @@ namespace ClinicDent.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(int id)
         {
-            Pagos pago = db.Pagos.Find(id);
-            db.Pagos.Remove(pago);
-            db.SaveChanges();
-            return RedirectToAction("Index");
+            try
+            {
+                Pagos pago = db.Pagos.Find(id);
+                if (pago == null)
+                {
+                    return HttpNotFound();
+                }
+                db.Pagos.Remove(pago);
+                db.SaveChanges();
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", $"Error al eliminar el pago: {ex.Message}");
+                var pago = db.Database.SqlQuery<PagoViewModel>("SELECT * FROM VistaPagos WHERE id_pago = @id", new SqlParameter("@id", id)).FirstOrDefault();
+                return View("Delete", pago);
+            }
         }
 
         protected override void Dispose(bool disposing)
