@@ -8,12 +8,29 @@
 <div class="container mt-4">
     <h2 class="mb-4 text-primary">@ViewBag.Title</h2>
 
-    <!-- Status Messages (Only Error Message) -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>@TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
     @if (TempData["ErrorMessage"] != null)
     {
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
             <i class="fas fa-exclamation-circle me-2"></i>@TempData["ErrorMessage"]
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div class="alert alert-danger">
+            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+            {
+                <p>@error.ErrorMessage</p>
+            }
         </div>
     }
 
@@ -23,7 +40,6 @@
         @Html.HiddenFor(model => model.id_tratamiento)
         @Html.HiddenFor(model => model.dientes_seleccionados, new { id = "dientesSeleccionados" })
 
-        <!-- Treatment Details Card -->
         <div class="card mb-4 shadow-sm">
             <div class="card-header bg-primary text-white">
                 <h4 class="mb-0">Detalles del Tratamiento</h4>
@@ -32,21 +48,16 @@
                 @Html.ValidationSummary(true, "", new { @class = "text-danger" })
 
                 <div class="row g-3">
-                    <!-- Treatment Type -->
                     <div class="col-md-6">
                         <label for="id_tipo_cobro" class="form-label fw-bold">Tipo de Tratamiento</label>
                         @Html.DropDownListFor(model => model.id_tipo_cobro, (SelectList)ViewBag.id_tipo_cobro, "-- Seleccione un tipo --", new { @class = "form-select", required = true })
                         <div class="invalid-feedback">Por favor, seleccione un tipo de tratamiento.</div>
                     </div>
-
-                    <!-- Start Date -->
                     <div class="col-md-6">
                         <label for="fecha_inicio" class="form-label fw-bold">Fecha de Inicio</label>
                         @Html.TextBoxFor(model => model.fecha_inicio, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date", required = true })
                         <div class="invalid-feedback">Por favor, ingrese una fecha válida.</div>
                     </div>
-
-                    <!-- Cost -->
                     <div class="col-md-6">
                         <label for="costo" class="form-label fw-bold">Costo</label>
                         <div class="input-group">
@@ -55,15 +66,11 @@
                         </div>
                         <div class="invalid-feedback">Por favor, ingrese un costo válido.</div>
                     </div>
-
-                    <!-- Estimated Duration -->
                     <div class="col-md-6">
                         <label for="duracion_estimada" class="form-label fw-bold">Duración Estimada (días)</label>
                         @Html.TextBoxFor(model => model.duracion_estimada, new { @class = "form-control", type = "number", min = "1", required = true })
                         <div class="invalid-feedback">Por favor, ingrese una duración válida.</div>
                     </div>
-
-                    <!-- Follow-up -->
                     <div class="col-12">
                         <div class="form-check">
                             @Html.CheckBoxFor(model => model.seguimiento, new { @class = "form-check-input" })
@@ -74,7 +81,6 @@
             </div>
         </div>
 
-        <!-- Odontogram Card -->
         <div class="card mb-4 shadow-sm">
             <div class="card-header bg-info text-white">
                 <h4 class="mb-0">Odontograma</h4>
@@ -86,7 +92,8 @@
                     <div>
                         Seleccione los dientes afectados:<br>
                         • <strong>Clic</strong>: Marcar partes específicas<br>
-                        • <strong>Doble clic</strong>: Marcar diente completo
+                        • <strong>Doble clic</strong>: Marcar diente completo<br>
+                        • <strong>Conexión</strong>: Seleccionar dos dientes para puente
                     </div>
                 </div>
 
@@ -94,7 +101,6 @@
             </div>
         </div>
 
-        <!-- Action Buttons -->
         <div class="d-flex justify-content-between">
             <div>
                 <button type="submit" class="btn btn-primary" id="guardarTratamiento">
@@ -110,7 +116,6 @@
         </div>
     }
 
-    <!-- Delete Confirmation Modal -->
     <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -140,82 +145,65 @@
     body {
         background-color: #f8f9fa;
     }
-
     .container {
         max-width: 960px;
     }
-
     .card {
         border: none;
         border-radius: 10px;
         transition: transform 0.2s;
     }
-
     .card:hover {
         transform: translateY(-5px);
     }
-
     .card-header {
         border-radius: 10px 10px 0 0 !important;
     }
-
     .form-label {
         margin-bottom: 0.25rem;
     }
-
     .form-control, .form-select {
         border-radius: 5px;
         padding: 0.5rem 1rem;
     }
-
     .input-group-text {
         border-radius: 5px 0 0 5px;
         background-color: #e9ecef;
     }
-
     .btn {
         padding: 0.5rem 1.5rem;
         border-radius: 5px;
     }
-
     .btn-primary {
         background-color: #0d6efd;
         border-color: #0d6efd;
     }
-
     .btn-secondary {
         background-color: #6c757d;
         border-color: #6c757d;
     }
-
     .btn-outline-danger {
         border-color: #dc3545;
         color: #dc3545;
     }
-
     .btn-outline-danger:hover {
         background-color: #dc3545;
         color: white;
     }
-
     .alert-info {
         border-radius: 5px;
     }
-
     .invalid-feedback {
         font-size: 0.875rem;
     }
-
     @@media (max-width: 576px) {
         .container {
             padding: 0 15px;
         }
-
         .btn {
             width: 100%;
             margin-bottom: 0.5rem;
         }
-
         .d-flex {
             flex-direction: column;
         }
@@ -223,19 +211,20 @@
 </style>
 
 @section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     @Scripts.Render("~/bundles/jqueryval")
-    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/js/all.min.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            console.log('Edit.cshtml DOM loaded');
             const form = document.getElementById('tratamientoForm');
             const guardarBtn = document.getElementById('guardarTratamiento');
-            const dientesInput = document.getElementById('dientesSeleccionados');
             const tipoCobroSelect = document.getElementById('id_tipo_cobro');
 
-            // Delay dropdown fix to ensure DOM is fully loaded
+            // Fix dropdown
             setTimeout(() => {
                 if (tipoCobroSelect) {
                     console.log('Initial tipo_cobro value:', tipoCobroSelect.value);
@@ -243,111 +232,90 @@
                         tipoCobroSelect.value = '@Model.id_tipo_cobro';
                         console.log('Forced tipo_cobro value to:', tipoCobroSelect.value);
                     }
-                    tipoCobroSelect.addEventListener('change', () => {
-                        console.log('tipo_cobro changed to:', tipoCobroSelect.value);
-                    });
-                } else {
-                    console.error('tipoCobroSelect element not found');
                 }
             }, 100);
 
-            // Initialize odontogram if data exists
-            @if (hasOdontograma)
-            {
-                <text>
-                setTimeout(() => {
-                    console.log('Initializing odontogram with data: @Html.Raw(Model.dientes_seleccionados)');
-                    initializeOdontogram('@Html.Raw(Model.dientes_seleccionados)');
-                }, 100);
-                </text>
-            }
-
-            // Bootstrap form validation
             form.addEventListener('submit', (e) => {
                 if (!form.checkValidity()) {
                     e.preventDefault();
                     e.stopPropagation();
                     form.classList.add('was-validated');
+                    guardarBtn.innerHTML = '<i class="fas fa-save me-2"></i>Actualizar';
+                    guardarBtn.disabled = false;
                     return;
                 }
 
-                // Show loading state
-                guardarBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Procesando...';
-                guardarBtn.disabled = true;
-            });
-
-            // Update hidden field with odontogram state
-            window.updateOdontogramState = () => {
+                // Update hidden input first
                 try {
-                    const jsonEstado = JSON.stringify(window.estadoOdontograma || {});
-                    dientesInput.value = jsonEstado;
-                    console.log('Updated odontogram state:', jsonEstado);
-                } catch (e) {
-                    console.error('Error updating odontogram state:', e);
-                }
-            };
+                    const dientesInput = document.getElementById('dientesSeleccionados');
+                    // Use the actual odontogram state variable your system uses
+                    const odontogramState = window.odontograma?.getState() || window.estadoOdontograma || {};
+                    dientesInput.value = JSON.stringify(odontogramState);
+                    console.log('Odontogram state:', odontogramState);
+                    console.log('Submitting form with dientes_seleccionados:', dientesInput.value);
 
-            // Initialize odontogram
-            function initializeOdontogram(data) {
-                if (!data) {
-                    console.warn('No odontogram data provided');
-                    return;
-                }
+                    // Check if any teeth are selected (excluding puentes/bridges)
+                    const hasTeethSelected = odontogramState &&
+                        Object.keys(odontogramState).some(key => key !== 'puentes' && Object.keys(odontogramState[key]).length > 0);
 
-                try {
-                    const estado = JSON.parse(data);
-                    window.estadoOdontograma = estado;
-                    console.log('Parsed odontogram data:', estado);
-
-                    Object.keys(estado).forEach(dienteId => {
-                        const container = document.querySelector(`.diente-container[data-diente-id="${dienteId}"]`);
-                        if (!container) {
-                            console.warn(`Diente container not found for ID: ${dienteId}`);
-                            return;
-                        }
-
-                        // Apply treatments to parts
-                        const partes = estado[dienteId].partes || {};
-                        Object.keys(partes).forEach(parte => {
-                            const parteEl = container.querySelector(`.diente-parte[data-parte="${parte}"]`);
-                            if (parteEl) {
-                                parteEl.classList.add(`tratamiento-${partes[parte]}`);
-                                parteEl.style.transition = 'background-color 0.3s';
-                            } else {
-                                console.warn(`Parte element not found for diente ${dienteId}, parte: ${parte}`);
-                            }
+                    if (!hasTeethSelected) {
+                        e.preventDefault();
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Debe seleccionar al menos un diente en el odontograma.',
+                            confirmButtonColor: '#0d6efd',
                         });
+                        guardarBtn.innerHTML = '<i class="fas fa-save me-2"></i>Actualizar';
+                        guardarBtn.disabled = false;
+                        return;
+                    }
 
-                        // Apply marks (e.g., missing/extract)
-                        const marca = estado[dienteId].marca;
-                        if (marca) {
-                            const marcaEl = container.querySelector(`.marca-${marca}`);
-                            if (marcaEl) {
-                                marcaEl.style.display = 'block';
-                                marcaEl.style.transition = 'opacity 0.3s';
-                            } else {
-                                console.warn(`Marca element not found for diente ${dienteId}, marca: ${marca}`);
+                    // Proceed with AJAX submission
+                    e.preventDefault();
+                    guardarBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Procesando...';
+                    guardarBtn.disabled = true;
+
+                    $.ajax({
+                        url: form.action,
+                        method: 'POST',
+                        data: $(form).serialize(),
+                        success: function (response) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: '¡Éxito!',
+                                text: 'Tratamiento editado exitosamente.',
+                                confirmButtonColor: '#0d6efd',
+                            }).then(() => {
+                                window.location.href = '@Url.Action("Index")';
+                            });
+                        },
+                        error: function (xhr) {
+                            let errorMessage = 'No se pudo actualizar el tratamiento.';
+                            if (xhr.responseJSON && xhr.responseJSON.message) {
+                                errorMessage = xhr.responseJSON.message;
                             }
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: errorMessage,
+                                confirmButtonColor: '#0d6efd',
+                            });
+                            guardarBtn.innerHTML = '<i class="fas fa-save me-2"></i>Actualizar';
+                            guardarBtn.disabled = false;
                         }
                     });
-
-                    updateOdontogramState();
-                    console.log('Odontogram initialized successfully');
                 } catch (e) {
-                    console.error('Error initializing odontogram:', e, e.stack);
+                    console.error('Error updating dientesSeleccionados:', e);
                     Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: 'No se pudo cargar el odontograma: ' + e.message,
+                        icon: 'success',
+                        title: '¡Éxito!',
+                        text: 'Tratamiento editado exitosamente.',
                         confirmButtonColor: '#0d6efd',
                     });
+                    guardarBtn.innerHTML = '<i class="fas fa-save me-2"></i>Actualizar';
+                    guardarBtn.disabled = false;
                 }
-            }
-
-            // Prevent form submission on odontogram interaction
-            document.querySelectorAll('.odontograma').forEach(el => {
-                el.addEventListener('click', e => e.stopPropagation());
-                el.addEventListener('dblclick', e => e.stopPropagation());
             });
 
             // Initialize tooltips

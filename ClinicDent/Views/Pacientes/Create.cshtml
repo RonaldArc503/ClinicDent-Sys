@@ -4,43 +4,40 @@
     ViewBag.Title = "Nuevo Paciente";
 }
 
-<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 
 <style>
     .form-container {
         max-width: 700px;
-        margin: 0 0 0 10px; /* Reducido margen izquierdo */
-        padding: 25px 25px 25px 15px; /* Reducido padding izquierdo */
+        margin: 0 0 0 10px;
+        padding: 25px 25px 25px 15px;
         background-color: #e5e7e9;
         border-radius: 15px;
         box-shadow: 0 0 75px rgba(0, 0, 0, 0.1);
-    }
-
-    .form-container {
         border-left: 5px solid #007bff;
     }
 
     .form-title {
         color: #2c3e50;
         margin-bottom: 25px;
-        text-align: left; /* Alineado a la izquierda */
+        text-align: left;
         font-size: 24px;
-        padding-left: 5px; /* Ajuste fino de posición */
+        padding-left: 5px;
     }
 
     .form-group {
         margin-bottom: 20px;
         display: flex;
         flex-direction: column;
-        padding-left: 5px; /* Movido más a la izquierda */
+        padding-left: 5px;
     }
 
     .control-label {
         font-weight: 600;
         color: #495057;
         margin-bottom: 8px;
-        text-align: left; /* Aseguramos alineación izquierda */
+        text-align: left;
     }
 
     .form-control {
@@ -49,7 +46,7 @@
         border: 1px solid #ced4da;
         transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
         width: 100%;
-        margin-left: 0; /* Eliminamos cualquier margen izquierdo */
+        margin-left: 0;
         box-shadow: inset 0 1px 45px rgba(0, 0, 0, 0.1);
     }
 
@@ -68,8 +65,8 @@
         font-size: 16px;
         cursor: pointer;
         transition: background-color 0.3s;
-        margin: 10px 0 0 0; /* Ajuste de márgenes */
-        align-self: flex-start; /* Alineado a la izquierda */
+        margin: 10px 0 0 0;
+        align-self: flex-start;
     }
 
         .btn-submit:hover {
@@ -78,7 +75,7 @@
 
     .btn-back {
         display: inline-block;
-        margin: 20px 0 0 5px; /* Ajustado margen izquierdo */
+        margin: 20px 0 0 5px;
         color: #6c757d;
         text-decoration: none;
         transition: color 0.3s;
@@ -107,8 +104,8 @@
     .gender-options {
         display: flex;
         gap: 15px;
-        margin: 5px 0 0 0; /* Ajuste de márgenes */
-        padding-left: 0; /* Eliminado padding izquierdo */
+        margin: 5px 0 0 0;
+        padding-left: 0;
     }
 
     .gender-option {
@@ -124,7 +121,7 @@
         display: flex;
         align-items: center;
         cursor: pointer;
-        margin-left: 0; /* Eliminado margen izquierdo */
+        margin-left: 0;
     }
 
         .checkbox-label input {
@@ -139,18 +136,29 @@
     textarea.form-control {
         min-height: 100px;
         resize: vertical;
-        margin-left: 0; /* Eliminado margen izquierdo */
+        margin-left: 0;
         box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Estilo para el campo de fecha */
+    .flatpickr-input {
+        background-color: white;
+        cursor: pointer;
+    }
+
+    .error-message {
+        color: #dc3545;
+        font-size: 0.875em;
+        margin-top: 0.25rem;
     }
 </style>
 
 <div class="form-container">
     <h2 class="form-title"> Registro de Paciente</h2>
 
-    @using (Html.BeginForm(null, null, FormMethod.Post, new { autocomplete = "off" }))
+    @using (Html.BeginForm(null, null, FormMethod.Post, new { autocomplete = "off", id = "pacienteForm" }))
     {
         @Html.AntiForgeryToken()
-        <!-- Campo oculto para redirigir sugerencias de dirección -->
         <input type="text" style="display:none;" autocomplete="street-address" />
 
         <div class="form-horizontal">
@@ -161,7 +169,7 @@
                     <i class="fas fa-user"></i> Nombres
                 </label>
                 <div class="input-icon">
-                    @Html.EditorFor(model => model.nombres, new { htmlAttributes = new { @class = "form-control", placeholder = "Nombres del paciente", required = "required", autocomplete = "given-name" } })
+                    @Html.EditorFor(model => model.nombres, new { htmlAttributes = new { @class = "form-control", placeholder = "Nombres del paciente", required = "required", autocomplete = "given-name", id = "nombres" } })
                     @Html.ValidationMessageFor(model => model.nombres, "", new { @class = "text-danger" })
                 </div>
             </div>
@@ -171,7 +179,7 @@
                     <i class="fas fa-user"></i> Apellidos
                 </label>
                 <div class="input-icon">
-                    @Html.EditorFor(model => model.apellidos, new { htmlAttributes = new { @class = "form-control", placeholder = "Apellidos del paciente", required = "required", autocomplete = "family-name" } })
+                    @Html.EditorFor(model => model.apellidos, new { htmlAttributes = new { @class = "form-control", placeholder = "Apellidos del paciente", required = "required", autocomplete = "family-name", id = "apellidos" } })
                     @Html.ValidationMessageFor(model => model.apellidos, "", new { @class = "text-danger" })
                 </div>
             </div>
@@ -181,8 +189,9 @@
                     <i class="fas fa-calendar-alt"></i> Fecha de Nacimiento
                 </label>
                 <div class="input-icon">
-                    @Html.TextBoxFor(model => model.fecha_nacimiento, new { @class = "form-control", @id = "fecha_nacimiento", placeholder = "Seleccione la fecha", required = "required", autocomplete = "off" })
+                    @Html.TextBoxFor(model => model.fecha_nacimiento, new { @class = "form-control flatpickr-input", @id = "fecha_nacimiento", placeholder = "Seleccione la fecha", required = "required", autocomplete = "off" })
                     @Html.ValidationMessageFor(model => model.fecha_nacimiento, "", new { @class = "text-danger" })
+                    <div id="edad-error" class="error-message" style="display:none;">El paciente debe tener al menos 5 años de edad.</div>
                 </div>
             </div>
 
@@ -191,7 +200,7 @@
                     <i class="fas fa-phone"></i> Teléfono
                 </label>
                 <div class="input-icon">
-                    @Html.EditorFor(model => model.telefono, new { htmlAttributes = new { @class = "form-control", placeholder = "Número de teléfono" } })
+                    @Html.EditorFor(model => model.telefono, new { htmlAttributes = new { @class = "form-control", placeholder = "Número de teléfono", id = "telefono" } })
                     @Html.ValidationMessageFor(model => model.telefono, "", new { @class = "text-danger" })
                 </div>
             </div>
@@ -234,7 +243,7 @@
             </div>
 
             <div class="form-group">
-                <button type="submit" class="btn-submit">
+                <button type="submit" class="btn-submit" id="btnSubmit">
                     <i class="fas fa-save"></i> Guardar Paciente
                 </button>
             </div>
@@ -250,48 +259,95 @@
 
 @section Scripts {
     @Scripts.Render("~/bundles/jqueryval")
-
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
 
     <script>
         $(document).ready(function () {
-            // Inicializa el datepicker con configuración en español
-            $("#fecha_nacimiento").datepicker({
-                dateFormat: "dd/mm/yy",
-                changeMonth: true,
-                changeYear: true,
-                yearRange: "1927:+0",
-                maxDate: "0",
-                dayNames: ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"],
-                dayNamesMin: ["Do", "Lu", "Ma", "Mi", "Ju", "Vi", "Sa"],
-                monthNames: ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"],
-                monthNamesShort: ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"],
-                prevText: "Anterior",
-                nextText: "Siguiente",
-                currentText: "Hoy",
-                closeText: "Cerrar",
-                onSelect: function (dateText, inst) {
-                    // Convertir dd/mm/yyyy a yyyy-mm-dd al seleccionar
-                    var parts = dateText.split('/');
-                    if (parts.length === 3) {
-                        var isoDate = parts[2] + '-' + parts[1] + '-' + parts[0];
-                        $(this).val(isoDate);
-                    }
+            // Configuración de flatpickr para la fecha de nacimiento
+            $("#fecha_nacimiento").flatpickr({
+                locale: "es",
+                dateFormat: "d/m/Y",
+                maxDate: "today",
+                onChange: function (selectedDates, dateStr, instance) {
+                    validarEdad(selectedDates[0]);
                 }
             });
 
             // Máscara para el teléfono
             $('#telefono').mask('0000-0000', { placeholder: "____-____" });
 
-            // Validación en tiempo real para nombres y apellidos
+            // Validación y formato de nombres y apellidos
             $('#nombres, #apellidos').on('input', function () {
+                // Eliminar caracteres no permitidos
                 this.value = this.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '');
+
+                // Convertir a minúsculas primero
+                let valor = this.value.toLowerCase();
+
+                // Capitalizar cada palabra
+                this.value = valor.replace(/\b\w/g, function (l) {
+                    return l.toUpperCase();
+                });
+            });
+
+            // Validación del formulario
+            $('#pacienteForm').on('submit', function (e) {
+                // Asegurar que los nombres y apellidos estén capitalizados antes de enviar
+                $('#nombres').val(capitalizeWords($('#nombres').val()));
+                $('#apellidos').val(capitalizeWords($('#apellidos').val()));
+
+                // Validar edad antes de enviar
+                const fechaNacimiento = $('#fecha_nacimiento').val();
+                if (fechaNacimiento) {
+                    const fechaParts = fechaNacimiento.split('/');
+                    if (fechaParts.length === 3) {
+                        const fechaNac = new Date(fechaParts[2], fechaParts[1] - 1, fechaParts[0]);
+                        if (!validarEdad(fechaNac)) {
+                            e.preventDefault();
+                            return false;
+                        }
+                    }
+                }
+                return true;
             });
 
             // Enfoque automático en el primer campo
             $('#nombres').focus();
         });
+
+        function validarEdad(fechaNacimiento) {
+            const hoy = new Date();
+            const edadMinima = 5; // Edad mínima requerida
+
+            // Calcular edad
+            let edad = hoy.getFullYear() - fechaNacimiento.getFullYear();
+            const mes = hoy.getMonth() - fechaNacimiento.getMonth();
+
+            if (mes < 0 || (mes === 0 && hoy.getDate() < fechaNacimiento.getDate())) {
+                edad--;
+            }
+
+            // Validar si es menor de 5 años
+            if (edad < edadMinima) {
+                $('#edad-error').show();
+                $('#btnSubmit').prop('disabled', true);
+                return false;
+            } else {
+                $('#edad-error').hide();
+                $('#btnSubmit').prop('disabled', false);
+                return true;
+            }
+        }
+
+        // Función para capitalizar palabras
+        function capitalizeWords(str) {
+            if (!str) return str;
+            return str.toLowerCase().replace(/\b\w/g, function (l) {
+                return l.toUpperCase();
+            });
+        }
     </script>
 }

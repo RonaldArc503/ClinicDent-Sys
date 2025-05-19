@@ -1,35 +1,32 @@
-﻿using System;
+﻿using ClinicDent.Models;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.Data.Entity;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
+using System.Threading.Tasks;
 using System.Web.Mvc;
-using ClinicDent.Models;
-using Newtonsoft.Json.Linq;
-using Newtonsoft.Json;
-using System.Diagnostics;
 
 namespace ClinicDent.Controllers
 {
     public class TratamientosController : Controller
     {
         private ClinicaDentalLocal0 db = new ClinicaDentalLocal0();
-        private const int PageSize = 10; // Número de tratamientos por página
+        private const int PageSize = 10;
 
-        // GET: Tratamientos
         public ActionResult Index(string searchString, string tipoCobroFilter, string seguimientoFilter,
                                  DateTime? fechaInicio, DateTime? fechaFin, int page = 1)
         {
-            // Obtener tipos de cobro para el dropdown
             ViewBag.TiposCobro = new SelectList(
                 db.Tipo_Cobro.OrderBy(t => t.nombre),
                 "id_tipo_cobro",
                 "nombre");
 
-            // Consulta base
             var tratamientos = db.Tratamientos.Include(t => t.Tipo_Cobro).AsQueryable();
 
-            // Aplicar filtros
             if (!string.IsNullOrEmpty(searchString))
             {
                 searchString = searchString.Trim().ToLower();
@@ -58,21 +55,17 @@ namespace ClinicDent.Controllers
                 tratamientos = tratamientos.Where(t => t.fecha_inicio <= fechaFin.Value);
             }
 
-            // Ordenar
             tratamientos = tratamientos.OrderByDescending(t => t.fecha_inicio);
 
-            // Calcular paginación
             int totalRecords = tratamientos.Count();
             int totalPages = (int)Math.Ceiling((double)totalRecords / PageSize);
             page = Math.Max(1, Math.Min(page, totalPages));
 
-            // Aplicar paginación
             var tratamientosPaginados = tratamientos
                 .Skip((page - 1) * PageSize)
                 .Take(PageSize)
                 .ToList();
 
-            // Pasar parámetros de filtro y paginación a la vista
             ViewBag.CurrentFilter = searchString;
             ViewBag.TipoCobroFilter = tipoCobroFilter;
             ViewBag.SeguimientoFilter = seguimientoFilter;
@@ -84,7 +77,6 @@ namespace ClinicDent.Controllers
             return View(tratamientosPaginados);
         }
 
-        // GET: Tratamientos/Details/5
         public ActionResult Details(int? id)
         {
             if (id == null)
@@ -92,7 +84,6 @@ namespace ClinicDent.Controllers
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
 
-            // Deshabilitar proxies dinámicos para esta consulta
             var tratamiento = db.Tratamientos
                 .Include(t => t.Tipo_Cobro)
                 .AsNoTracking()
@@ -103,13 +94,11 @@ namespace ClinicDent.Controllers
                 return HttpNotFound();
             }
 
-            // Forzar la carga del nombre si es necesario
             ViewBag.NombreTratamiento = tratamiento.Tipo_Cobro?.nombre;
 
             return View(tratamiento);
         }
 
-        // GET: Tratamientos/Create
         public ActionResult Create()
         {
             ViewBag.id_tipo_cobro = new SelectList(
@@ -119,18 +108,16 @@ namespace ClinicDent.Controllers
 
             ViewBag.FechaActual = DateTime.Now.ToString("yyyy-MM-dd");
 
-            // Inicializar con odontograma vacío
             var tratamiento = new Tratamientos
             {
                 fecha_inicio = DateTime.Now,
                 seguimiento = false,
-                dientes_seleccionados = "{}" // JSON vacío
+                dientes_seleccionados = "{}"
             };
 
             return View(tratamiento);
         }
 
-        // POST: Tratamientos/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Create([Bind(Include = "id_tipo_cobro,fecha_inicio,costo,duracion_estimada,seguimiento,dientes_seleccionados")] Tratamientos tratamiento)
@@ -141,7 +128,6 @@ namespace ClinicDent.Controllers
             {
                 try
                 {
-                    // Validar y limpiar el JSON de dientes seleccionados
                     tratamiento.dientes_seleccionados = LimpiarJsonDientes(tratamiento.dientes_seleccionados);
 
                     db.Tratamientos.Add(tratamiento);
@@ -165,7 +151,6 @@ namespace ClinicDent.Controllers
             return View(tratamiento);
         }
 
-        // GET: Tratamientos/Edit/5
         public ActionResult Edit(int? id)
         {
             if (id == null)
@@ -173,7 +158,6 @@ namespace ClinicDent.Controllers
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
 
-            // Explicitly fetch treatment without tracking to avoid proxy issues
             Tratamientos tratamiento = db.Tratamientos
                 .AsNoTracking()
                 .FirstOrDefault(t => t.id_tratamiento == id);
@@ -183,7 +167,6 @@ namespace ClinicDent.Controllers
                 return HttpNotFound();
             }
 
-            // Set default values for nullable or invalid fields
             if (tratamiento.fecha_inicio == default(DateTime))
             {
                 tratamiento.fecha_inicio = DateTime.Now;
@@ -201,7 +184,6 @@ namespace ClinicDent.Controllers
                 tratamiento.dientes_seleccionados = "{}";
             }
 
-            // Set dropdown for tipo_cobro
             ViewBag.id_tipo_cobro = new SelectList(
                 db.Tipo_Cobro.OrderBy(t => t.nombre),
                 "id_tipo_cobro",
@@ -211,73 +193,102 @@ namespace ClinicDent.Controllers
             return View(tratamiento);
         }
 
-        // POST: Tratamientos/Edit
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "id_tratamiento,id_tipo_cobro,fecha_inicio,costo,duracion_estimada,seguimiento,dientes_seleccionados")] Tratamientos tratamiento)
+        public ActionResult Edit(Tratamientos model)
         {
-            ValidarTratamiento(tratamiento);
+            ValidarTratamiento(model); // Reuse the existing validation method
 
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                try
+                if (Request.IsAjaxRequest())
                 {
-                    // Validar y limpiar el JSON de dientes seleccionados
-                    tratamiento.dientes_seleccionados = LimpiarJsonDientes(tratamiento.dientes_seleccionados);
-
-                    db.Entry(tratamiento).State = EntityState.Modified;
-                    db.SaveChanges();
-                    TempData["SuccessMessage"] = "Tratamiento actualizado exitosamente.";
-                    return RedirectToAction("Index");
+                    return Json(new { success = false, message = "Datos inválidos. Por favor, revisa los campos." });
                 }
-                catch (Exception ex)
-                {
-                    Trace.TraceError($"Error al actualizar tratamiento {tratamiento.id_tratamiento}: {ex.Message}");
-                    ModelState.AddModelError("", "No se pudo actualizar el tratamiento. Por favor, intenta de nuevo.");
-                }
+                ViewBag.id_tipo_cobro = new SelectList(db.Tipo_Cobro.OrderBy(t => t.nombre), "id_tipo_cobro", "nombre", model.id_tipo_cobro);
+                return View(model);
             }
 
-            // Reload dropdown in case of validation failure
-            ViewBag.id_tipo_cobro = new SelectList(
-                db.Tipo_Cobro.OrderBy(t => t.nombre),
-                "id_tipo_cobro",
-                "nombre",
-                tratamiento.id_tipo_cobro);
+            var tratamiento = db.Tratamientos.Find(model.id_tratamiento);
+            if (tratamiento == null)
+            {
+                if (Request.IsAjaxRequest())
+                {
+                    return Json(new { success = false, message = "Tratamiento no encontrado." });
+                }
+                return HttpNotFound();
+            }
 
-            return View(tratamiento);
+            try
+            {
+                tratamiento.id_tipo_cobro = model.id_tipo_cobro;
+                tratamiento.fecha_inicio = model.fecha_inicio;
+                tratamiento.costo = model.costo;
+                tratamiento.duracion_estimada = model.duracion_estimada;
+                tratamiento.seguimiento = model.seguimiento;
+                tratamiento.dientes_seleccionados = LimpiarJsonDientes(model.dientes_seleccionados);
+
+                db.Entry(tratamiento).State = EntityState.Modified;
+                db.SaveChanges();
+
+                if (Request.IsAjaxRequest())
+                {
+                    return Json(new { success = true, message = "Tratamiento editado exitosamente." });
+                }
+
+                TempData["SuccessMessage"] = "Tratamiento editado exitosamente.";
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                Trace.TraceError($"Error al actualizar tratamiento {model.id_tratamiento}: {ex.Message}");
+                if (Request.IsAjaxRequest())
+                {
+                    return Json(new { success = false, message = $"No se pudo actualizar el tratamiento: {ex.Message}" });
+                }
+                TempData["ErrorMessage"] = "No se pudo actualizar el tratamiento. Por favor, intenta de nuevo.";
+                ViewBag.id_tipo_cobro = new SelectList(db.Tipo_Cobro.OrderBy(t => t.nombre), "id_tipo_cobro", "nombre", model.id_tipo_cobro);
+                return View(model);
+            }
         }
 
-        // GET: Tratamientos/Delete/5
-        public ActionResult Delete(int? id)
+        public async Task<ActionResult> Delete(int? id)
         {
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Tratamientos tratamiento = db.Tratamientos
+
+            var tratamiento = await db.Tratamientos
                 .Include(t => t.Tipo_Cobro)
-                .FirstOrDefault(t => t.id_tratamiento == id);
+                .AsNoTracking()
+                .FirstOrDefaultAsync(t => t.id_tratamiento == id);
+
             if (tratamiento == null)
             {
                 return HttpNotFound();
             }
+
+            ViewBag.NombreTratamiento = tratamiento.Tipo_Cobro?.nombre;
             return View(tratamiento);
         }
 
-        // POST: Tratamientos/Delete
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public ActionResult DeleteConfirmed(int id)
+        public async Task<ActionResult> DeleteConfirmed(int id)
         {
             try
             {
-                Tratamientos tratamiento = db.Tratamientos.Find(id);
+                var tratamiento = await db.Tratamientos.FindAsync(id);
                 if (tratamiento == null)
                 {
-                    return HttpNotFound();
+                    TempData["ErrorMessage"] = "El tratamiento no fue encontrado.";
+                    return RedirectToAction("Index");
                 }
+
                 db.Tratamientos.Remove(tratamiento);
-                db.SaveChanges();
+                await db.SaveChangesAsync();
                 TempData["SuccessMessage"] = "Tratamiento eliminado exitosamente.";
                 return RedirectToAction("Index");
             }
@@ -289,7 +300,6 @@ namespace ClinicDent.Controllers
             }
         }
 
-        // Método para validar el tratamiento
         private void ValidarTratamiento(Tratamientos tratamiento)
         {
             if (tratamiento.costo <= 0)
@@ -312,7 +322,6 @@ namespace ClinicDent.Controllers
                 ModelState.AddModelError("fecha_inicio", "La fecha de inicio no es válida.");
             }
 
-            // Validar dientes_seleccionados
             if (string.IsNullOrWhiteSpace(tratamiento.dientes_seleccionados))
             {
                 ModelState.AddModelError("dientes_seleccionados", "Debe seleccionar al menos un diente o parte en el odontograma.");
@@ -322,13 +331,12 @@ namespace ClinicDent.Controllers
             try
             {
                 var json = JObject.Parse(tratamiento.dientes_seleccionados);
-                if (!json.Properties().Any())
+                if (!json.Properties().Any(p => p.Name != "puentes"))
                 {
                     ModelState.AddModelError("dientes_seleccionados", "Debe seleccionar al menos un diente en el odontograma.");
                     return;
                 }
 
-                // Validar IDs de dientes y estructura
                 var validDientes = new HashSet<string>(Enumerable.Range(11, 8)
                     .Concat(Enumerable.Range(21, 8))
                     .Concat(Enumerable.Range(31, 8))
@@ -341,10 +349,33 @@ namespace ClinicDent.Controllers
 
                 var validPartes = new HashSet<string> { "superior", "inferior", "izquierda", "derecha", "centro" };
                 var validTratamientos = new HashSet<string> { "caries", "relleno" };
-                var validMarcas = new HashSet<string> { "faltante", "extraer" };
+                var validMarcas = new HashSet<string> { "faltante", "extraer", "necesita-endodoncia", "tiene-endodoncia", "puente-azul", "puente-rojo" };
 
                 foreach (var diente in json.Properties())
                 {
+                    if (diente.Name == "puentes")
+                    {
+                        var puentes = diente.Value as JArray;
+                        if (puentes != null)
+                        {
+                            foreach (var puente in puentes)
+                            {
+                                var dienteId1 = puente["dienteId1"]?.ToString();
+                                var dienteId2 = puente["dienteId2"]?.ToString();
+                                var color = puente["color"]?.ToString();
+                                if (!validDientes.Contains(dienteId1) || !validDientes.Contains(dienteId2))
+                                {
+                                    ModelState.AddModelError("dientes_seleccionados", $"ID de diente inválido en puente: {dienteId1}, {dienteId2}.");
+                                }
+                                if (color != "azul" && color != "roja")
+                                {
+                                    ModelState.AddModelError("dientes_seleccionados", $"Color de puente inválido: {color}.");
+                                }
+                            }
+                        }
+                        continue;
+                    }
+
                     if (!validDientes.Contains(diente.Name))
                     {
                         ModelState.AddModelError("dientes_seleccionados", $"ID de diente inválido: {diente.Name}.");
@@ -375,13 +406,13 @@ namespace ClinicDent.Controllers
                     }
                 }
             }
-            catch (JsonReaderException)
+            catch (JsonReaderException ex)
             {
+                Trace.TraceError($"Error parsing dientes_seleccionados: {ex.Message}");
                 ModelState.AddModelError("dientes_seleccionados", "El formato de los dientes seleccionados no es válido.");
             }
         }
 
-        // Método para limpiar y validar el JSON de dientes seleccionados
         private string LimpiarJsonDientes(string jsonDientes)
         {
             if (string.IsNullOrWhiteSpace(jsonDientes))
@@ -394,7 +425,6 @@ namespace ClinicDent.Controllers
                 var jsonObj = JObject.Parse(jsonDientes);
                 var dientesValidos = new JObject();
 
-                // Lista de dientes válidos
                 var validDientes = new HashSet<string>(Enumerable.Range(11, 8)
                     .Concat(Enumerable.Range(21, 8))
                     .Concat(Enumerable.Range(31, 8))
@@ -405,11 +435,37 @@ namespace ClinicDent.Controllers
                     .Concat(Enumerable.Range(81, 5))
                     .Select(x => x.ToString()));
 
+                var validMarcas = new HashSet<string> { "faltante", "extraer", "necesita-endodoncia", "tiene-endodoncia", "puente-azul", "puente-rojo" };
+
                 foreach (var diente in jsonObj.Properties())
                 {
+                    if (diente.Name == "puentes")
+                    {
+                        var puentes = diente.Value as JArray;
+                        if (puentes != null)
+                        {
+                            var validPuentes = new JArray();
+                            foreach (var puente in puentes)
+                            {
+                                var dienteId1 = puente["dienteId1"]?.ToString();
+                                var dienteId2 = puente["dienteId2"]?.ToString();
+                                var color = puente["color"]?.ToString();
+                                if (validDientes.Contains(dienteId1) && validDientes.Contains(dienteId2) && (color == "azul" || color == "roja"))
+                                {
+                                    validPuentes.Add(puente);
+                                }
+                            }
+                            if (validPuentes.Any())
+                            {
+                                dientesValidos["puentes"] = validPuentes;
+                            }
+                        }
+                        continue;
+                    }
+
                     if (!validDientes.Contains(diente.Name))
                     {
-                        continue; // Saltar dientes inválidos
+                        continue;
                     }
 
                     var partesValidas = new JObject();
@@ -438,7 +494,7 @@ namespace ClinicDent.Controllers
                         nuevoDiente["partes"] = partesValidas;
                     }
 
-                    if (marca == "faltante" || marca == "extraer")
+                    if (!string.IsNullOrEmpty(marca) && validMarcas.Contains(marca))
                     {
                         nuevoDiente["marca"] = marca;
                     }

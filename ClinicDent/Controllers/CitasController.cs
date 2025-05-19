@@ -112,33 +112,177 @@ namespace ClinicDent.Controllers
             return View();
         }
 
-        // POST: Citas/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "id_cita,id_paciente,id_dentista,fecha_hora,estado")] Citas citas)
+        public JsonResult Create([Bind(Include = "id_cita,id_paciente,id_dentista,estado")] Citas citas, string fecha_hora)
         {
-            bool citaExiste = db.Citas.Any(c =>
-                c.id_dentista == citas.id_dentista &&
-                DbFunctions.TruncateTime(c.fecha_hora) == citas.fecha_hora.Date &&
-                c.fecha_hora.Hour == citas.fecha_hora.Hour &&
-                c.fecha_hora.Minute == citas.fecha_hora.Minute
-            );
-
-            if (citaExiste)
+            try
             {
-                ModelState.AddModelError("", "Ya existe una cita con este dentista a la misma fecha y hora.");
-            }
+                // Parse fecha_hora
+                if (!DateTime.TryParse(fecha_hora, out DateTime parsedFechaHora))
+                {
+                    return Json(new { success = false, message = "Formato de fecha_hora inválido." });
+                }
+                citas.fecha_hora = parsedFechaHora;
 
-            if (ModelState.IsValid)
+                // Validar que no exista cita con el mismo dentista en el mismo horario exacto
+                bool citaExactaMismoDentista = db.Citas.Any(c =>
+                    c.id_dentista == citas.id_dentista &&
+                    c.fecha_hora == citas.fecha_hora &&
+                    c.estado != "Cancelada");
+
+                if (citaExactaMismoDentista)
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = "Ya existe una cita con este dentista a la misma fecha y hora exacta.",
+                        motivo = "dentista_ocupado_exacto"
+                    });
+                }
+
+                // Validar intervalo de 40 minutos para el mismo dentista
+                DateTime horaInicio40 = citas.fecha_hora.AddMinutes(-40);
+                DateTime horaFin40 = citas.fecha_hora.AddMinutes(40);
+
+                bool citaEnIntervaloDentista = db.Citas.Any(c =>
+                    c.id_dentista == citas.id_dentista &&
+                    c.fecha_hora >= horaInicio40 &&
+                    c.fecha_hora <= horaFin40 &&
+                    c.estado != "Cancelada");
+
+                if (citaEnIntervaloDentista)
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = "El dentista ya tiene una cita programada en un intervalo de 40 minutos.",
+                        motivo = "dentista_ocupado_intervalo"
+                    });
+                }
+
+                // Validar intervalo de 1 hora para el mismo paciente y dentista
+                DateTime horaInicio = citas.fecha_hora.AddHours(-1);
+                DateTime horaFin = citas.fecha_hora.AddHours(1);
+
+                bool citaEnIntervaloPaciente = db.Citas.Any(c =>
+                    c.id_dentista == citas.id_dentista &&
+                    c.id_paciente == citas.id_paciente &&
+                    c.fecha_hora >= horaInicio &&
+                    c.fecha_hora <= horaFin &&
+                    c.id_cita != citas.id_cita &&
+                    c.estado != "Cancelada");
+
+                if (citaEnIntervaloPaciente)
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = "El paciente ya tiene una cita con este dentista en un intervalo de 1 hora. Por favor, seleccione otro horario.",
+                        motivo = "paciente_con_dentista"
+                    });
+                }
+
+                if (ModelState.IsValid)
+                {
+                    db.Citas.Add(citas);
+                    db.SaveChanges();
+                    return Json(new { success = true, message = "La cita se ha programado correctamente." });
+                }
+
+                // Collect validation errors
+                var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
+                return Json(new { success = false, message = "Errores de validación: " + string.Join("; ", errors) });
+            }
+            catch (Exception ex)
             {
-                db.Citas.Add(citas);
-                db.SaveChanges();
-                return RedirectToAction("Index");
+                System.Diagnostics.Debug.WriteLine($"Error in Create: {ex.Message}\n{ex.StackTrace}");
+                return Json(new { success = false, message = "Error al crear la cita: " + ex.Message });
             }
+        }
 
-            ViewBag.id_dentista = new SelectList(db.Dentistas, "id_dentista", "nombre", citas.id_dentista);
-            ViewBag.id_paciente = new SelectList(db.Pacientes, "id_paciente", "nombres", citas.id_paciente);
-            return View(citas);
+        // GET: Citas/ValidarDisponibilidad
+        [HttpGet]
+        public JsonResult ValidarDisponibilidad(int id_dentista, int id_paciente, string fecha_hora, string hora_inicio, string hora_fin)
+        {
+            try
+            {
+                // Parse ISO date strings
+                if (!DateTime.TryParse(fecha_hora, out DateTime fechaHora))
+                {
+                    return Json(new
+                    {
+                        disponible = false,
+                        mensaje = "Formato de fecha_hora inválido."
+                    }, JsonRequestBehavior.AllowGet);
+                }
+
+                if (!DateTime.TryParse(hora_inicio, out DateTime horaInicio))
+                {
+                    return Json(new
+                    {
+                        disponible = false,
+                        mensaje = "Formato de hora_inicio inválido."
+                    }, JsonRequestBehavior.AllowGet);
+                }
+
+                if (!DateTime.TryParse(hora_fin, out DateTime horaFin))
+                {
+                    return Json(new
+                    {
+                        disponible = false,
+                        mensaje = "Formato de hora_fin inválido."
+                    }, JsonRequestBehavior.AllowGet);
+                }
+
+                // Log parameters for debugging
+                System.Diagnostics.Debug.WriteLine($"ValidarDisponibilidad: id_dentista={id_dentista}, id_paciente={id_paciente}, fecha_hora={fecha_hora}, hora_inicio={hora_inicio}, hora_fin={hora_fin}");
+
+                // Validate exact same dentist appointment
+                var citaExistenteMismoDentista = db.Citas.Any(c =>
+                    c.id_dentista == id_dentista &&
+                    c.fecha_hora == fechaHora &&
+                    c.estado != "Cancelada");
+
+                if (citaExistenteMismoDentista)
+                {
+                    return Json(new
+                    {
+                        disponible = false,
+                        motivo = "dentista_ocupado",
+                        mensaje = "El dentista ya tiene una cita programada para esta fecha y hora exacta."
+                    }, JsonRequestBehavior.AllowGet);
+                }
+
+                // Validate 1-hour interval for same patient and dentist
+                var citaExistentePacienteDentista = db.Citas.Any(c =>
+                    c.id_dentista == id_dentista &&
+                    c.id_paciente == id_paciente &&
+                    c.fecha_hora >= horaInicio &&
+                    c.fecha_hora <= horaFin &&
+                    c.estado != "Cancelada");
+
+                if (citaExistentePacienteDentista)
+                {
+                    return Json(new
+                    {
+                        disponible = false,
+                        motivo = "paciente_con_dentista",
+                        mensaje = "El paciente ya tiene una cita con este dentista en un intervalo de 1 hora."
+                    }, JsonRequestBehavior.AllowGet);
+                }
+
+                return Json(new { disponible = true }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error in ValidarDisponibilidad: {ex.Message}\n{ex.StackTrace}");
+                return Json(new
+                {
+                    disponible = false,
+                    mensaje = "Error al validar disponibilidad: " + ex.Message
+                }, JsonRequestBehavior.AllowGet);
+            }
         }
 
         // GET: Citas/Edit/5
@@ -214,13 +358,13 @@ namespace ClinicDent.Controllers
             return RedirectToAction("Index");
         }
 
+        // GET: Citas/Calendario
         public ActionResult Calendario()
         {
             return View();
         }
 
-        // En CitasController.cs
-
+        // GET: Citas/ObtenerEventos
         [HttpGet]
         public JsonResult ObtenerEventos()
         {
@@ -237,7 +381,7 @@ namespace ClinicDent.Controllers
                     id = c.id_cita,
                     title = $"{c.Pacientes?.nombres ?? "Sin paciente"} - {c.Dentistas?.nombre ?? "Sin dentista"} - {c.estado}",
                     start = c.fecha_hora.ToString("yyyy-MM-ddTHH:mm:ss"),
-                    end = c.fecha_hora.AddHours(1).ToString("yyyy-MM-ddTHH:mm:ss"), // Duración de 1 hora
+                    end = c.fecha_hora.AddHours(1).ToString("yyyy-MM-ddTHH:mm:ss"),
                     estado = c.estado
                 }).ToList();
 
@@ -245,7 +389,6 @@ namespace ClinicDent.Controllers
             }
             catch (Exception ex)
             {
-                // Log del error
                 System.Diagnostics.Debug.WriteLine($"Error en ObtenerEventos: {ex.Message}");
                 return Json(new { error = "Error al obtener las citas" }, JsonRequestBehavior.AllowGet);
             }
@@ -275,6 +418,41 @@ namespace ClinicDent.Controllers
             }
         }
 
+        // GET: Citas/GenerarConsulta/5
+        public ActionResult GenerarConsulta(int idCita)
+        {
+            var cita = db.Citas
+                .Include(c => c.Pacientes)
+                .Include(c => c.Dentistas)
+                .FirstOrDefault(c => c.id_cita == idCita);
+
+            if (cita == null)
+            {
+                return HttpNotFound();
+            }
+
+            // Verificar si ya existe una consulta para esta cita
+            if (db.Consulta.Any(c => c.id_cita == idCita))
+            {
+                TempData["WarningMessage"] = "Esta cita ya tiene una consulta asociada.";
+                return RedirectToAction("Index");
+            }
+
+            // Formatear la fecha como "16 abr. 2025 15:02"
+            string fechaFormateada = cita.fecha_hora.ToString("dd MMM. yyyy HH:mm", new System.Globalization.CultureInfo("es-ES"));
+
+            // Redirigir al formulario de creación de consultas con los datos precargados
+            return RedirectToAction("Create", "Consultas", new
+            {
+                idCita = idCita,
+                fechaConsulta = fechaFormateada,
+                idDentista = cita.id_dentista,
+                idPaciente = cita.id_paciente,
+                nombreDentista = cita.Dentistas?.nombre,
+                nombrePaciente = cita.Pacientes?.nombres
+            });
+        }
+
         protected override void Dispose(bool disposing)
         {
             if (disposing)
@@ -283,39 +461,5 @@ namespace ClinicDent.Controllers
             }
             base.Dispose(disposing);
         }
-
-
-        // Generar consulta desde una cita
-       public ActionResult GenerarConsulta(int idCita)
-{
-    var cita = db.Citas.Find(idCita);
-    if (cita == null)
-    {
-        return HttpNotFound();
-    }
-
-    // Verificar si ya existe una consulta para esta cita
-    if (db.Consulta.Any(c => c.id_cita == idCita))
-    {
-        TempData["WarningMessage"] = "Esta cita ya tiene una consulta asociada.";
-        return RedirectToAction("Index");
-    }
-
-    // Formatear la fecha como "16 abr. 2025 15:02"
-    string fechaFormateada = cita.fecha_hora.ToString("dd MMM. yyyy HH:mm", new System.Globalization.CultureInfo("es-ES"));
-
-    // Redirigir al formulario de creación de consultas con los datos precargados
-    return RedirectToAction("Create", "Consultas", new { 
-        idCita = idCita,
-        fechaConsulta = fechaFormateada,
-        idDentista = cita.id_dentista,
-        idPaciente = cita.id_paciente
-    });
-}
-
-       
-        
-
-
     }
 }

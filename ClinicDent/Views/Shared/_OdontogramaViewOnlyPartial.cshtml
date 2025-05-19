@@ -16,6 +16,7 @@
         padding: 20px;
         border-radius: 10px;
         box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        position: relative; /* Added for SVG positioning */
     }
 
     .cuadrante {
@@ -110,21 +111,20 @@
         font-size: 12px;
         font-weight: bold;
         color: #2c3e50;
-        z-index: 40; /* Aumentar el z-index para que esté por encima de diente-marca */
+        z-index: 40;
         pointer-events: none;
     }
 
-    /* Asegúrate que estas clases estén presentes */
     .diente-marca {
         position: absolute;
         top: 0;
         left: 0;
         width: 100%;
         height: 100%;
-        z-index: 20; /* Reducir el z-index para que esté debajo del diente-label */
+        z-index: 20;
         pointer-events: none;
         display: none;
-        background-color: transparent; /* Eliminar el fondo opaco */
+        background-color: transparent;
         border-radius: 50%;
         overflow: visible;
     }
@@ -133,20 +133,88 @@
             display: block !important;
         }
 
-    .marca-faltante::before, .marca-faltante::after {
-        background-color: #3498db;
-    }
-
+    .marca-faltante::before, .marca-faltante::after,
     .marca-extraer::before, .marca-extraer::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 80%;
+        height: 3px;
+        transform-origin: center;
+        z-index: 35;
+    }
+
+    .marca-faltante::before {
+        background-color: #3498db;
+        transform: translate(-50%, -50%) rotate(45deg);
+    }
+
+    .marca-faltante::after {
+        background-color: #3498db;
+        transform: translate(-50%, -50%) rotate(-45deg);
+    }
+
+    .marca-extraer::before {
         background-color: #e74c3c;
+        transform: translate(-50%, -50%) rotate(45deg);
     }
 
-    .marca-faltante {
-        color: #3498db;
+    .marca-extraer::after {
+        background-color: #e74c3c;
+        transform: translate(-50%, -50%) rotate(-45deg);
     }
 
-    .marca-extraer {
-        color: #e74c3c;
+    .marca-necesita-endodoncia::before,
+    .marca-tiene-endodoncia::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 0;
+        height: 0;
+        border-left: 20px solid transparent;
+        border-right: 20px solid transparent;
+        border-bottom: 30px solid;
+        z-index: 35;
+    }
+
+    .marca-necesita-endodoncia::before {
+        border-bottom-color: #e74c3c;
+    }
+
+    .marca-tiene-endodoncia::before {
+        border-bottom-color: #3498db;
+    }
+
+    /* Added styles for puente marks */
+    .marca-puente-azul::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 80%;
+        height: 80%;
+        border: 3px solid #3498db;
+        border-radius: 50%;
+        background-color: transparent;
+        z-index: 35;
+    }
+
+    .marca-puente-rojo::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 80%;
+        height: 80%;
+        border: 3px solid #e74c3c;
+        border-radius: 50%;
+        background-color: transparent;
+        z-index: 35;
     }
 
     .tratamiento-caries {
@@ -157,7 +225,16 @@
         background-color: rgba(52, 152, 219, 0.7);
     }
 
-
+    /* Added style for SVG connections */
+    .svg-conexiones {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 25;
+    }
 
     .leyenda {
         margin-top: 30px;
@@ -187,7 +264,7 @@
         border: 1px solid #adb5bd;
     }
 
-    .leyenda-x {
+    .leyenda-x, .leyenda-triangulo, .leyenda-circulo, .leyenda-linea {
         position: relative;
         width: 20px;
         height: 20px;
@@ -213,6 +290,42 @@
             transform: translate(-50%, -50%) rotate(-45deg);
         }
 
+        .leyenda-triangulo::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-bottom: 15px solid;
+        }
+
+        /* Added styles for puente legend */
+        .leyenda-circulo::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 16px;
+            height: 16px;
+            border: 2px solid currentColor;
+            border-radius: 50%;
+        }
+
+        .leyenda-linea::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background-color: currentColor;
+        }
+
     .x-azul {
         color: #3498db;
     }
@@ -221,17 +334,41 @@
         color: #e74c3c;
     }
 
+    .triangulo-rojo::before {
+        border-bottom-color: #e74c3c;
+    }
 
+    .triangulo-azul::before {
+        border-bottom-color: #3498db;
+    }
+
+    .circulo-azul {
+        color: #3498db;
+    }
+
+    .circulo-rojo {
+        color: #e74c3c;
+    }
+
+    .linea-azul {
+        color: #3498db;
+    }
+
+    .linea-roja {
+        color: #e74c3c;
+    }
 </style>
 
 <div class="odontograma-view-only">
     <div class="odontograma-container">
         <h4>Odontograma del Tratamiento</h4>
 
+        <!-- Added SVG for connections -->
+        <svg class="svg-conexiones"></svg>
+
         <div class="cuadrante">
             <!-- Cuadrante superior: 18-11 y 21-28 -->
             <div class="fila">
-               
                 <div class="grupo-dientes">
                     @for (int i = 18; i >= 11; i--)
                     {
@@ -246,6 +383,11 @@
                             </div>
                             <div class="diente-marca marca-faltante"></div>
                             <div class="diente-marca marca-extraer"></div>
+                            <div class="diente-marca marca-necesita-endodoncia"></div>
+                            <div class="diente-marca marca-tiene-endodoncia"></div>
+                            <!-- Added puente marks -->
+                            <div class="diente-marca marca-puente-azul"></div>
+                            <div class="diente-marca marca-puente-rojo"></div>
                         </div>
                     }
                 </div>
@@ -264,15 +406,18 @@
                             </div>
                             <div class="diente-marca marca-faltante"></div>
                             <div class="diente-marca marca-extraer"></div>
+                            <div class="diente-marca marca-necesita-endodoncia"></div>
+                            <div class="diente-marca marca-tiene-endodoncia"></div>
+                            <!-- Added puente marks -->
+                            <div class="diente-marca marca-puente-azul"></div>
+                            <div class="diente-marca marca-puente-rojo"></div>
                         </div>
                     }
                 </div>
-              
             </div>
 
             <!-- Cuadrante temporal superior: 55-51 y 61-65 -->
             <div class="fila">
-              
                 <div class="grupo-dientes">
                     @for (int i = 55; i >= 51; i--)
                     {
@@ -287,6 +432,11 @@
                             </div>
                             <div class="diente-marca marca-faltante"></div>
                             <div class="diente-marca marca-extraer"></div>
+                            <div class="diente-marca marca-necesita-endodoncia"></div>
+                            <div class="diente-marca marca-tiene-endodoncia"></div>
+                            <!-- Added puente marks -->
+                            <div class="diente-marca marca-puente-azul"></div>
+                            <div class="diente-marca marca-puente-rojo"></div>
                         </div>
                     }
                 </div>
@@ -305,15 +455,18 @@
                             </div>
                             <div class="diente-marca marca-faltante"></div>
                             <div class="diente-marca marca-extraer"></div>
+                            <div class="diente-marca marca-necesita-endodoncia"></div>
+                            <div class="diente-marca marca-tiene-endodoncia"></div>
+                            <!-- Added puente marks -->
+                            <div class="diente-marca marca-puente-azul"></div>
+                            <div class="diente-marca marca-puente-rojo"></div>
                         </div>
                     }
                 </div>
-                
             </div>
 
             <!-- Cuadrante temporal inferior: 85-81 y 71-75 -->
             <div class="fila">
-               
                 <div class="grupo-dientes">
                     @for (int i = 85; i >= 81; i--)
                     {
@@ -328,6 +481,11 @@
                             </div>
                             <div class="diente-marca marca-faltante"></div>
                             <div class="diente-marca marca-extraer"></div>
+                            <div class="diente-marca marca-necesita-endodoncia"></div>
+                            <div class="diente-marca marca-tiene-endodoncia"></div>
+                            <!-- Added puente marks -->
+                            <div class="diente-marca marca-puente-azul"></div>
+                            <div class="diente-marca marca-puente-rojo"></div>
                         </div>
                     }
                 </div>
@@ -346,15 +504,18 @@
                             </div>
                             <div class="diente-marca marca-faltante"></div>
                             <div class="diente-marca marca-extraer"></div>
+                            <div class="diente-marca marca-necesita-endodoncia"></div>
+                            <div class="diente-marca marca-tiene-endodoncia"></div>
+                            <!-- Added puente marks -->
+                            <div class="diente-marca marca-puente-azul"></div>
+                            <div class="diente-marca marca-puente-rojo"></div>
                         </div>
                     }
                 </div>
-               
             </div>
 
             <!-- Cuadrante inferior: 48-41 y 31-38 -->
             <div class="fila">
-              
                 <div class="grupo-dientes">
                     @for (int i = 48; i >= 41; i--)
                     {
@@ -369,6 +530,11 @@
                             </div>
                             <div class="diente-marca marca-faltante"></div>
                             <div class="diente-marca marca-extraer"></div>
+                            <div class="diente-marca marca-necesita-endodoncia"></div>
+                            <div class="diente-marca marca-tiene-endodoncia"></div>
+                            <!-- Added puente marks -->
+                            <div class="diente-marca marca-puente-azul"></div>
+                            <div class="diente-marca marca-puente-rojo"></div>
                         </div>
                     }
                 </div>
@@ -387,10 +553,14 @@
                             </div>
                             <div class="diente-marca marca-faltante"></div>
                             <div class="diente-marca marca-extraer"></div>
+                            <div class="diente-marca marca-necesita-endodoncia"></div>
+                            <div class="diente-marca marca-tiene-endodoncia"></div>
+                            <!-- Added puente marks -->
+                            <div class="diente-marca marca-puente-azul"></div>
+                            <div class="diente-marca marca-puente-rojo"></div>
                         </div>
                     }
                 </div>
-              
             </div>
         </div>
 
@@ -412,6 +582,31 @@
                 <div class="leyenda-x x-roja"></div>
                 <span>Pieza para Extraer</span>
             </div>
+            <div class="leyenda-item">
+                <div class="leyenda-triangulo triangulo-rojo"></div>
+                <span>Necesita Endodoncia</span>
+            </div>
+            <div class="leyenda-item">
+                <div class="leyenda-triangulo triangulo-azul"></div>
+                <span>Tiene Endodoncia</span>
+            </div>
+            <!-- Added legend items for puentes -->
+            <div class="leyenda-item">
+                <div class="leyenda-circulo circulo-azul"></div>
+                <span>Puente Azul</span>
+            </div>
+            <div class="leyenda-item">
+                <div class="leyenda-circulo circulo-rojo"></div>
+                <span>Puente Rojo</span>
+            </div>
+            <div class="leyenda-item">
+                <div class="leyenda-linea linea-azul"></div>
+                <span>Conexión Puente Azul</span>
+            </div>
+            <div class="leyenda-item">
+                <div class="leyenda-linea linea-roja"></div>
+                <span>Conexión Puente Roja</span>
+            </div>
         </div>
     </div>
 </div>
@@ -427,11 +622,12 @@
         }
 
         try {
-            const estadoOdontograma = JSON.parse(odontogramaData.replace(/&quot;/g, '"'));
+            const estadoOdontograma = JSON.parse(odontogramaData.replace(/"/g, '"'));
             console.log('Datos del odontograma:', estadoOdontograma);
 
             // Aplicar el estado al odontograma
             Object.keys(estadoOdontograma).forEach(dienteId => {
+                if (dienteId === 'puentes') return; // Skip puentes array
                 const dienteContainer = document.querySelector(`.diente-container[data-diente-id="${dienteId}"]`);
                 if (!dienteContainer) {
                     console.log(`No se encontró el contenedor para el diente ${dienteId}`);
@@ -448,48 +644,175 @@
                     }
                 });
 
-                // Aplicar marcas (faltante/extraer)
+                // Aplicar marcas (faltante, extraer, necesita-endodoncia, tiene-endodoncia, puente-azul, puente-rojo)
                 const marca = estadoOdontograma[dienteId].marca;
                 if (marca) {
                     const marcaElemento = dienteContainer.querySelector(`.marca-${marca}`);
                     if (marcaElemento) {
-                        // Crear elementos reales para las líneas de la X
-                        const line1 = document.createElement('div');
-                        const line2 = document.createElement('div');
+                        if (marca === 'faltante' || marca === 'extraer') {
+                            // Crear elementos para las líneas de la X
+                            const line1 = document.createElement('div');
+                            const line2 = document.createElement('div');
 
-                        // Configurar estilos para ambas líneas
-                        const lineStyle = {
-                            position: 'absolute',
-                            top: '50%',
-                            left: '50%',
-                            width: '80%',
-                            height: '3px',
-                            backgroundColor: marca === 'faltante' ? '#3498db' : '#e74c3c',
-                            transformOrigin: 'center',
-                            zIndex: '35'
-                        };
+                            // Configurar estilos para las líneas
+                            const lineStyle = {
+                                position: 'absolute',
+                                top: '50%',
+                                left: '50%',
+                                width: '80%',
+                                height: '3px',
+                                backgroundColor: marca === 'faltante' ? '#3498db' : '#e74c3c',
+                                transformOrigin: 'center',
+                                zIndex: '35'
+                            };
 
-                        // Aplicar transformaciones específicas
-                        Object.assign(line1.style, lineStyle, {
-                            transform: 'translate(-50%, -50%) rotate(45deg)'
-                        });
+                            Object.assign(line1.style, lineStyle, {
+                                transform: 'translate(-50%, -50%) rotate(45deg)'
+                            });
 
-                        Object.assign(line2.style, lineStyle, {
-                            transform: 'translate(-50%, -50%) rotate(-45deg)'
-                        });
+                            Object.assign(line2.style, lineStyle, {
+                                transform: 'translate(-50%, -50%) rotate(-45deg)'
+                            });
 
-                        // Limpiar y agregar nuevas líneas
-                        marcaElemento.innerHTML = '';
-                        marcaElemento.appendChild(line1);
-                        marcaElemento.appendChild(line2);
+                            // Limpiar y agregar líneas
+                            marcaElemento.innerHTML = '';
+                            marcaElemento.appendChild(line1);
+                            marcaElemento.appendChild(line2);
+                        } else {
+                            // Para triángulos y puentes, el estilo CSS ::before se encarga
+                            marcaElemento.innerHTML = ''; // Limpiar cualquier contenido previo
+                        }
 
                         // Hacer visible la marca
                         marcaElemento.style.display = 'block';
                         marcaElemento.style.zIndex = '30';
-
                         console.log(`Mostrando marca ${marca} en diente ${dienteId}`);
                     }
                 }
+            });
+
+            // Dibujar conexiones de puentes
+            const svg = document.querySelector('.svg-conexiones');
+            svg.innerHTML = '';
+
+            const puentes = estadoOdontograma.puentes || [];
+            puentes.forEach(puente => {
+                const diente1 = document.querySelector(`.diente-container[data-diente-id="${puente.dienteId1}"]`);
+                const diente2 = document.querySelector(`.diente-container[data-diente-id="${puente.dienteId2}"]`);
+                if (!diente1 || !diente2) {
+                    console.warn(`No se encontraron dientes para puente: ${puente.dienteId1}, ${puente.dienteId2}`);
+                    return;
+                }
+
+                const rect1 = diente1.getBoundingClientRect();
+                const rect2 = diente2.getBoundingClientRect();
+                const svgRect = svg.getBoundingClientRect();
+
+                // Centro del círculo central (diámetro = 30px, ya que width: 60% de 50px)
+                const centroCircle1X = rect1.left + rect1.width / 2 - svgRect.left;
+                const centroCircle1Y = rect1.top + rect1.height / 2 - svgRect.top;
+                const centroCircle2X = rect2.left + rect2.width / 2 - svgRect.left;
+                const centroCircle2Y = rect2.top + rect2.height / 2 - svgRect.top;
+
+                // Borde superior del círculo central (15px desde el centro hacia arriba)
+                const bordeSuperiorCircle1Y = centroCircle1Y - 15;
+                const bordeSuperiorCircle2Y = centroCircle2Y - 15;
+
+                // Puntos para la línea horizontal arriba de los dientes, elevada 10px
+                const offsetY = 10; // Elevar la línea 10px por encima del borde superior
+                const top1X = rect1.left + rect1.width / 2 - svgRect.left;
+                const top1Y = rect1.top - svgRect.top - offsetY;
+                const top2X = rect2.left + rect2.width / 2 - svgRect.left;
+                const top2Y = rect2.top - svgRect.top - offsetY;
+
+                const strokeColor = puente.color === 'azul' ? '#3498db' : '#e74c3c';
+
+                // Línea vertical desde el círculo central del primer diente hasta la línea horizontal
+                const line1 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line1.setAttribute('x1', centroCircle1X);
+                line1.setAttribute('y1', bordeSuperiorCircle1Y);
+                line1.setAttribute('x2', top1X);
+                line1.setAttribute('y2', top1Y);
+                line1.setAttribute('stroke', strokeColor);
+                line1.setAttribute('stroke-width', '3');
+                svg.appendChild(line1);
+
+                // Línea horizontal entre los puntos superiores de los dientes
+                const line2 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line2.setAttribute('x1', top1X);
+                line2.setAttribute('y1', top1Y);
+                line2.setAttribute('x2', top2X);
+                line2.setAttribute('y2', top2Y);
+                line2.setAttribute('stroke', strokeColor);
+                line2.setAttribute('stroke-width', '3');
+                svg.appendChild(line2);
+
+                // Línea vertical desde el círculo central del segundo diente hasta la línea horizontal
+                const line3 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line3.setAttribute('x1', centroCircle2X);
+                line3.setAttribute('y1', bordeSuperiorCircle2Y);
+                line3.setAttribute('x2', top2X);
+                line3.setAttribute('y2', top2Y);
+                line3.setAttribute('stroke', strokeColor);
+                line3.setAttribute('stroke-width', '3');
+                svg.appendChild(line3);
+            });
+
+            // Redibujar conexiones al redimensionar
+            window.addEventListener('resize', () => {
+                svg.innerHTML = '';
+                puentes.forEach(puente => {
+                    const diente1 = document.querySelector(`.diente-container[data-diente-id="${puente.dienteId1}"]`);
+                    const diente2 = document.querySelector(`.diente-container[data-diente-id="${puente.dienteId2}"]`);
+                    if (!diente1 || !diente2) return;
+
+                    const rect1 = diente1.getBoundingClientRect();
+                    const rect2 = diente2.getBoundingClientRect();
+                    const svgRect = svg.getBoundingClientRect();
+
+                    const centroCircle1X = rect1.left + rect1.width / 2 - svgRect.left;
+                    const centroCircle1Y = rect1.top + rect1.height / 2 - svgRect.top;
+                    const centroCircle2X = rect2.left + rect2.width / 2 - svgRect.left;
+                    const centroCircle2Y = rect2.top + rect2.height / 2 - svgRect.top;
+
+                    const bordeSuperiorCircle1Y = centroCircle1Y - 15;
+                    const bordeSuperiorCircle2Y = centroCircle2Y - 15;
+
+                    const offsetY = 10;
+                    const top1X = rect1.left + rect1.width / 2 - svgRect.left;
+                    const top1Y = rect1.top - svgRect.top - offsetY;
+                    const top2X = rect2.left + rect2.width / 2 - svgRect.left;
+                    const top2Y = rect2.top - svgRect.top - offsetY;
+
+                    const strokeColor = puente.color === 'azul' ? '#3498db' : '#e74c3c';
+
+                    const line1 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                    line1.setAttribute('x1', centroCircle1X);
+                    line1.setAttribute('y1', bordeSuperiorCircle1Y);
+                    line1.setAttribute('x2', top1X);
+                    line1.setAttribute('y2', top1Y);
+                    line1.setAttribute('stroke', strokeColor);
+                    line1.setAttribute('stroke-width', '3');
+                    svg.appendChild(line1);
+
+                    const line2 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                    line2.setAttribute('x1', top1X);
+                    line2.setAttribute('y1', top1Y);
+                    line2.setAttribute('x2', top2X);
+                    line2.setAttribute('y2', top2Y);
+                    line2.setAttribute('stroke', strokeColor);
+                    line2.setAttribute('stroke-width', '3');
+                    svg.appendChild(line2);
+
+                    const line3 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                    line3.setAttribute('x1', centroCircle2X);
+                    line3.setAttribute('y1', bordeSuperiorCircle2Y);
+                    line3.setAttribute('x2', top2X);
+                    line3.setAttribute('y2', top2Y);
+                    line3.setAttribute('stroke', strokeColor);
+                    line3.setAttribute('stroke-width', '3');
+                    svg.appendChild(line3);
+                });
             });
         } catch (e) {
             console.error('Error al cargar odontograma:', e);

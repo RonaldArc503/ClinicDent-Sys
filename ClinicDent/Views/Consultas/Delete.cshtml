@@ -1,88 +1,334 @@
 ﻿@model ClinicDent.Models.Consulta
 
 @{
-    ViewBag.Title = "Delete";
+    ViewBag.Title = "Eliminar Consulta";
 }
 
-<h2>Delete</h2>
+<!-- Main Content -->
+<div class="edit-container">
+    <div class="section-container">
+        <h2 class="edit-title">
+            <i class="fas fa-trash-alt" style="margin-right: 12px; color: #dc3545;"></i> Eliminar Consulta
+        </h2>
+        <h4 class="text-center text-muted mb-4">¿Estás seguro de que quieres eliminar esta consulta?</h4>
 
-<h3>Are you sure you want to delete this?</h3>
-<div>
-    <h4>Consulta</h4>
-    <hr />
-    <dl class="dl-horizontal">
-        <dt>
-            @Html.DisplayNameFor(model => model.fecha_consulta)
-        </dt>
+        <div class="card shadow-sm border-0 rounded-4 p-4 bg-light">
+            <h5 class="tratamiento-title">
+                <i class="fas fa-info-circle" style="margin-right: 12px; color: #17a2b8;"></i> Detalles de la Consulta
+            </h5>
+            <hr class="border-secondary" />
+            <dl class="row g-3">
+                <dt class="col-sm-4 control-label">
+                    <i class="fas fa-calendar-check label-icon"></i> Fecha de Consulta
+                </dt>
+                <dd class="col-sm-8">
+                    @Html.DisplayFor(model => model.fecha_consulta)
+                </dd>
 
-        <dd>
-            @Html.DisplayFor(model => model.fecha_consulta)
-        </dd>
+                <dt class="col-sm-4 control-label">
+                    <i class="fas fa-diagnoses label-icon"></i> Diagnóstico
+                </dt>
+                <dd class="col-sm-8">
+                    @Html.DisplayFor(model => model.diagnostico)
+                </dd>
 
-        <dt>
-            @Html.DisplayNameFor(model => model.diagnostico)
-        </dt>
+                <dt class="col-sm-4 control-label">
+                    <i class="fas fa-eye label-icon"></i> Observaciones
+                </dt>
+                <dd class="col-sm-8">
+                    @Html.DisplayFor(model => model.observaciones)
+                </dd>
 
-        <dd>
-            @Html.DisplayFor(model => model.diagnostico)
-        </dd>
+                <dt class="col-sm-4 control-label">
+                    <i class="fas fa-comment-medical label-icon"></i> Recomendaciones
+                </dt>
+                <dd class="col-sm-8">
+                    @Html.DisplayFor(model => model.recomendaciones)
+                </dd>
 
-        <dt>
-            @Html.DisplayNameFor(model => model.observaciones)
-        </dt>
+                <dt class="col-sm-4 control-label">
+                    <i class="fas fa-procedures label-icon"></i> Requiere Tratamiento
+                </dt>
+                <dd class="col-sm-8">
+                    @Html.DisplayFor(model => model.requiere_tratamiento)
+                </dd>
 
-        <dd>
-            @Html.DisplayFor(model => model.observaciones)
-        </dd>
+                <dt class="col-sm-4 control-label">
+                    <i class="fas fa-calendar-alt label-icon"></i> Estado de la Cita
+                </dt>
+                <dd class="col-sm-8">
+                    @Html.DisplayFor(model => model.Citas.estado)
+                </dd>
 
-        <dt>
-            @Html.DisplayNameFor(model => model.recomendaciones)
-        </dt>
+                <dt class="col-sm-4 control-label">
+                    <i class="fas fa-user-md label-icon"></i> Dentista
+                </dt>
+                <dd class="col-sm-8">
+                    @Html.DisplayFor(model => model.Dentistas.nombre)
+                </dd>
 
-        <dd>
-            @Html.DisplayFor(model => model.recomendaciones)
-        </dd>
+                <dt class="col-sm-4 control-label">
+                    <i class="fas fa-user label-icon"></i> Paciente
+                </dt>
+                <dd class="col-sm-8">
+                    @Html.DisplayFor(model => model.Pacientes.nombres)
+                </dd>
+            </dl>
 
-        <dt>
-            @Html.DisplayNameFor(model => model.requiere_tratamiento)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.requiere_tratamiento)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.Citas.estado)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.Citas.estado)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.Dentistas.nombre)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.Dentistas.nombre)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.Pacientes.nombres)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.Pacientes.nombres)
-        </dd>
-
-    </dl>
-
-    @using (Html.BeginForm()) {
-        @Html.AntiForgeryToken()
-
-        <div class="form-actions no-color">
-            <input type="submit" value="Delete" class="btn btn-default" /> |
-            @Html.ActionLink("Back to List", "Index")
+            <!-- Action Buttons -->
+            <div class="d-flex gap-3 mt-5 justify-content-end">
+                <a href="@Url.Action("Index")" class="btn-back">
+                    <i class="fas fa-arrow-left" style="margin-right: 8px;"></i> Volver al listado
+                </a>
+                <button type="button" class="btn btn-danger rounded-pill px-5" data-bs-toggle="modal" data-bs-target="#firstConfirmModal">
+                    <i class="fas fa-trash" style="margin-right: 8px;"></i> Eliminar
+                </button>
+            </div>
         </div>
-    }
+
+        <!-- First Confirmation Modal -->
+        <div class="modal fade" id="firstConfirmModal" tabindex="-1" aria-labelledby="firstConfirmModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0 rounded-4 shadow-lg">
+                    <div class="modal-header bg-danger text-white border-0">
+                        <h5 class="modal-title fw-semibold" id="firstConfirmModalLabel">Confirmar Eliminación</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <p class="mb-0">¿Estás seguro de que deseas eliminar esta consulta? <strong>Esta acción no se puede deshacer</strong>.</p>
+                    </div>
+                    <div class="modal-footer border-0">
+                        <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-danger rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#secondConfirmModal" onclick="closeFirstModal()">Confirmar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Second Confirmation Modal -->
+        <div class="modal fade" id="secondConfirmModal" tabindex="-1" aria-labelledby="secondConfirmModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0 rounded-4 shadow-lg">
+                    <div class="modal-header bg-danger text-white border-0">
+                        <h5 class="modal-title fw-semibold" id="secondConfirmModalLabel">Confirmación Final</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <p class="mb-0">Por favor, confirma nuevamente: <strong>¿Realmente deseas eliminar esta consulta?</strong></p>
+                    </div>
+                    <div class="modal-footer border-0">
+                        <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
+                        @using (Html.BeginForm())
+                        {
+                            @Html.AntiForgeryToken()
+                            <input type="submit" value="Eliminar" class="btn btn-danger rounded-pill px-4" />
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
+@section Scripts {
+    <script>
+        function closeFirstModal() {
+            const firstModal = document.getElementById('firstConfirmModal');
+            const modal = bootstrap.Modal.getInstance(firstModal);
+            modal.hide();
+        }
+    </script>
+}
+
+<!-- External Dependencies -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
+
+<!-- Styles -->
+<style>
+    @@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+    body {
+        background-color: #f1f4f8;
+        font-family: 'Poppins', sans-serif;
+        color: #333;
+        line-height: 1.6;
+    }
+
+    .edit-container {
+        max-width: 900px;
+        margin: 2rem auto;
+        padding: 0;
+        background-color: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    }
+
+    .section-container {
+        padding: 2rem;
+        margin-bottom: 1.5rem;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        border-left: 4px solid #17a2b8;
+        background-color: #fff;
+    }
+
+    .edit-title {
+        color: #2c3e50;
+        margin-bottom: 1.5rem;
+        font-size: 1.8rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .tratamiento-title {
+        color: #2c3e50;
+        margin-bottom: 1.25rem;
+        font-size: 1.4rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+    }
+
+    .card {
+        border-radius: 1.5rem;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+    }
+
+    .control-label {
+        font-weight: 600;
+        color: #17a2b8;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        font-size: 0.95rem;
+    }
+
+    .label-icon {
+        margin-right: 0.75rem;
+        color: #6c757d;
+        width: 20px;
+        text-align: center;
+    }
+
+    dl.row dt, dl.row dd {
+        padding: 0.75rem 0;
+        font-size: 1rem;
+    }
+
+    hr {
+        border-top: 2px solid #dee2e6;
+        margin: 1.5rem 0;
+    }
+
+    /* Button Styles */
+    .btn-danger {
+        background: linear-gradient(45deg, #dc3545, #e4606d);
+        border: none;
+        font-weight: 500;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .btn-danger:hover {
+        background: linear-gradient(45deg, #c82333, #d7545f);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(220, 53, 69, 0.4);
+    }
+
+    .btn-outline-secondary {
+        border-color: #6c757d;
+        color: #6c757d;
+        font-weight: 500;
+        transition: all 0.2s ease;
+    }
+
+    .btn-outline-secondary:hover {
+        background-color: #6c757d;
+        color: #fff;
+        transform: translateY(-2px);
+    }
+
+    .btn-back {
+        display: inline-flex;
+        align-items: center;
+        color: #6c757d;
+        text-decoration: none;
+        transition: all 0.3s;
+        font-size: 0.95rem;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        background-color: #f8f9fa;
+    }
+
+    .btn-back:hover {
+        color: #17a2b8;
+        background-color: #f1f1f1;
+        text-decoration: none;
+    }
+
+    .rounded-pill {
+        border-radius: 2rem !important;
+    }
+
+    /* Modal Styles */
+    .modal-content {
+        border-radius: 1.5rem;
+        overflow: hidden;
+        animation: slideIn 0.3s ease;
+    }
+
+    .modal-header {
+        padding: 1.5rem;
+    }
+
+    .modal-body {
+        font-size: 1.1rem;
+        color: #444;
+    }
+
+    .modal-footer {
+        padding: 1rem 1.5rem;
+    }
+
+    /* Animation for Modal */
+    @@keyframes slideIn {
+        from {
+            transform: translateY(50px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    /* Responsive Design */
+    @@media (max-width: 576px) {
+        .edit-container {
+            margin: 1rem;
+            padding: 1rem;
+        }
+
+        .section-container {
+            padding: 1.5rem;
+        }
+
+        .btn-danger, .btn-back {
+            padding: 0.5rem 1.5rem;
+            font-size: 0.9rem;
+        }
+
+        dl.row dt, dl.row dd {
+            font-size: 0.9rem;
+        }
+    }
+</style>

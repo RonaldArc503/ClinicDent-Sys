@@ -1,50 +1,52 @@
 ﻿@model ClinicDent.Models.Citas
 
 @{
-    ViewBag.Title = "Details";
+    ViewBag.Title = "Detalles de la Cita";
 }
 
-<h2>Details</h2>
+<!-- Asegúrate de tener Bootstrap Icons en tu _Layout.cshtml o aquí -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 
-<div>
-    <h4>Citas</h4>
-    <hr />
-    <dl class="dl-horizontal">
-        <dt>
-            @Html.DisplayNameFor(model => model.fecha_hora)
-        </dt>
+<div class="container py-5">
+    <div class="card shadow rounded-4">
+        <div class="card-header bg-primary text-white rounded-top-4 d-flex align-items-center">
+            <i class="bi bi-calendar-event me-2 fs-3"></i>
+            <h3 class="mb-0">Detalles de la Cita</h3>
+        </div>
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-4 text-muted">
+                    <i class="bi bi-clock"></i> Fecha y hora
+                </dt>
+                <dd class="col-sm-8">
+                    @Html.DisplayFor(model => model.fecha_hora)
+                </dd>
 
-        <dd>
-            @Html.DisplayFor(model => model.fecha_hora)
-        </dd>
+                <dt class="col-sm-4 text-muted">
+                    <i class="bi bi-info-circle"></i> Estado
+                </dt>
+                <dd class="col-sm-8">
+                    @Html.DisplayFor(model => model.estado)
+                </dd>
 
-        <dt>
-            @Html.DisplayNameFor(model => model.estado)
-        </dt>
+                <dt class="col-sm-4 text-muted">
+                    <i class="bi bi-person-badge"></i> Nombre del dentista
+                </dt>
+                <dd class="col-sm-8">
+                    @Html.DisplayFor(model => model.Dentistas.nombre)
+                </dd>
 
-        <dd>
-            @Html.DisplayFor(model => model.estado)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.Dentistas.nombre)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.Dentistas.nombre)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.Pacientes.nombres)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.Pacientes.nombres)
-        </dd>
-
-    </dl>
+                <dt class="col-sm-4 text-muted">
+                    <i class="bi bi-person"></i> Nombres del paciente
+                </dt>
+                <dd class="col-sm-8">
+                    @Html.DisplayFor(model => model.Pacientes.nombres)
+                </dd>
+            </dl>
+        </div>
+        <div class="card-footer bg-light text-end">
+            @Html.ActionLink("Editar", "Edit", new { id = Model.id_cita }, new { @class = "btn btn-warning me-2" })
+            @Html.ActionLink("Volver a la Lista", "Index", null, new { @class = "btn btn-secondary" })
+        </div>
+    </div>
 </div>
-<p>
-    @Html.ActionLink("Edit", "Edit", new { id = Model.id_cita }) |
-    @Html.ActionLink("Back to List", "Index")
-</p>

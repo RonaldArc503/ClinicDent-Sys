@@ -5,219 +5,612 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="container mt-4">
-    <div class="row">
-        <div class="col-md-8 mx-auto">
-            <div class="card shadow">
-                <div class="card-header bg-primary text-white">
-                    <h3 class="card-title mb-0">
-                        <i class="fas fa-calendar-plus me-2"></i>@ViewBag.Title
-                    </h3>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
+
+<style>
+    /* Estilos modernizados (adaptados de Nueva Consulta) */
+    .edit-container {
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 0;
+        background-color: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    }
+
+    .section-container {
+        padding: 2rem;
+        margin-bottom: 1.5rem;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        border-left: 4px solid #17a2b8;
+        background-color: #fff;
+    }
+
+    .edit-title {
+        color: #2c3e50;
+        margin-bottom: 1.5rem;
+        font-size: 1.8rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .control-label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        font-size: 0.95rem;
+    }
+
+    .label-icon {
+        margin-right: 0.75rem;
+        color: #6c757d;
+        width: 20px;
+        text-align: center;
+    }
+
+    .form-control, .select2-selection {
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        border: 1px solid #e0e0e0;
+        transition: all 0.3s ease;
+        font-size: 0.95rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+        .form-control:focus, .select2-selection:focus {
+            border-color: #17a2b8;
+            box-shadow: 0 4px 8px rgba(23, 162, 184, 0.2);
+        }
+
+    .btn-submit {
+        background-color: #17a2b8;
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 1.5rem;
+        width: 100%;
+        max-width: 220px;
+    }
+
+        .btn-submit:hover {
+            background-color: #138496;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+    .btn-back {
+        display: inline-flex;
+        align-items: center;
+        color: #6c757d;
+        text-decoration: none;
+        transition: all 0.3s;
+        font-size: 0.95rem;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        background-color: #f8f9fa;
+    }
+
+        .btn-back:hover {
+            color: #17a2b8;
+            background-color: #f1f1f1;
+            text-decoration: none;
+        }
+
+    /* Estilos para el selector de fecha/hora */
+    .datetime-container {
+        position: relative;
+    }
+
+    /* Ajuste para alinear el calendario de Flatpickr */
+    .flatpickr-calendar {
+        transform: translateY(140px) !important; /* Alinea el centro del calendario con el centro del input */
+        margin-top: -20px; /* Ajuste fino */
+    }
+
+    @@media (max-width: 768px) {
+        .flatpickr-calendar {
+            transform: translateY(-100px) !important; /* Ajuste para pantallas pequeñas */
+        }
+    }
+
+    /* Diseño responsive */
+    .form-columns {
+        display: flex;
+        gap: 2rem;
+    }
+
+    .form-left-column, .form-right-column {
+        flex: 1;
+    }
+
+    @@media (max-width: 992px) {
+        .form-columns {
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .edit-container {
+            margin: 1rem;
+        }
+    }
+
+    /* Estilos para select2 */
+    .select2-container--bootstrap-5 .select2-selection {
+        height: auto;
+        min-height: 42px;
+        display: flex;
+        align-items: center;
+    }
+
+    .is-validating {
+        background-color: #fff8e1;
+    }
+
+    /* Estilo para horas no disponibles */
+    .flatpickr-time .flatpickr-time-separator,
+    .flatpickr-time .flatpickr-am-pm,
+    .flatpickr-time input.disabled,
+    .flatpickr-hour.disabled,
+    .flatpickr-minute.disabled {
+        opacity: 0.5;
+        pointer-events: none;
+    }
+
+    /* Estilo para mensaje de hora pasada */
+    .time-validation-message {
+        color: #dc3545;
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+        display: none;
+    }
+
+    /* Estilo para AM/PM seleccionable */
+    .flatpickr-am-pm {
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+        .flatpickr-am-pm:hover {
+            background-color: #f0f0f0;
+        }
+
+        .flatpickr-am-pm.selected {
+            font-weight: bold;
+            color: #17a2b8;
+        }
+
+
+    /* Estilo para mensaje de hora pasada y dentista ocupado */
+    .time-validation-message {
+        color: #dc3545;
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+        display: none;
+    }
+
+    /* Estilo específico para mensaje de dentista ocupado */
+    #dentistaOcupadoMessage {
+        color: #dc3545;
+    }
+</style>
+
+<div class="edit-container">
+    <div class="section-container">
+        <h2 class="edit-title">
+            <i class="fas fa-calendar-plus" style="margin-right: 12px; color: #17a2b8;"></i> Programar Nueva Cita
+        </h2>
+
+        @using (Html.BeginForm("Create", "Citas", FormMethod.Post, new { id = "citaForm", autocomplete = "off" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+            <div class="form-columns">
+                <!-- Columna izquierda -->
+                <div class="form-left-column">
+                    <div class="form-group">
+                        <label class="control-label">
+                            <i class="fas fa-user label-icon"></i>Paciente
+                        </label>
+                        @Html.DropDownListFor(model => model.id_paciente, (SelectList)ViewBag.Pacientes, "-- Seleccione un paciente --", new { @class = "form-control select2", required = "required", autocomplete = "off" })
+                        @Html.ValidationMessageFor(model => model.id_paciente, "", new { @class = "text-danger" })
+                    </div>
+
+                    <div class="form-group">
+                        <label class="control-label">
+                            <i class="fas fa-clock label-icon"></i>Fecha y Hora
+                        </label>
+                        <div class="datetime-container">
+                            <input type="text" id="fecha_hora" class="form-control" placeholder="Seleccione fecha y hora" readonly autocomplete="off" />
+                            @Html.HiddenFor(model => model.fecha_hora, new { @id = "fecha_horaHidden", autocomplete = "off" })
+                            <div id="timeValidationMessage" class="time-validation-message">
+                                <i class="fas fa-exclamation-circle"></i> La hora seleccionada ya ha pasado
+                            </div>
+                        </div>
+                        @Html.ValidationMessageFor(model => model.fecha_hora, "", new { @class = "text-danger" })
+                        <small class="text-muted">Seleccione fecha y hora para la cita</small>
+                    </div>
                 </div>
 
-                <div class="card-body">
-                    @using (Html.BeginForm())
-                    {
-                        @Html.AntiForgeryToken()
+                <!-- Columna derecha -->
+                <div class="form-right-column">
+                    <div class="form-group">
+                        <label class="control-label">
+                            <i class="fas fa-user-md label-icon"></i>Dentista
+                        </label>
+                        @Html.DropDownListFor(model => model.id_dentista, (SelectList)ViewBag.Dentistas, "-- Seleccione un dentista --", new { @class = "form-control select2", required = "required", autocomplete = "off" })
+                        @Html.ValidationMessageFor(model => model.id_dentista, "", new { @class = "text-danger" })
+                    </div>
 
-                        @Html.ValidationSummary(true, "", new { @class = "alert alert-danger" })
-
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    @Html.LabelFor(model => model.id_paciente, "Paciente", htmlAttributes: new { @class = "form-label fw-bold" })
-                                    @Html.DropDownList("id_paciente", null, "Seleccione un paciente...", new { @class = "form-select", required = "required" })
-                                    @Html.ValidationMessageFor(model => model.id_paciente, "", new { @class = "text-danger" })
-                                </div>
-                            </div>
-
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    @Html.LabelFor(model => model.id_dentista, "Dentista", htmlAttributes: new { @class = "form-label fw-bold" })
-                                    @Html.DropDownList("id_dentista", null, "Seleccione un dentista...", new { @class = "form-select", required = "required" })
-                                    @Html.ValidationMessageFor(model => model.id_dentista, "", new { @class = "text-danger" })
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    @Html.LabelFor(model => model.fecha_hora, "Fecha y Hora", htmlAttributes: new { @class = "form-label fw-bold" })
-                                    <input type="datetime-local" id="fecha_hora" name="fecha_hora" class="form-control" required
-                                           min="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")">
-                                    @Html.ValidationMessageFor(model => model.fecha_hora, "", new { @class = "text-danger" })
-                                    <small class="text-muted">Seleccione fecha y hora para la cita</small>
-                                </div>
-                            </div>
-
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    @Html.LabelFor(model => model.estado, "Estado", htmlAttributes: new { @class = "form-label fw-bold" })
-                                    @Html.DropDownListFor(model => model.estado, new List<SelectListItem>
-                                    {
-                                        new SelectListItem { Text = "Pendiente", Value = "Pendiente", Selected = true },
-                                        new SelectListItem { Text = "Confirmada", Value = "Confirmada" },
-                                        new SelectListItem { Text = "Cancelada", Value = "Cancelada" }
-                                    }, new { @class = "form-select" })
-                                    @Html.ValidationMessageFor(model => model.estado, "", new { @class = "text-danger" })
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form-group mt-4">
-                            <div class="d-flex justify-content-between">
-                                <a href="@Url.Action("Index")" class="btn btn-outline-secondary">
-                                    <i class="fas fa-arrow-left me-1"></i> Volver al Listado
-                                </a>
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-save me-1"></i> Guardar Cita
-                                </button>
-                            </div>
-                        </div>
-                    }
+                    <div class="form-group">
+                        <label class="control-label">
+                            <i class="fas fa-info-circle label-icon"></i>Estado
+                        </label>
+                        @Html.DropDownListFor(model => model.estado, new List<SelectListItem>
+                        {
+                            new SelectListItem { Text = "Pendiente", Value = "Pendiente", Selected = true },
+                            new SelectListItem { Text = "Confirmada", Value = "Confirmada" },
+                            new SelectListItem { Text = "Cancelada", Value = "Cancelada" }
+                        }, new { @class = "form-control select2", autocomplete = "off" })
+                        @Html.ValidationMessageFor(model => model.estado, "", new { @class = "text-danger" })
+                    </div>
                 </div>
             </div>
-        </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 2rem;">
+                <a href="@Url.Action("Index")" class="btn-back">
+                    <i class="fas fa-arrow-left" style="margin-right: 8px;"></i> Volver al listado
+                </a>
+                <button type="submit" class="btn-submit" id="guardarCita">
+                    <i class="fas fa-save" style="margin-right: 8px;"></i> Guardar Cita
+                </button>
+            </div>
+        }
     </div>
 </div>
 
-
-    <style>
-        .card {
-            border-radius: 10px;
-            overflow: hidden;
-            border: none;
-        }
-
-        .form-label {
-            margin-bottom: 0.5rem;
-            color: #495057;
-        }
-
-        .form-control, .form-select {
-            border-radius: 8px;
-            padding: 10px 15px;
-            border: 1px solid #ced4da;
-            transition: all 0.3s;
-        }
-
-            .form-control:focus, .form-select:focus {
-                border-color: #86b7fe;
-                box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
-            }
-
-        .btn {
-            border-radius: 50px;
-            padding: 8px 20px;
-            font-weight: 500;
-            transition: all 0.3s;
-        }
-
-        .btn-primary {
-            background-color: #0d6efd;
-            border-color: #0d6efd;
-        }
-
-            .btn-primary:hover {
-                background-color: #0b5ed7;
-                border-color: #0a58ca;
-                transform: translateY(-1px);
-            }
-
-        .btn-outline-secondary {
-            border-color: #6c757d;
-            color: #6c757d;
-        }
-
-            .btn-outline-secondary:hover {
-                background-color: #6c757d;
-                color: white;
-            }
-
-        .is-validating {
-            background-color: #fff8e1;
-        }
-    </style>
-
-
-
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <script>
-        $(document).ready(function() {
-            // Validación de disponibilidad en tiempo real
-            $('#fecha_hora').change(function() {
-                var fechaHora = $(this).val();
-                var idDentista = $('#id_dentista').val();
+        $(document).ready(function () {
+            // Inicializar Select2
+            $('.select2').select2({
+                theme: 'bootstrap-5',
+                width: '100%',
+                placeholder: $(this).data('placeholder') || 'Seleccione una opción',
+                allowClear: true
+            });
 
-                if (!fechaHora || !idDentista) return;
+            // Función para calcular la hora de inicio predeterminada (próxima hora completa o media hora)
+            function getDefaultTime() {
+                const now = new Date();
+                const currentMinutes = now.getMinutes();
+                const currentHour = now.getHours();
 
-                $.ajax({
-                    url: '@Url.Action("ValidarDisponibilidad", "Citas")',
-                    type: 'GET',
-                    data: {
-                        id_dentista: idDentista,
-                        fecha_hora: fechaHora
-                    },
-                    beforeSend: function() {
-                        $('#fecha_hora').addClass('is-validating');
-                    },
-                    success: function(response) {
-                        if (!response.disponible) {
-                            Swal.fire({
-                                icon: 'warning',
-                                title: 'Horario no disponible',
-                                text: 'El dentista ya tiene una cita programada para esta fecha y hora. Por favor, seleccione otro horario.',
-                                confirmButtonColor: '#0d6efd'
+                // Si estamos en la primera media hora, empezar a la hora en punto
+                if (currentMinutes < 30) {
+                    return { hour: currentHour, minute: 30 };
+                }
+                // Si estamos en la segunda media hora, empezar a la siguiente hora en punto
+                else {
+                    return { hour: currentHour + 1, minute: 0 };
+                }
+            }
+
+            // Configuración del selector de fecha/hora con Flatpickr
+            const defaultTime = getDefaultTime();
+            const fp = flatpickr("#fecha_hora", {
+                locale: "es",
+                enableTime: true,
+                dateFormat: "d/m/Y h:i K",
+                minDate: "today",
+                defaultHour: defaultTime.hour,
+                defaultMinute: defaultTime.minute,
+                minuteIncrement: 10,
+                time_24hr: false,
+                position: "above",
+                allowInput: false,
+                clickOpens: true,
+                disable: [
+                    function(date) {
+                        // Deshabilitar horas pasadas para el día actual
+                        return (date.getDate() === new Date().getDate() &&
+                                date.getMonth() === new Date().getMonth() &&
+                                date.getFullYear() === new Date().getFullYear() &&
+                                date < new Date());
+                    }
+                ],
+                onChange: function (selectedDates, dateStr, instance) {
+                    const isoDate = selectedDates[0] ? selectedDates[0].toISOString() : '';
+                    $('#fecha_horaHidden').val(isoDate);
+                    console.log('Fecha seleccionada:', isoDate); // Debug
+
+                    // Validar si la hora seleccionada es pasada
+                    if (selectedDates[0] && selectedDates[0] < new Date()) {
+                        $('#timeValidationMessage').show();
+                    } else {
+                        $('#timeValidationMessage').hide();
+                    }
+                },
+                onReady: function(selectedDates, dateStr, instance) {
+                    // Deshabilitar horas pasadas en el selector de tiempo
+                    const now = new Date();
+                    if (instance.currentYear === now.getFullYear() &&
+                        instance.currentMonth === now.getMonth() &&
+                        instance.currentDay === now.getDate()) {
+
+                        const currentHour = now.getHours();
+                        const currentMinutes = now.getMinutes();
+
+                        // Deshabilitar horas anteriores a la actual
+                        instance.hourElement.querySelectorAll('.flatpickr-hour').forEach(hour => {
+                            if (parseInt(hour.textContent) < currentHour) {
+                                hour.classList.add('disabled');
+                            }
+                        });
+
+                        // Para la hora actual, deshabilitar minutos pasados
+                        if (instance.hourElement.querySelector('.flatpickr-hour.selected') &&
+                            parseInt(instance.hourElement.querySelector('.flatpickr-hour.selected').textContent) === currentHour) {
+
+                            instance.minuteElement.querySelectorAll('.flatpickr-minute').forEach(minute => {
+                                if (parseInt(minute.textContent) < currentMinutes) {
+                                    minute.classList.add('disabled');
+                                }
                             });
-                            $('#fecha_hora').val('');
                         }
-                    },
-                    complete: function() {
-                        $('#fecha_hora').removeClass('is-validating');
-                    },
-                    error: function() {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: 'Ocurrió un error al verificar la disponibilidad. Por favor, intente nuevamente.',
-                            confirmButtonColor: '#0d6efd'
+                    }
+
+                    // Hacer AM/PM seleccionable con clic
+                    const amPmElement = instance.amPM;
+                    if (amPmElement) {
+                        amPmElement.addEventListener('click', function() {
+                            instance.amPM = instance.amPM === 'AM' ? 'PM' : 'AM';
+                            amPmElement.textContent = instance.amPM;
+
+                            // Actualizar la visualización
+                            instance.updateValue();
+
+                            // Agregar clase selected
+                            document.querySelectorAll('.flatpickr-am-pm').forEach(el => el.classList.remove('selected'));
+                            this.classList.add('selected');
+                        });
+
+                        // Establecer clase selected inicial
+                        const currentAmPm = instance.amPM;
+                        document.querySelectorAll('.flatpickr-am-pm').forEach(el => {
+                            if (el.textContent === currentAmPm) {
+                                el.classList.add('selected');
+                            }
                         });
                     }
-                });
-            });
+                },
+                onHourChange: function(selectedDates, dateStr, instance) {
+                    // Cuando cambia la hora, actualizar los minutos disponibles
+                    const now = new Date();
+                    if (instance.currentYear === now.getFullYear() &&
+                        instance.currentMonth === now.getMonth() &&
+                        instance.currentDay === now.getDate() &&
+                        parseInt(instance.hourElement.querySelector('.flatpickr-hour.selected').textContent) === now.getHours()) {
 
-            // Mejorar la experiencia de usuario para selección de fecha/hora
-            $('#fecha_hora').on('focus', function() {
-                if (!$(this).val()) {
-                    // Establecer un valor predeterminado (ahora + 1 hora)
-                    var now = new Date();
-                    now.setHours(now.getHours() + 1);
-                    now.setMinutes(0);
-                    now.setSeconds(0);
+                        const currentMinutes = now.getMinutes();
+                        instance.minuteElement.querySelectorAll('.flatpickr-minute').forEach(minute => {
+                            if (parseInt(minute.textContent) < currentMinutes) {
+                                minute.classList.add('disabled');
+                            } else {
+                                minute.classList.remove('disabled');
+                            }
+                        });
+                    } else {
+                        // Habilitar todos los minutos si no es la hora actual
+                        instance.minuteElement.querySelectorAll('.flatpickr-minute').forEach(minute => {
+                            minute.classList.remove('disabled');
+                        });
+                    }
 
-                    var year = now.getFullYear();
-                    var month = String(now.getMonth() + 1).padStart(2, '0');
-                    var day = String(now.getDate()).padStart(2, '0');
-                    var hours = String(now.getHours()).padStart(2, '0');
-                    var minutes = String(now.getMinutes()).padStart(2, '0');
+                    // Actualizar AM/PM según la hora seleccionada
+                    const hour = parseInt(instance.hourElement.querySelector('.flatpickr-hour.selected').textContent);
+                    const newAmPm = hour < 12 ? 'AM' : 'PM';
+                    if (instance.amPM !== newAmPm) {
+                        instance.amPM = newAmPm;
+                        instance.amPMElement.textContent = newAmPm;
 
-                    $(this).val(year + '-' + month + '-' + day + 'T' + hours + ':' + minutes);
+                        // Actualizar clases selected
+                        document.querySelectorAll('.flatpickr-am-pm').forEach(el => {
+                            el.classList.remove('selected');
+                            if (el.textContent === newAmPm) {
+                                el.classList.add('selected');
+                            }
+                        });
+                    }
+                },
+                onOpen: function(selectedDates, dateStr, instance) {
+                    // Asegurarse de que AM/PM sea seleccionable
+                    setTimeout(() => {
+                        const amPmElements = document.querySelectorAll('.flatpickr-am-pm');
+                        if (amPmElements.length > 0 && !amPmElements[0].hasEventListener) {
+                            amPmElements.forEach(el => {
+                                el.hasEventListener = true;
+                                el.addEventListener('click', function() {
+                                    instance.amPM = instance.amPM === 'AM' ? 'PM' : 'AM';
+                                    instance.amPMElement.textContent = instance.amPM;
+                                    instance.updateValue();
+
+                                    // Actualizar clases selected
+                                    document.querySelectorAll('.flatpickr-am-pm').forEach(el => el.classList.remove('selected'));
+                                    this.classList.add('selected');
+                                });
+                            });
+                        }
+                    }, 100);
                 }
             });
 
-            // Validación del formulario
-            $('form').submit(function(e) {
-                if (!$('#id_paciente').val() || !$('#id_dentista').val() || !$('#fecha_hora').val()) {
+// Validación de disponibilidad en tiempo real
+$('#fecha_hora').change(function () {
+    var fechaHora = $('#fecha_horaHidden').val();
+    var idDentista = $('#id_dentista').val();
+    var idPaciente = $('#id_paciente').val();
+
+    if (!fechaHora || !idDentista || !idPaciente) return;
+
+    var fechaSeleccionada = new Date(fechaHora);
+    var horaInicio = new Date(fechaSeleccionada);
+    var horaFin = new Date(fechaSeleccionada);
+    horaInicio.setMinutes(horaInicio.getMinutes() - 40); // Intervalo de 40 minutos antes
+    horaFin.setMinutes(horaFin.getMinutes() + 40); // Intervalo de 40 minutos después
+
+    // Ocultar todos los mensajes primero
+    $('#timeValidationMessage').hide();
+    $('#dentistaOcupadoMessage').hide();
+
+    $.ajax({
+        url: '@Url.Action("ValidarDisponibilidad", "Citas")',
+        type: 'GET',
+        data: {
+            id_dentista: idDentista,
+            id_paciente: idPaciente,
+            fecha_hora: fechaHora,
+            hora_inicio: horaInicio.toISOString(),
+            hora_fin: horaFin.toISOString()
+        },
+        beforeSend: function () {
+            $('#fecha_hora').addClass('is-validating');
+            console.log('Validando disponibilidad:', {
+                id_dentista: idDentista,
+                id_paciente: idPaciente,
+                fecha_hora: fechaHora,
+                hora_inicio: horaInicio.toISOString(),
+                hora_fin: horaFin.toISOString()
+            });
+        },
+        success: function (response) {
+            console.log('ValidarDisponibilidad response:', response);
+            if (!response.disponible) {
+                if (response.motivo === 'dentista_ocupado_exacto' || response.motivo === 'dentista_ocupado_intervalo') {
+                    $('#dentistaOcupadoMessage').show();
+                } else if (response.motivo === 'paciente_con_dentista') {
+                    // Mensaje para paciente con cita en intervalo de 1 hora
+                    $('#timeValidationMessage').text(response.mensaje).show();
+                }
+
+                $('#fecha_hora').val('');
+                $('#fecha_horaHidden').val('');
+            }
+        },
+        complete: function () {
+            $('#fecha_hora').removeClass('is-validating');
+        },
+        error: function (xhr, status, error) {
+            console.error('Error en ValidarDisponibilidad:', {
+                status: xhr.status,
+                statusText: xhr.statusText,
+                responseText: xhr.responseText,
+                dataSent: {
+                    id_dentista: idDentista,
+                    id_paciente: idPaciente,
+                    fecha_hora: fechaHora,
+                    hora_inicio: horaInicio.toISOString(),
+                    hora_fin: horaFin.toISOString()
+                }
+            });
+            $('#fecha_hora').val('');
+            $('#fecha_horaHidden').val('');
+        }
+    });
+});
+
+            // Validación del formulario con AJAX
+            $('#citaForm').on('submit', function (e) {
+                e.preventDefault();
+
+                const submitBtn = $('#guardarCita');
+                submitBtn.html('<i class="fas fa-spinner fa-spin"></i> Procesando...');
+                submitBtn.prop('disabled', true);
+
+                if ($(this).valid()) {
+                    var formData = $(this).serialize();
+                    console.log('Form data being sent:', formData);
+                    $.ajax({
+                        url: '@Url.Action("Create", "Citas")',
+                        type: 'POST',
+                        data: formData,
+                        success: function (response) {
+                            console.log('Create response:', response);
+                            if (response.success) {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Cita creada',
+                                    text: response.message || 'La cita se ha programado correctamente.',
+                                    confirmButtonColor: '#17a2b8'
+                                }).then(() => {
+                                    window.location.href = '@Url.Action("Index", "Citas")';
+                                });
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error',
+                                    text: response.message || 'Ocurrió un error al crear la cita.',
+                                    confirmButtonColor: '#17a2b8'
+                                });
+                                submitBtn.html('<i class="fas fa-save"></i> Guardar Cita');
+                                submitBtn.prop('disabled', false);
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            console.error('Error en Crear Cita:', {
+                                status: xhr.status,
+                                statusText: xhr.statusText,
+                                responseText: xhr.responseText,
+                                formData: formData
+                            });
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: 'Ocurrió un error al procesar la solicitud. Por favor, intenta de nuevo.',
+                                confirmButtonColor: '#17a2b8'
+                            });
+                            submitBtn.html('<i class="fas fa-save"></i> Guardar Cita');
+                            submitBtn.prop('disabled', false);
+                        }
+                    });
+                } else {
                     Swal.fire({
                         icon: 'error',
-                        title: 'Campos requeridos',
-                        text: 'Por favor complete todos los campos obligatorios.',
-                        confirmButtonColor: '#0d6efd'
+                        title: 'Datos incompletos',
+                        text: 'Por favor, corrige los errores en el formulario.',
+                        confirmButtonColor: '#17a2b8'
                     });
-                    return false;
+                    submitBtn.html('<i class="fas fa-save"></i> Guardar Cita');
+                    submitBtn.prop('disabled', false);
                 }
-                return true;
             });
         });
     </script>
+}
