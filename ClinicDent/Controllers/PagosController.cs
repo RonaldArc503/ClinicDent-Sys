@@ -1,12 +1,15 @@
-﻿using System;
+﻿using ClinicDent.Models;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Entity;
+using System.Data.Entity.Infrastructure;
 using System.Data.SqlClient;
+using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Web.Mvc;
-using ClinicDent.Models;
 
 namespace ClinicDent.Controllers
 {
@@ -17,48 +20,48 @@ namespace ClinicDent.Controllers
         // GET: Pagos
         public ActionResult Index()
         {
-            try
+            var pagos = db.Pagos.Select(p => new PagoViewModel
             {
-                var pagos = db.Database.SqlQuery<PagoViewModel>("SELECT * FROM VistaPagos").ToList();
-                return View(pagos);
-            }
-            catch (SqlException ex)
-            {
-                // Log the error (in a real app, use a logging framework)
-                ModelState.AddModelError("", $"Error al cargar los pagos: {ex.Message}");
-                return View(new List<PagoViewModel>());
-            }
-        }
+                IdPago = p.id_pago,
+                IdConsulta = p.id_consulta,
+                FechaPago = p.fecha_pago,
+                MontoTotal = p.monto_total,
+                MetodoPago = p.metodo_pago,
+                TipoPago = p.tipo_pago,
+                Cuotas = p.Pagos_Cuotas.Select(c => new PagoCuotaViewModel
+                {
+                    IdCuota = c.id_cuota,
+                    IdPago = c.id_pago,
+                    FechaPago = c.fecha_pago,
+                    Monto = c.monto,
+                    Estado = c.estado
+                }).ToList()
+            }).ToList();
 
-        // GET: Pagos/Details/5
-        public ActionResult Details(int? id)
-        {
-            if (id == null)
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            }
-            var pago = db.Database.SqlQuery<PagoViewModel>("SELECT * FROM VistaPagos WHERE id_pago = @id", new SqlParameter("@id", id)).FirstOrDefault();
-            if (pago == null)
-            {
-                return HttpNotFound();
-            }
-            return View(pago);
+            return View(pagos);
         }
 
         // GET: Pagos/Create
         public ActionResult Create()
         {
-            var consultas = from c in db.Consulta
-                            join p in db.Pacientes on c.id_paciente equals p.id_paciente
-                            select new
-                            {
-                                c.id_consulta,
-                                DisplayText = p.nombres + " " + p.apellidos + " - " + c.diagnostico
-                            };
-            ViewBag.IdConsulta = new SelectList(consultas, "id_consulta", "DisplayText");
-            ViewBag.MetodoPago = new SelectList(new[] { "Efectivo", "Tarjeta", "Transferencia" });
-            ViewBag.TipoPago = new SelectList(new[] { "Unico", "Cuotas" });
-            return View(new PagoCreateViewModel());
+            var model = new PagoCreateViewModel
+            {
+                Consultas = GetConsultasSelectList(),
+                MetodosPago = new List<SelectListItem>
+                {
+                    new SelectListItem { Value = "Efectivo", Text = "Efectivo" },
+                    new SelectListItem { Value = "Tarjeta", Text = "Tarjeta" },
+                    new SelectListItem { Value = "Transferencia", Text = "Transferencia" }
+                },
+                TiposPago = new List<SelectListItem>
+                {
+                    new SelectListItem { Value = "Unico", Text = "Único" },
+                    new SelectListItem { Value = "Cuotas", Text = "Cuotas" }
+                }
+            };
+
+            Debug.WriteLine($"Consultas cargadas: {model.Consultas.Count()}");
+            return View(model);
         }
 
         // POST: Pagos/Create
@@ -66,157 +69,307 @@ namespace ClinicDent.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Create(PagoCreateViewModel model)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                try
+                LogModelStateErrors();
+            }
+
+            try
+            {
+                if (ModelState.IsValid)
                 {
-                    using (var connection = db.Database.Connection)
+                    // Validate consultation exists
+                    if (!db.Consulta.Any(c => c.id_consulta == model.IdConsulta))
                     {
-                        connection.Open();
-                        using (var command = connection.CreateCommand())
+                        ModelState.AddModelError("IdConsulta", "La consulta seleccionada no existe.");
+                    }
+
+                    // Validate cuotas for Cuotas type
+                    if (model.TipoPago == "Cuotas")
+                    {
+                        if (model.NumeroCuotas <= 0)
                         {
-                            command.CommandText = "RegistrarPago";
-                            command.CommandType = CommandType.StoredProcedure;
-
-                            command.Parameters.Add(new SqlParameter("@id_consulta", model.IdConsulta));
-                            command.Parameters.Add(new SqlParameter("@fecha_pago", model.FechaPago));
-                            command.Parameters.Add(new SqlParameter("@monto_total", model.MontoTotal));
-                            command.Parameters.Add(new SqlParameter("@metodo_pago", model.MetodoPago));
-                            command.Parameters.Add(new SqlParameter("@tipo_pago", model.TipoPago));
-
-                            var cuotasTable = new DataTable();
-                            cuotasTable.Columns.Add("fecha_inicio", typeof(DateTime));
-                            cuotasTable.Columns.Add("costo", typeof(decimal));
-                            cuotasTable.Columns.Add("id_tipo_cobro", typeof(int));
-                            cuotasTable.Columns.Add("duracion_estimada", typeof(int));
-                            cuotasTable.Columns.Add("seguimiento", typeof(bool));
-                            cuotasTable.Columns.Add("dientes_seleccionados", typeof(string));
-                            cuotasTable.Columns.Add("cantidad", typeof(int));
-                            cuotasTable.Columns.Add("total", typeof(decimal));
-
-                            if (model.Cuotas != null && model.Cuotas.Any())
+                            ModelState.AddModelError("NumeroCuotas", "El número de cuotas debe ser mayor que 0.");
+                        }
+                        else if (model.Cuotas == null || model.Cuotas.Count == 0)
+                        {
+                            // Auto-generate cuotas if not provided
+                            model.Cuotas = new List<ClinicDent.Models.CuotaInputModel>();
+                            decimal montoPorCuota = model.MontoTotal / model.NumeroCuotas;
+                            for (int i = 0; i < model.NumeroCuotas; i++)
                             {
-                                foreach (var cuota in model.Cuotas)
+                                model.Cuotas.Add(new ClinicDent.Models.CuotaInputModel
                                 {
-                                    cuotasTable.Rows.Add(
-                                        cuota.FechaInicio,
-                                        cuota.Costo,
-                                        null, null, null, null, null, null);
-                                }
+                                    FechaPago = DateTime.Now.AddMonths(i),
+                                    Monto = montoPorCuota,
+                                    Estado = "Pendiente"
+                                });
                             }
+                        }
 
-                            var cuotasParam = new SqlParameter("@cuotas", SqlDbType.Structured)
-                            {
-                                TypeName = "dbo.TratamientoType",
-                                Value = cuotasTable
-                            };
-                            command.Parameters.Add(cuotasParam);
+                        // Validate cuotas count and sum
+                        if (model.Cuotas.Count != model.NumeroCuotas)
+                        {
+                            ModelState.AddModelError("Cuotas", $"Debe proporcionar exactamente {model.NumeroCuotas} cuotas.");
+                        }
 
-                            var idPago = (int)command.ExecuteScalar();
-                            return RedirectToAction("Index");
+                        decimal cuotasSum = model.Cuotas.Sum(c => c.Monto);
+                        if (Math.Abs(cuotasSum - model.MontoTotal) > 0.01m)
+                        {
+                            ModelState.AddModelError("Cuotas", "La suma de los montos de las cuotas debe coincidir con el monto total.");
                         }
                     }
-                }
-                catch (SqlException ex)
-                {
-                    ModelState.AddModelError("", $"Error: {ex.Message} (Código: {ex.Number})");
-                }
-                catch (Exception ex)
-                {
-                    ModelState.AddModelError("", $"Error: {ex.Message}");
-                }
-            }
+                    else
+                    {
+                        model.Cuotas = new List<ClinicDent.Models.CuotaInputModel>(); // Ensure empty cuotas for Unico
+                    }
 
-            var consultas = from c in db.Consulta
-                            join p in db.Pacientes on c.id_paciente equals p.id_paciente
-                            select new
+                    if (ModelState.IsValid)
+                    {
+                        // Create DataTable for cuotas
+                        DataTable cuotasTable = new DataTable();
+                        cuotasTable.Columns.Add("fecha_pago", typeof(DateTime));
+                        cuotasTable.Columns.Add("monto", typeof(decimal));
+                        cuotasTable.Columns.Add("estado", typeof(string));
+
+                        foreach (var cuota in model.Cuotas)
+                        {
+                            cuotasTable.Rows.Add(cuota.FechaPago, cuota.Monto, cuota.Estado);
+                        }
+
+                        // Call stored procedure
+                        using (var connection = new SqlConnection(db.Database.Connection.ConnectionString))
+                        {
+                            connection.Open();
+                            using (var command = new SqlCommand("dbo.GestionarPago", connection))
                             {
-                                c.id_consulta,
-                                DisplayText = p.nombres + " " + p.apellidos + " - " + c.diagnostico
-                            };
-            ViewBag.IdConsulta = new SelectList(consultas, "id_consulta", "DisplayText", model.IdConsulta);
-            ViewBag.MetodoPago = new SelectList(new[] { "Efectivo", "Tarjeta", "Transferencia" }, model.MetodoPago);
-            ViewBag.TipoPago = new SelectList(new[] { "Unico", "Cuotas" }, model.TipoPago);
-            return View(model);
-        }
+                                command.CommandType = CommandType.StoredProcedure;
 
-        // GET: Pagos/Cuotas/5
-        public ActionResult Cuotas(int? id)
-        {
-            if (id == null)
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            }
-            var cuotas = db.Database.SqlQuery<Pagos_Cuotas>(
-                "SELECT * FROM Pagos_Cuotas WHERE id_pago = @id",
-                new SqlParameter("@id", id)).ToList();
-            if (!cuotas.Any())
-            {
-                return HttpNotFound();
-            }
-            ViewBag.IdPago = id;
-            return View(cuotas);
-        }
+                                command.Parameters.AddWithValue("@id_consulta", model.IdConsulta);
+                                command.Parameters.AddWithValue("@fecha_pago", DateTime.Now);
+                                command.Parameters.AddWithValue("@monto_total", model.MontoTotal);
+                                command.Parameters.AddWithValue("@metodo_pago", model.MetodoPago ?? "Efectivo");
+                                command.Parameters.AddWithValue("@tipo_pago", model.TipoPago ?? "Unico");
+                                command.Parameters.AddWithValue("@fecha_registro", DateTime.Today);
 
-        // GET: Pagos/UpdateCuota/5
-        public ActionResult UpdateCuota(int? id)
-        {
-            if (id == null)
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                                var cuotasParam = command.Parameters.AddWithValue("@cuotas", cuotasTable);
+                                cuotasParam.SqlDbType = SqlDbType.Structured;
+                                cuotasParam.TypeName = "dbo.CuotasType";
+
+                                var result = command.ExecuteScalar();
+                                Debug.WriteLine($"Pago creado con ID: {result}");
+                            }
+                        }
+
+                        return RedirectToAction("Index");
+                    }
+                }
             }
-            var cuota = db.Database.SqlQuery<Pagos_Cuotas>("SELECT * FROM Pagos_Cuotas WHERE id_cuota = @id", new SqlParameter("@id", id)).FirstOrDefault();
-            if (cuota == null)
+            catch (SqlException ex)
             {
-                return HttpNotFound();
+                ModelState.AddModelError("", $"Error en la base de datos: {ex.Message}");
+                Debug.WriteLine($"SQL Excepción: {ex.Message}\n{ex.StackTrace}");
             }
-            var model = new ActualizarCuotaViewModel
+            catch (Exception ex)
             {
-                IdCuota = cuota.id_cuota,
-                Estado = cuota.estado,
-                FechaPago = cuota.fecha_pago
+                ModelState.AddModelError("", $"Error al guardar el pago: {ex.Message}");
+                Debug.WriteLine($"Excepción: {ex.Message}\n{ex.StackTrace}");
+            }
+
+            // Reload dropdowns
+            model.Consultas = GetConsultasSelectList();
+            model.MetodosPago = new List<SelectListItem>
+            {
+                new SelectListItem { Value = "Efectivo", Text = "Efectivo" },
+                new SelectListItem { Value = "Tarjeta", Text = "Tarjeta" },
+                new SelectListItem { Value = "Transferencia", Text = "Transferencia" }
             };
-            ViewBag.Estado = new SelectList(new[] { "Pendiente", "Pagada", "Vencida" }, cuota.estado);
+            model.TiposPago = new List<SelectListItem>
+            {
+                new SelectListItem { Value = "Unico", Text = "Único" },
+                new SelectListItem { Value = "Cuotas", Text = "Cuotas" }
+            };
+
             return View(model);
         }
 
-        // POST: Pagos/UpdateCuota/5
+        // GET: Pagos/Edit/5
+        public ActionResult Edit(int? id)
+        {
+            if (id == null)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
+
+            Pagos pago = db.Pagos.Find(id);
+            if (pago == null)
+            {
+                return HttpNotFound();
+            }
+
+            var model = new PagoCreateViewModel
+            {
+                IdConsulta = pago.id_consulta ?? 0,
+                MontoTotal = pago.monto_total,
+                MetodoPago = pago.metodo_pago,
+                TipoPago = pago.tipo_pago,
+                NumeroCuotas = pago.Pagos_Cuotas.Count,
+                Cuotas = pago.Pagos_Cuotas.Select(c => new ClinicDent.Models.CuotaInputModel
+                {
+                    FechaPago = c.fecha_pago,
+                    Monto = c.monto,
+                    Estado = c.estado
+                }).ToList(),
+                Consultas = GetConsultasSelectList(),
+                MetodosPago = new List<SelectListItem>
+                {
+                    new SelectListItem { Value = "Efectivo", Text = "Efectivo" },
+                    new SelectListItem { Value = "Tarjeta", Text = "Tarjeta" },
+                    new SelectListItem { Value = "Transferencia", Text = "Transferencia" }
+                },
+                TiposPago = new List<SelectListItem>
+                {
+                    new SelectListItem { Value = "Unico", Text = "Único" },
+                    new SelectListItem { Value = "Cuotas", Text = "Cuotas" }
+                }
+            };
+
+            return View(model);
+        }
+
+        // POST: Pagos/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult UpdateCuota(ActualizarCuotaViewModel model)
+        public ActionResult Edit(int id, PagoCreateViewModel model)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                try
-                {
-                    using (var connection = db.Database.Connection)
-                    {
-                        connection.Open();
-                        using (var command = connection.CreateCommand())
-                        {
-                            command.CommandText = "ActualizarCuota";
-                            command.CommandType = CommandType.StoredProcedure;
-
-                            command.Parameters.Add(new SqlParameter("@id_cuota", model.IdCuota));
-                            command.Parameters.Add(new SqlParameter("@estado", model.Estado));
-                            command.Parameters.Add(new SqlParameter("@fecha_pago", model.FechaPago));
-
-                            command.ExecuteScalar();
-                            return RedirectToAction("Index");
-                        }
-                    }
-                }
-                catch (SqlException ex)
-                {
-                    ModelState.AddModelError("", $"Error: {ex.Message} (Código: {ex.Number})");
-                }
-                catch (Exception ex)
-                {
-                    ModelState.AddModelError("", $"Error: {ex.Message}");
-                }
+                LogModelStateErrors();
             }
 
-            ViewBag.Estado = new SelectList(new[] { "Pendiente", "Pagada", "Vencida" }, model.Estado);
+            try
+            {
+                if (ModelState.IsValid)
+                {
+                    // Validate consultation exists
+                    if (!db.Consulta.Any(c => c.id_consulta == model.IdConsulta))
+                    {
+                        ModelState.AddModelError("IdConsulta", "La consulta seleccionada no existe.");
+                    }
+
+                    // Validate cuotas for Cuotas type
+                    if (model.TipoPago == "Cuotas")
+                    {
+                        if (model.NumeroCuotas <= 0)
+                        {
+                            ModelState.AddModelError("NumeroCuotas", "El número de cuotas debe ser mayor que 0.");
+                        }
+                        else if (model.Cuotas == null || model.Cuotas.Count == 0)
+                        {
+                            // Auto-generate cuotas if not provided
+                            model.Cuotas = new List<ClinicDent.Models.CuotaInputModel>();
+                            decimal montoPorCuota = model.MontoTotal / model.NumeroCuotas;
+                            for (int i = 0; i < model.NumeroCuotas; i++)
+                            {
+                                model.Cuotas.Add(new ClinicDent.Models.CuotaInputModel
+                                {
+                                    FechaPago = DateTime.Now.AddMonths(i),
+                                    Monto = montoPorCuota,
+                                    Estado = "Pendiente"
+                                });
+                            }
+                        }
+
+                        // Validate cuotas count and sum
+                        if (model.Cuotas.Count != model.NumeroCuotas)
+                        {
+                            ModelState.AddModelError("Cuotas", $"Debe proporcionar exactamente {model.NumeroCuotas} cuotas.");
+                        }
+
+                        decimal cuotasSum = model.Cuotas.Sum(c => c.Monto);
+                        if (Math.Abs(cuotasSum - model.MontoTotal) > 0.01m)
+                        {
+                            ModelState.AddModelError("Cuotas", "La suma de los montos de las cuotas debe coincidir con el monto total.");
+                        }
+                    }
+                    else
+                    {
+                        model.Cuotas = new List<ClinicDent.Models.CuotaInputModel>();
+                    }
+
+                    if (ModelState.IsValid)
+                    {
+                        // Delete existing payment and cuotas
+                        var pago = db.Pagos.Find(id);
+                        if (pago != null)
+                        {
+                            db.Pagos_Cuotas.RemoveRange(pago.Pagos_Cuotas);
+                            db.Pagos.Remove(pago);
+                            db.SaveChanges();
+                        }
+
+                        // Create new payment using GestionarPago
+                        DataTable cuotasTable = new DataTable();
+                        cuotasTable.Columns.Add("fecha_pago", typeof(DateTime));
+                        cuotasTable.Columns.Add("monto", typeof(decimal));
+                        cuotasTable.Columns.Add("estado", typeof(string));
+
+                        foreach (var cuota in model.Cuotas)
+                        {
+                            cuotasTable.Rows.Add(cuota.FechaPago, cuota.Monto, cuota.Estado);
+                        }
+
+                        using (var connection = new SqlConnection(db.Database.Connection.ConnectionString))
+                        {
+                            connection.Open();
+                            using (var command = new SqlCommand("dbo.GestionarPago", connection))
+                            {
+                                command.CommandType = CommandType.StoredProcedure;
+
+                                command.Parameters.AddWithValue("@id_consulta", model.IdConsulta);
+                                command.Parameters.AddWithValue("@fecha_pago", DateTime.Now);
+                                command.Parameters.AddWithValue("@monto_total", model.MontoTotal);
+                                command.Parameters.AddWithValue("@metodo_pago", model.MetodoPago ?? "Efectivo");
+                                command.Parameters.AddWithValue("@tipo_pago", model.TipoPago ?? "Unico");
+                                command.Parameters.AddWithValue("@fecha_registro", DateTime.Today);
+
+                                var cuotasParam = command.Parameters.AddWithValue("@cuotas", cuotasTable);
+                                cuotasParam.SqlDbType = SqlDbType.Structured;
+                                cuotasParam.TypeName = "dbo.CuotasType";
+
+                                var result = command.ExecuteScalar();
+                                Debug.WriteLine($"Pago actualizado con ID: {result}");
+                            }
+                        }
+
+                        return RedirectToAction("Index");
+                    }
+                }
+            }
+            catch (SqlException ex)
+            {
+                ModelState.AddModelError("", $"Error en la base de datos: {ex.Message}");
+                Debug.WriteLine($"SQL Excepción: {ex.Message}\n{ex.StackTrace}");
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", $"Error al actualizar el pago: {ex.Message}");
+                Debug.WriteLine($"Excepción: {ex.Message}\n{ex.StackTrace}");
+            }
+
+            model.Consultas = GetConsultasSelectList();
+            model.MetodosPago = new List<SelectListItem>
+    {
+        new SelectListItem { Value = "Efectivo", Text = "Efectivo" },
+        new SelectListItem { Value = "Tarjeta", Text = "Tarjeta" },
+        new SelectListItem { Value = "Transferencia", Text = "Transferencia" }
+    };
+            model.TiposPago = new List<SelectListItem>
+    {
+        new SelectListItem { Value = "Unico", Text = "Único" },
+        new SelectListItem { Value = "Cuotas", Text = "Cuotas" }
+    };
+
             return View(model);
         }
 
@@ -227,35 +380,143 @@ namespace ClinicDent.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            var pago = db.Database.SqlQuery<PagoViewModel>("SELECT * FROM VistaPagos WHERE id_pago = @id", new SqlParameter("@id", id)).FirstOrDefault();
+
+            Pagos pago = db.Pagos.Find(id);
             if (pago == null)
             {
                 return HttpNotFound();
             }
-            return View(pago);
+
+            var model = new PagoViewModel
+            {
+                IdPago = pago.id_pago,
+                IdConsulta = pago.id_consulta,
+                FechaPago = pago.fecha_pago,
+                MontoTotal = pago.monto_total,
+                MetodoPago = pago.metodo_pago,
+                TipoPago = pago.tipo_pago,
+                Cuotas = pago.Pagos_Cuotas.Select(c => new PagoCuotaViewModel
+                {
+                    IdCuota = c.id_cuota,
+                    IdPago = c.id_pago,
+                    FechaPago = c.fecha_pago,
+                    Monto = c.monto,
+                    Estado = c.estado
+                }).ToList()
+            };
+
+            return View(model);
         }
 
-        // POST: Pagos/Delete/5
+        public class CustomDateTimeBinder : IModelBinder
+        {
+            public object BindModel(ControllerContext controllerContext, ModelBindingContext bindingContext)
+            {
+                var value = bindingContext.ValueProvider.GetValue(bindingContext.ModelName);
+                if (value != null)
+                {
+                    try
+                    {
+                        return DateTime.ParseExact(value.AttemptedValue, "dd/MM/yyyy", CultureInfo.InvariantCulture);
+                    }
+                    catch
+                    {
+                        bindingContext.ModelState.AddModelError(bindingContext.ModelName, "Formato de fecha inválido (dd/mm/aaaa)");
+                    }
+                }
+                return null;
+            }
+        }
+
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(int id)
         {
             try
             {
-                Pagos pago = db.Pagos.Find(id);
+                Pagos pago = db.Pagos
+                    .Include(p => p.Pagos_Cuotas)
+                    .Include(p => p.Historial_Pagos) // Añade esto para cargar el historial
+                    .FirstOrDefault(p => p.id_pago == id);
+
                 if (pago == null)
                 {
-                    return HttpNotFound();
+                    TempData["Error"] = "Pago no encontrado.";
+                    return RedirectToAction("Index");
                 }
+
+                // Eliminar primero las cuotas si existen
+                if (pago.Pagos_Cuotas.Any())
+                {
+                    db.Pagos_Cuotas.RemoveRange(pago.Pagos_Cuotas);
+                }
+
+                // Eliminar el historial de pagos si existe
+                if (pago.Historial_Pagos.Any())
+                {
+                    db.Historial_Pagos.RemoveRange(pago.Historial_Pagos);
+                }
+
+                // Luego eliminar el pago
                 db.Pagos.Remove(pago);
+
                 db.SaveChanges();
-                return RedirectToAction("Index");
+                TempData["Success"] = "Pago eliminado correctamente.";
+            }
+            catch (DbUpdateException dbEx)
+            {
+                var sqlEx = dbEx.GetBaseException() as SqlException;
+                if (sqlEx != null && (sqlEx.Number == 547))
+                {
+                    TempData["Error"] = "No se puede eliminar el pago porque está relacionado con otros registros.";
+                }
+                else
+                {
+                    TempData["Error"] = "Error al eliminar el pago: " + dbEx.Message;
+                }
+                Debug.WriteLine($"Error al eliminar: {dbEx.Message}\n{dbEx.StackTrace}");
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError("", $"Error al eliminar el pago: {ex.Message}");
-                var pago = db.Database.SqlQuery<PagoViewModel>("SELECT * FROM VistaPagos WHERE id_pago = @id", new SqlParameter("@id", id)).FirstOrDefault();
-                return View("Delete", pago);
+                Debug.WriteLine($"Excepción al eliminar: {ex.Message}\n{ex.StackTrace}");
+                TempData["Error"] = "Error al eliminar el pago: " + ex.Message;
+            }
+
+            return RedirectToAction("Index");
+        }
+
+        // Helper method to get consultas dropdown
+        private IEnumerable<SelectListItem> GetConsultasSelectList()
+        {
+            var consultas = db.Consulta
+                .GroupJoin(db.Pacientes,
+                    c => c.id_paciente,
+                    p => p.id_paciente,
+                    (c, p) => new { c, p = p.DefaultIfEmpty() })
+                .SelectMany(x => x.p.DefaultIfEmpty(), (c, p) => new
+                {
+                    c.c.id_consulta,
+                    c.c.fecha_consulta,
+                    NombrePaciente = p != null ? p.nombres + " " + p.apellidos : "Sin paciente"
+                })
+                .ToList();
+
+            return consultas.Select(c => new SelectListItem
+            {
+                Value = c.id_consulta.ToString(),
+                Text = $"Consulta #{c.id_consulta} - {c.fecha_consulta:dd/MM/yyyy} - {c.NombrePaciente}"
+            });
+        }
+
+        // Helper method to log ModelState errors
+        private void LogModelStateErrors()
+        {
+            foreach (var state in ModelState)
+            {
+                foreach (var error in state.Value.Errors)
+                {
+                    Debug.WriteLine($"Error en {state.Key}: {error.ErrorMessage}");
+                }
             }
         }
 
