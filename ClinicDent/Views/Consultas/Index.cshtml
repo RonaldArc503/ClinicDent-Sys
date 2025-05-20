@@ -160,15 +160,21 @@
                                         </td>
                                         <td class="text-end">
                                             <div class="btn-group" role="group">
-                                                <a href="@Url.Action("Edit", new { id = item.id_consulta })" class="btn btn-sm btn-outline-primary acciones-btn" title="Editar">
+                                                <a href="@Url.Action("Edit", "Consultas", new { id = item.id_consulta })" class="btn btn-sm btn-outline-primary acciones-btn" title="Editar Consulta">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
-                                                <a href="@Url.Action("Details", new { id = item.id_consulta })" class="btn btn-sm btn-outline-info acciones-btn" title="Detalles">
+                                                <a href="@Url.Action("Details", "Consultas", new { id = item.id_consulta })" class="btn btn-sm btn-outline-info acciones-btn" title="Detalles">
                                                     <i class="fas fa-info-circle"></i>
                                                 </a>
-                                                <a href="@Url.Action("Delete", new { id = item.id_consulta })" class="btn btn-sm btn-outline-danger acciones-btn" title="Eliminar">
+                                                <a href="@Url.Action("Delete", "Consultas", new { id = item.id_consulta })" class="btn btn-sm btn-outline-danger acciones-btn" title="Eliminar Consulta">
                                                     <i class="fas fa-trash-alt"></i>
                                                 </a>
+                                                @if (item.requiere_tratamiento)
+                                                {
+                                                    <a href="@Url.Action("Edit", "Tratamientos", new { id = item.id_consulta })" class="btn btn-sm btn-outline-success acciones-btn" title="Editar Tratamiento">
+                                                        <i class="fas fa-tooth"></i>
+                                                    </a>
+                                                }
                                             </div>
                                         </td>
                                     </tr>

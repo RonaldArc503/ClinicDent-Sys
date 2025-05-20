@@ -1,80 +1,80 @@
 ﻿@model ClinicDent.Models.Pacientes
 
 @{
-    ViewBag.Title = "Delete";
+    ViewBag.Title = "Eliminar Paciente";
 }
 
-<h2>Delete</h2>
+<!-- Título con ícono -->
+<h2 class="text-danger mt-4">
+    <i class="fas fa-exclamation-triangle"></i> Confirmación de Eliminación
+</h2>
+<p class="lead">¿Está completamente seguro de que desea eliminar al siguiente paciente?</p>
 
-<h3>Are you sure you want to delete this?</h3>
-<div>
-    <h4>Pacientes</h4>
-    <hr />
-    <dl class="dl-horizontal">
-        <dt>
-            @Html.DisplayNameFor(model => model.nombres)
-        </dt>
+<!-- Tarjeta con información del paciente -->
+<div class="card border-danger mb-4">
+    <div class="card-header bg-danger text-white">
+        <h5 class="mb-0"><i class="fas fa-user"></i> Información del Paciente</h5>
+    </div>
+    <div class="card-body">
+        <dl class="row">
+            <dt class="col-sm-4">Nombres</dt>
+            <dd class="col-sm-8">@Html.DisplayFor(model => model.nombres)</dd>
 
-        <dd>
-            @Html.DisplayFor(model => model.nombres)
-        </dd>
+            <dt class="col-sm-4">Apellidos</dt>
+            <dd class="col-sm-8">@Html.DisplayFor(model => model.apellidos)</dd>
 
-        <dt>
-            @Html.DisplayNameFor(model => model.apellidos)
-        </dt>
+            <dt class="col-sm-4">Fecha de nacimiento</dt>
+            <dd class="col-sm-8">@Html.DisplayFor(model => model.fecha_nacimiento)</dd>
 
-        <dd>
-            @Html.DisplayFor(model => model.apellidos)
-        </dd>
+            <dt class="col-sm-4">Teléfono</dt>
+            <dd class="col-sm-8">@Html.DisplayFor(model => model.telefono)</dd>
 
-        <dt>
-            @Html.DisplayNameFor(model => model.fecha_nacimiento)
-        </dt>
+            <dt class="col-sm-4">Género</dt>
+            <dd class="col-sm-8">@Html.DisplayFor(model => model.genero)</dd>
 
-        <dd>
-            @Html.DisplayFor(model => model.fecha_nacimiento)
-        </dd>
+            <dt class="col-sm-4">Alergias</dt>
+            <dd class="col-sm-8">@Html.DisplayFor(model => model.alergias)</dd>
 
-        <dt>
-            @Html.DisplayNameFor(model => model.telefono)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.telefono)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.genero)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.genero)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.alergias)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.alergias)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.activo)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.activo)
-        </dd>
-
-    </dl>
-
-    @using (Html.BeginForm()) {
-        @Html.AntiForgeryToken()
-
-        <div class="form-actions no-color">
-            <input type="submit" value="Delete" class="btn btn-default" /> |
-            @Html.ActionLink("Back to List", "Index")
-        </div>
-    }
+            <dt class="col-sm-4">Activo</dt>
+            <dd class="col-sm-8">@Html.DisplayFor(model => model.activo)</dd>
+        </dl>
+    </div>
 </div>
+
+<!-- Botones con doble confirmación -->
+<div class="form-group text-center">
+    <button type="button" class="btn btn-danger btn-lg" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal">
+        <i class="fas fa-trash-alt"></i> Eliminar Paciente
+    </button>
+    @Html.ActionLink("Cancelar", "Index", null, new { @class = "btn btn-secondary btn-lg ms-2" })
+</div>
+
+<!-- Modal de Confirmación -->
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content border-danger">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="confirmDeleteModalLabel">
+                    <i class="fas fa-exclamation-circle"></i> Confirmar Eliminación
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                ¿Está completamente seguro de eliminar a <strong>@Model.nombres @Model.apellidos</strong>? Esta acción no se puede deshacer.
+            </div>
+            <div class="modal-footer">
+                @using (Html.BeginForm())
+                {
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-check-circle"></i> Sí, eliminar
+                    </button>
+                }
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Requiere Bootstrap 5 y FontAwesome 5 o superior -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />

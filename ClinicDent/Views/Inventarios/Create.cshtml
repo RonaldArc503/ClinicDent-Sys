@@ -1,56 +1,292 @@
 ﻿@model ClinicDent.Models.Inventario
 
 @{
-    ViewBag.Title = "Create";
+    ViewBag.Title = "Crear Inventario";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h2>Create</h2>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
 
+<style>
+    /* Estilos modernizados */
+    .edit-container {
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 0;
+        background-color: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
 
-@using (Html.BeginForm()) 
-{
-    @Html.AntiForgeryToken()
-    
-    <div class="form-horizontal">
-        <h4>Inventario</h4>
-        <hr />
-        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
-        <div class="form-group">
-            @Html.LabelFor(model => model.id_material, "id_material", htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.DropDownList("id_material", null, htmlAttributes: new { @class = "form-control" })
+    .section-container {
+        padding: 2rem;
+        margin-bottom: 1.5rem;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        border-left: 4px solid #17a2b8;
+        background-color: #fff;
+    }
+
+    .edit-title {
+        color: #2c3e50;
+        margin-bottom: 1.5rem;
+        font-size: 1.8rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .control-label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        font-size: 0.95rem;
+    }
+
+    .label-icon {
+        margin-right: 0.75rem;
+        color: #6c757d;
+        width: 20px;
+        text-align: center;
+    }
+
+    .form-control, .select2-selection {
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        border: 1px solid #e0e0e0;
+        transition: all 0.3s ease;
+        font-size: 0.95rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+        .form-control:focus, .select2-selection:focus {
+            border-color: #17a2b8;
+            box-shadow: 0 4px 8px rgba(23, 162, 184, 0.2);
+        }
+
+    .btn-submit {
+        background-color: #17a2b8;
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 1.5rem;
+        width: 100%;
+        max-width: 220px;
+    }
+
+        .btn-submit:hover {
+            background-color: #138496;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+    .btn-back {
+        display: inline-flex;
+        align-items: center;
+        color: #6c757d;
+        text-decoration: none;
+        transition: all 0.3s;
+        font-size: 0.95rem;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        background-color: #f8f9fa;
+    }
+
+        .btn-back:hover {
+            color: #17a2b8;
+            background-color: #f1f1f1;
+            text-decoration: none;
+        }
+
+    /* Diseño responsive */
+    @@media (max-width: 768px) {
+        .edit-container {
+            margin: 1rem;
+        }
+    }
+
+    /* Estilos para select2 */
+    .select2-container--bootstrap-5 .select2-selection {
+        height: auto;
+        min-height: 42px;
+        display: flex;
+        align-items: center;
+    }
+</style>
+
+<div class="edit-container">
+    <div class="section-container">
+        <h2 class="edit-title">
+            <i class="fas fa-warehouse" style="margin-right: 12px; color: #17a2b8;"></i> Crear Inventario
+        </h2>
+
+        @using (Html.BeginForm("Create", "Inventarios", FormMethod.Post, new { id = "inventarioForm" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+            <div class="form-group">
+                <label class="control-label">
+                    <i class="fas fa-boxes label-icon"></i> Material
+                </label>
+                @Html.DropDownListFor(model => model.id_material, (SelectList)ViewBag.id_material, "-- Seleccione un material --", new { @class = "form-control select2", @id = "id_material" })
                 @Html.ValidationMessageFor(model => model.id_material, "", new { @class = "text-danger" })
             </div>
-        </div>
 
-        <div class="form-group">
-            @Html.LabelFor(model => model.cantidad, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.cantidad, new { htmlAttributes = new { @class = "form-control" } })
+            <div class="form-group">
+                <label class="control-label">
+                    <i class="fas fa-calculator label-icon"></i> Cantidad
+                </label>
+                @Html.EditorFor(model => model.cantidad, new { htmlAttributes = new { @class = "form-control", @type = "number", @min = "1", @placeholder = "Ingrese la cantidad" } })
                 @Html.ValidationMessageFor(model => model.cantidad, "", new { @class = "text-danger" })
             </div>
-        </div>
 
-        <div class="form-group">
-            @Html.LabelFor(model => model.fecha_actualizacion, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.fecha_actualizacion, new { htmlAttributes = new { @class = "form-control" } })
+            <div class="form-group">
+                <label class="control-label">
+                    <i class="fas fa-calendar-alt label-icon"></i> Fecha y Hora de Actualización
+                </label>
+                <div class="datetime-container">
+                    <input type="text" id="fechaActualizacion" class="form-control" readonly value="@DateTime.Now.ToString("dd/MM/yyyy HH:mm")" />
+                    @Html.HiddenFor(model => model.fecha_actualizacion, new { @id = "fechaActualizacionHidden" })
+                </div>
                 @Html.ValidationMessageFor(model => model.fecha_actualizacion, "", new { @class = "text-danger" })
             </div>
-        </div>
 
-        <div class="form-group">
-            <div class="col-md-offset-2 col-md-10">
-                <input type="submit" value="Create" class="btn btn-default" />
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 2rem;">
+                <a href="@Url.Action("Index")" class="btn-back">
+                    <i class="fas fa-arrow-left" style="margin-right: 8px;"></i> Volver al listado
+                </a>
+                <button type="submit" class="btn-submit" id="guardarInventario">
+                    <i class="fas fa-save" style="margin-right: 8px;"></i> Crear Inventario
+                </button>
             </div>
-        </div>
+        }
     </div>
-}
-
-<div>
-    @Html.ActionLink("Back to List", "Index")
 </div>
 
 @section Scripts {
     @Scripts.Render("~/bundles/jqueryval")
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        $(document).ready(function () {
+            // Inicializar Select2
+            $('#id_material').select2({ theme: 'bootstrap-5' });
+
+            // Actualizar fecha y hora en tiempo real
+            function updateDateTime() {
+                const now = new Date();
+                const isoDate = now.toISOString(); // Formato ISO: YYYY-MM-DDTHH:MM:SSZ
+                const formattedDate = now.toLocaleString('es-MX', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: false
+                }).replace(',', ''); // Formato: DD/MM/YYYY HH:MM
+                $('#fechaActualizacion').val(formattedDate);
+                $('#fechaActualizacionHidden').val(isoDate);
+            }
+
+            // Actualizar inicialmente
+            updateDateTime();
+
+            // Actualizar cada segundo
+            setInterval(updateDateTime, 1000);
+
+            // Validación del formulario
+            $('#inventarioForm').on('submit', function (e) {
+                e.preventDefault();
+
+                const submitBtn = $('#guardarInventario');
+                submitBtn.html('<i class="fas fa-spinner fa-spin"></i> Procesando...');
+                submitBtn.prop('disabled', true);
+
+                // Validar el formulario con jQuery Validation
+                if ($(this).valid()) {
+                    // Actualizar fecha justo antes de enviar
+                    updateDateTime();
+
+                    // Enviar el formulario mediante AJAX
+                    $.ajax({
+                        url: '@Url.Action("Create", "Inventarios")',
+                        type: 'POST',
+                        data: $(this).serialize(),
+                        success: function (response) {
+                            if (response.success) {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Inventario creado',
+                                    text: response.message || 'El inventario se ha creado correctamente.',
+                                    confirmButtonColor: '#3085d6',
+                                }).then(() => {
+                                    window.location.href = '@Url.Action("Index", "Inventarios")';
+                                });
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error',
+                                    text: response.message || 'Ocurrió un error al crear el inventario.',
+                                    confirmButtonColor: '#3085d6',
+                                });
+                                submitBtn.html('<i class="fas fa-save"></i> Crear Inventario');
+                                submitBtn.prop('disabled', false);
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: xhr.responseJSON?.message || 'Ocurrió un error al procesar la solicitud: ' + error,
+                                confirmButtonColor: '#3085d6',
+                            });
+                            submitBtn.html('<i class="fas fa-save"></i> Crear Inventario');
+                            submitBtn.prop('disabled', false);
+                        }
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Datos incompletos',
+                        text: 'Por favor, corrige los errores en el formulario.',
+                        confirmButtonColor: '#3085d6',
+                    });
+                    submitBtn.html('<i class="fas fa-save"></i> Crear Inventario');
+                    submitBtn.prop('disabled', false);
+                }
+            });
+
+            // Validación en tiempo real para el campo cantidad
+            $('#cantidad').on('input', function () {
+                const value = parseInt(this.value);
+                if (value < 1 || isNaN(value)) {
+                    this.classList.add('is-invalid');
+                    this.nextElementSibling.textContent = 'La cantidad debe ser mayor o igual a 1.';
+                } else {
+                    this.classList.remove('is-invalid');
+                    this.nextElementSibling.textContent = '';
+                }
+            });
+        });
+    </script>
 }

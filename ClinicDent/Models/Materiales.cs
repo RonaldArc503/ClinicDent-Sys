@@ -24,7 +24,7 @@ namespace ClinicDent.Models
         public string nombre { get; set; }
         public int cantidad { get; set; }
         public string proveedor { get; set; }
-        public Nullable<System.DateTime> fecha_caducidad { get; set; }
+        public DateTime? fecha_caducidad { get; set; }
         public Nullable<int> minimo_stock { get; set; }
         public string descripcion { get; set; }
         public string estado { get; set; }

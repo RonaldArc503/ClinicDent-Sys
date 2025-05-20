@@ -9,7 +9,6 @@ using System.Web.Mvc;
 using System.Data.SqlClient;
 using ClinicDent.Models;
 
-
 namespace ClinicDent.Controllers
 {
     public class ConsultasController : Controller
@@ -94,26 +93,26 @@ namespace ClinicDent.Controllers
         // GET: Consultas/Create
         public ActionResult Create(int? idCita, string fechaConsulta, int? idDentista, int? idPaciente)
         {
-            PopulateDropdowns(idCita, idDentista, idPaciente);
-
             var model = new ConsultaConTratamientoViewModel();
 
-            if (idCita != null)
+            // Si viene de una cita, cargar los datos relacionados
+            if (idCita.HasValue)
             {
-                var cita = db.Citas.Find(idCita);
+                var cita = db.Citas
+                    .Include(c => c.Pacientes)
+                    .Include(c => c.Dentistas)
+                    .FirstOrDefault(c => c.id_cita == idCita);
+
                 if (cita != null)
                 {
                     model.IdCita = cita.id_cita;
+                    model.IdPaciente = cita.id_paciente;
+                    model.IdDentista = cita.id_dentista;
                     model.FechaConsulta = cita.fecha_hora;
+
+                    ViewBag.PacienteSeleccionado = cita.Pacientes?.nombres;
+                    ViewBag.DentistaSeleccionado = cita.Dentistas?.nombre;
                     ViewBag.FechaConsulta = cita.fecha_hora.ToString("dd MMM. yyyy HH:mm", new System.Globalization.CultureInfo("es-ES"));
-                    if (idDentista != null)
-                    {
-                        model.IdDentista = idDentista.Value;
-                    }
-                    if (idPaciente != null)
-                    {
-                        model.IdPaciente = idPaciente.Value;
-                    }
                 }
             }
             else
@@ -121,14 +120,17 @@ namespace ClinicDent.Controllers
                 model.FechaConsulta = DateTime.Now;
             }
 
+            // Configurar dropdowns
+            ViewBag.Citas = new SelectList(db.Citas, "id_cita", "fecha_hora", model.IdCita);
+            ViewBag.Dentistas = new SelectList(db.Dentistas, "id_dentista", "nombre", model.IdDentista);
+            ViewBag.Pacientes = new SelectList(db.Pacientes, "id_paciente", "nombres", model.IdPaciente);
+            ViewBag.TiposCobro = new SelectList(db.Tipo_Cobro, "id_tipo_cobro", "nombre");
+
             return View(model);
         }
 
-        // POST: Consultas/Create
-
         [HttpPost]
         [ValidateAntiForgeryToken]
-       
         public ActionResult Create(ConsultaConTratamientoViewModel model)
         {
             try
@@ -179,7 +181,7 @@ namespace ClinicDent.Controllers
                 using (var connection = new SqlConnection(_connectionString))
                 {
                     connection.Open();
-                    
+
                     // Crear tabla de tratamientos para el procedimiento
                     var tratamientosTable = new DataTable();
 
@@ -266,6 +268,7 @@ namespace ClinicDent.Controllers
                 return Json(new { success = false, message = "Ocurrió un error inesperado al guardar la consulta. Detalles: " + ex.Message });
             }
         }
+
         // GET: Consultas/Edit/5
         public ActionResult Edit(int? id)
         {
@@ -288,34 +291,62 @@ namespace ClinicDent.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Edit([Bind(Include = "id_consulta,id_cita,id_dentista,id_paciente,fecha_consulta,diagnostico,observaciones,recomendaciones,requiere_tratamiento")] Consulta consulta)
         {
-            if (consulta.id_cita == null || consulta.id_cita == 0)
+            try
             {
-                consulta.id_cita = null;
-            }
-            else
-            {
-                if (db.Consulta.Any(c => c.id_cita == consulta.id_cita && c.id_consulta != consulta.id_consulta))
+                if (consulta.id_cita == null || consulta.id_cita == 0)
                 {
-                    ModelState.AddModelError("id_cita", "Esta cita ya tiene una consulta asociada.");
+                    consulta.id_cita = null;
                 }
-            }
+                else
+                {
+                    if (db.Consulta.Any(c => c.id_cita == consulta.id_cita && c.id_consulta != consulta.id_consulta))
+                    {
+                        ModelState.AddModelError("id_cita", "Esta cita ya tiene una consulta asociada.");
+                    }
+                }
 
-            if (consulta.fecha_consulta == default(DateTime))
-            {
-                ModelState.AddModelError("fecha_consulta", "Por favor, especifique una fecha y hora válidas para la consulta.");
-            }
+                if (consulta.fecha_consulta == default(DateTime))
+                {
+                    ModelState.AddModelError("fecha_consulta", "Por favor, especifique una fecha y hora válidas para la consulta.");
+                }
 
-            if (ModelState.IsValid)
-            {
+                if (!ModelState.IsValid)
+                {
+                    var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
+                    PopulateDropdowns(consulta.id_cita, consulta.id_dentista, consulta.id_paciente);
+                    return Json(new { success = false, message = "Errores en el formulario: " + string.Join("; ", errors) });
+                }
+
                 db.Entry(consulta).State = EntityState.Modified;
                 db.SaveChanges();
-                return RedirectToAction("Index");
+
+                return Json(new { success = true, message = "Consulta actualizada exitosamente." });
             }
+            catch (SqlException ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error SQL al actualizar consulta: {ex.Message}, Número: {ex.Number}");
+                string errorMessage = "Ocurrió un error al actualizar la consulta.";
 
-            PopulateDropdowns(consulta.id_cita, consulta.id_dentista, consulta.id_paciente);
-            return View(consulta);
+                if (ex.Number == 547) // Violación de clave foránea
+                {
+                    if (ex.Message.Contains("FK__Consulta__id_pac"))
+                        errorMessage = "El paciente seleccionado no existe.";
+                    else if (ex.Message.Contains("FK__Consulta__id_den"))
+                        errorMessage = "El dentista seleccionado no existe.";
+                    else if (ex.Message.Contains("FK__Consulta__id_cit"))
+                        errorMessage = "La cita seleccionada no es válida.";
+                }
+
+                PopulateDropdowns(consulta.id_cita, consulta.id_dentista, consulta.id_paciente);
+                return Json(new { success = false, message = errorMessage + " Detalles: " + ex.Message });
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error general al actualizar consulta: {ex}");
+                PopulateDropdowns(consulta.id_cita, consulta.id_dentista, consulta.id_paciente);
+                return Json(new { success = false, message = "Ocurrió un error inesperado al actualizar la consulta. Detalles: " + ex.Message });
+            }
         }
-
         // GET: Consultas/RenderOdontogramaPartial
         public ActionResult RenderOdontogramaPartial(int index)
         {

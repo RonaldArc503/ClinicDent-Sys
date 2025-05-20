@@ -1,119 +1,510 @@
 ﻿@model ClinicDent.Models.PagoCreateViewModel
 
 @{
-    ViewBag.Title = "Create";
+    ViewBag.Title = "Crear Pago";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h2>Create</h2>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 
-@using (Html.BeginForm())
-{
-    @Html.AntiForgeryToken()
-    
-    <div class="form-horizontal">
-        <h4>Pagos</h4>
-        <hr />
-        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
-        
-        <div class="form-group">
-            @Html.LabelFor(model => model.IdConsulta, "Consulta", htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.DropDownList("IdConsulta", null, htmlAttributes: new { @class = "form-control" })
-                @Html.ValidationMessageFor(model => model.IdConsulta, "", new { @class = "text-danger" })
-            </div>
-        </div>
+<style>
+    .form-container {
+        max-width: 800px;
+        margin: 0 0 0 10px;
+        padding: 25px 25px 25px 15px;
+        background-color: #e5e7e9;
+        border-radius: 15px;
+        box-shadow: 0 0 75px rgba(0, 0, 0, 0.1);
+        border-left: 5px solid #007bff;
+    }
 
-        <div class="form-group">
-            @Html.LabelFor(model => model.FechaPago, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.FechaPago, new { htmlAttributes = new { @class = "form-control", type = "datetime-local" } })
-                @Html.ValidationMessageFor(model => model.FechaPago, "", new { @class = "text-danger" })
-            </div>
-        </div>
+    .section-container {
+        padding: 2rem;
+        margin-bottom: 1.5rem;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        border-left: 4px solid #007bff;
+        background-color: #fff;
+    }
 
-        <div class="form-group">
-            @Html.LabelFor(model => model.MontoTotal, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.MontoTotal, new { htmlAttributes = new { @class = "form-control", type = "number", step = "0.01" } })
-                @Html.ValidationMessageFor(model => model.MontoTotal, "", new { @class = "text-danger" })
-            </div>
-        </div>
+    .edit-title {
+        color: #2c3e50;
+        margin-bottom: 1.5rem;
+        font-size: 1.8rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #e9ecef;
+    }
 
-        <div class="form-group">
-            @Html.LabelFor(model => model.MetodoPago, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.DropDownList("MetodoPago", (SelectList)ViewBag.MetodoPago, htmlAttributes: new { @class = "form-control" })
-                @Html.ValidationMessageFor(model => model.MetodoPago, "", new { @class = "text-danger" })
-            </div>
-        </div>
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
 
-        <div class="form-group">
-            @Html.LabelFor(model => model.TipoPago, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.DropDownList("TipoPago", (SelectList)ViewBag.TipoPago, htmlAttributes: new { @class = "form-control", id = "TipoPago" })
-                @Html.ValidationMessageFor(model => model.TipoPago, "", new { @class = "text-danger" })
-            </div>
-        </div>
+    .control-label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        font-size: 0.95rem;
+    }
 
-        <div class="form-group" id="cuotasSection" style="display: none;">
-            <label class="control-label col-md-2">Cuotas</label>
-            <div class="col-md-10">
-                <div id="cuotasContainer"></div>
-                <button type="button" onclick="agregarCuota()" class="btn btn-secondary">Agregar Cuota</button>
-            </div>
-        </div>
+    .label-icon {
+        margin-right: 0.75rem;
+        color: #6c757d;
+        width: 20px;
+        text-align: center;
+    }
 
-        <div class="form-group">
-            <div class="col-md-offset-2 col-md-10">
-                <input type="submit" value="Create" class="btn btn-default" />
+    .form-control, .flatpickr-input {
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        border: 1px solid #e0e0e0;
+        transition: all 0.3s ease;
+        font-size: 0.95rem;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    }
+
+        .form-control:focus, .flatpickr-input:focus {
+            border-color: #007bff;
+            box-shadow: 0 4px 8px rgba(0, 123, 255, 0.2);
+        }
+
+    select.form-control {
+        appearance: none;
+        background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right 1rem center;
+        background-size: 1em;
+    }
+
+    .btn-submit {
+        background-color: #007bff;
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 1.5rem;
+    }
+
+        .btn-submit:hover {
+            background-color: #0069d9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+    .btn-back {
+        display: inline-flex;
+        align-items: center;
+        color: #6c757d;
+        text-decoration: none;
+        transition: all 0.3s;
+        font-size: 0.95rem;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        background-color: #f8f9fa;
+        margin-top: 1rem;
+    }
+
+        .btn-back:hover {
+            color: #007bff;
+            background-color: #f1f1f1;
+            text-decoration: none;
+        }
+
+    .field-required::after {
+        content: " *";
+        color: #dc3545;
+    }
+
+    .text-danger {
+        font-size: 0.875em;
+        margin-top: 0.25rem;
+    }
+
+    #cuotasContainer {
+        margin-top: 1.5rem;
+        padding: 1rem;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+    }
+
+        #cuotasContainer h4 {
+            font-size: 1.2rem;
+            color: #2c3e50;
+            margin-bottom: 1rem;
+        }
+
+    .cuota-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+        .cuota-item > div {
+            margin-right: 1rem;
+        }
+
+    .alert-info {
+        background-color: #e9ecef;
+        border: none;
+        border-radius: 8px;
+        padding: 1rem;
+        font-size: 0.95rem;
+    }
+
+    small.text-muted {
+        font-size: 0.85rem;
+    }
+</style>
+
+<div class="form-container">
+    <div class="section-container">
+        <h2 class="edit-title">
+            <i class="fas fa-money-bill-wave" style="margin-right: 12px; color: #007bff;"></i> Crear Pago
+        </h2>
+
+        @using (Html.BeginForm(null, null, FormMethod.Post, new { id = "pagoForm" }))
+        {
+            @Html.AntiForgeryToken()
+
+            <div class="form-horizontal">
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                <div class="form-group">
+                    <label class="control-label field-required">
+                        <i class="fas fa-tooth label-icon"></i>Consulta
+                    </label>
+                    <div>
+                        @Html.DropDownListFor(model => model.IdConsulta, Model.Consultas, "Seleccione una consulta", new { @class = "form-control", required = "required" })
+                        @Html.ValidationMessageFor(model => model.IdConsulta, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="control-label field-required">
+                        <i class="fas fa-dollar-sign label-icon"></i>Monto Total
+                    </label>
+                    <div>
+                        @Html.EditorFor(model => model.MontoTotal, new { htmlAttributes = new { @class = "form-control", type = "number", step = "0.01", min = "0", required = "required" } })
+                        @Html.ValidationMessageFor(model => model.MontoTotal, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="control-label field-required">
+                        <i class="fas fa-credit-card label-icon"></i>Método de Pago
+                    </label>
+                    <div>
+                        @Html.DropDownListFor(model => model.MetodoPago, Model.MetodosPago, "Seleccione un método", new { @class = "form-control", required = "required" })
+                        @Html.ValidationMessageFor(model => model.MetodoPago, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="control-label field-required">
+                        <i class="fas fa-list-alt label-icon"></i>Tipo de Pago
+                    </label>
+                    <div>
+                        @Html.DropDownListFor(model => model.TipoPago, Model.TiposPago, "Seleccione un tipo", new { @class = "form-control", id = "TipoPago", required = "required" })
+                        @Html.ValidationMessageFor(model => model.TipoPago, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group" id="cuotasSection" style="display: none;">
+                    <label class="control-label">
+                        <i class="fas fa-sort-numeric-up label-icon"></i>Número de Cuotas
+                    </label>
+                    <div>
+                        @Html.EditorFor(model => model.NumeroCuotas, new
+                        {
+                            htmlAttributes = new
+                            {
+                                @class = "form-control",
+                                id = "NumeroCuotas",
+                                min = "1",
+                                type = "number",
+                                value = Model.NumeroCuotas > 0 ? Model.NumeroCuotas : 1
+                            }
+                        })
+                        @Html.ValidationMessageFor(model => model.NumeroCuotas, "", new { @class = "text-danger" })
+                        <small class="text-muted">Cambie el número para actualizar las cuotas</small>
+                    </div>
+                </div>
+
+                <div id="cuotasContainer" style="display: none;">
+                    <h4>Detalle de Cuotas</h4>
+                    <div id="cuotasList"></div>
+
+                    <div class="form-group">
+                        <div class="alert alert-info">
+                            <strong>Total Cuotas:</strong> <span id="totalCuotas">0</span>
+                            <span id="diferenciaMonto" class="text-success">(0)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 2rem;">
+                    @Html.ActionLink("Volver al listado", "Index", null, new { @class = "btn-back" })
+                    <button type="submit" class="btn-submit" id="btnSubmit">
+                        <i class="fas fa-save" style="margin-right: 8px;"></i> Crear Pago
+                    </button>
+                </div>
             </div>
-        </div>
+        }
     </div>
-}
-
-<div>
-    @Html.ActionLink("Back to List", "Index")
 </div>
 
 @section Scripts {
-    @Scripts.Render("~/bundles/jqueryval")
-    <script>
-        let cuotaIndex = 0;
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/3.2.12/jquery.validate.unobtrusive.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
 
-        // Mostrar/ocultar sección de cuotas según tipo_pago
+    <script>
         $(document).ready(function () {
+            // Configurar cultura para validaciones
+            if ($.validator) {
+                $.validator.methods.date = function (value, element) {
+                    return this.optional(element) || moment(value, ["YYYY-MM-DD HH:mm:ss", "DD/MM/YYYY HH:mm"], true).isValid();
+                };
+            }
+
+            // Inicializar flatpickr para fechas de cuotas con hora
+            function initializeFlatpickr() {
+                $(".flatpickr-input").flatpickr({
+                    locale: "es",
+                    dateFormat: "Y-m-d H:i:S",
+                    enableTime: true,
+                    time_24hr: true,
+                    defaultHour: 8,
+                    defaultMinute: 0,
+                    allowInput: true,
+                    minDate: "today",
+                    onChange: function (selectedDates, dateStr, instance) {
+                        $(instance.element).val(dateStr).trigger('change').valid();
+                    },
+                    onClose: function (selectedDates, dateStr, instance) {
+                        $(instance.element).valid();
+                    }
+                });
+            }
+
+            // Generar cuotas dinámicamente
+            function generateCuotas(numCuotas, montoTotal) {
+                numCuotas = Math.max(1, parseInt(numCuotas) || 1);
+                montoTotal = parseFloat(montoTotal) || 0;
+
+                // Calcular monto base por cuota, redondeando al entero más cercano
+                const baseMontoPorCuota = Math.round(montoTotal / numCuotas);
+                // Array para almacenar montos de cuotas
+                const montosCuotas = new Array(numCuotas).fill(baseMontoPorCuota);
+                // Calcular suma inicial
+                let sumaCuotas = baseMontoPorCuota * numCuotas;
+                // Ajustar cuotas para que la suma sea igual a montoTotal
+                if (sumaCuotas !== montoTotal) {
+                    const diferencia = montoTotal - sumaCuotas;
+                    // Distribuir la diferencia sumando o restando 1 a las cuotas necesarias
+                    const step = diferencia > 0 ? 1 : -1;
+                    const cuotasToAdjust = Math.abs(diferencia);
+                    for (let i = 0; i < cuotasToAdjust; i++) {
+                        montosCuotas[numCuotas - 1 - i] += step;
+                    }
+                }
+
+                // Si el redondeo entero falla, usar decimales mínimos
+                sumaCuotas = montosCuotas.reduce((sum, val) => sum + val, 0);
+                if (Math.abs(sumaCuotas - montoTotal) > 0.01) {
+                    const decimalBaseMonto = (montoTotal / numCuotas).toFixed(2);
+                    montosCuotas.fill(parseFloat(decimalBaseMonto));
+                    sumaCuotas = parseFloat(decimalBaseMonto) * numCuotas;
+                    if (sumaCuotas !== montoTotal) {
+                        const diff = (montoTotal - sumaCuotas).toFixed(2);
+                        montosCuotas[numCuotas - 1] = (parseFloat(decimalBaseMonto) + parseFloat(diff)).toFixed(2);
+                    }
+                }
+
+                let cuotasHtml = '';
+                const today = new Date();
+
+                for (let i = 0; i < numCuotas; i++) {
+                    const fechaCuota = new Date(today);
+                    fechaCuota.setMonth(today.getMonth() + i);
+                    fechaCuota.setHours(8, 0, 0, 0);
+                    const fechaFormateada = moment(fechaCuota).format("YYYY-MM-DD HH:mm:ss");
+
+                    cuotasHtml += `
+                            <div class="form-group cuota-item">
+                                <div class="col-md-2">Cuota ${i + 1}</div>
+                                <div class="col-md-3">
+                                    <input class="form-control flatpickr-input" autocomplete="off"
+                                        data-val="true" data-val-required="El campo Fecha de Pago es obligatorio."
+                                        id="Cuotas_${i}__FechaPago" name="Cuotas[${i}].FechaPago"
+                                        type="text" value="${fechaFormateada}" required>
+                                    <span class="field-validation-valid text-danger" data-valmsg-for="Cuotas[${i}].FechaPago" data-valmsg-replace="true"></span>
+                                </div>
+                                <div class="col-md-3">
+                                    <input class="form-control monto-cuota" data-val="true"
+                                        data-val-number="El campo Monto debe ser un número."
+                                        data-val-required="El campo Monto es obligatorio."
+                                        id="Cuotas_${i}__Monto" name="Cuotas[${i}].Monto"
+                                        readonly type="number" step="0.01" value="${montosCuotas[i]}">
+                                    <span class="field-validation-valid text-danger" data-valmsg-for="Cuotas[${i}].Monto" data-valmsg-replace="true"></span>
+                                </div>
+                                <div class="col-md-3">
+                                    <select class="form-control estado-cuota" data-val="true"
+                                        data-val-required="El campo Estado es obligatorio."
+                                        id="Cuotas_${i}__Estado" name="Cuotas[${i}].Estado" required>
+                                        <option value="Pendiente">Pendiente</option>
+                                        <option value="Completado">Completado</option>
+                                    </select>
+                                    <span class="field-validation-valid text-danger" data-valmsg-for="Cuotas[${i}].Estado" data-valmsg-replace="true"></span>
+                                </div>
+                            </div>`;
+                }
+
+                $("#cuotasList").html(cuotasHtml);
+                initializeFlatpickr();
+                $("#pagoForm").validate().resetForm();
+                $(".flatpickr-input, .monto-cuota, .estado-cuota").each(function () {
+                    if ($.validator) $(this).validate();
+                });
+                calcularTotalCuotas();
+            }
+
+            // Calcular total de cuotas y validar
+            function calcularTotalCuotas() {
+                if ($("#TipoPago").val() !== "Cuotas") {
+                    $("#btnSubmit").prop("disabled", false);
+                    $("#totalCuotas").text("0");
+                    $("#diferenciaMonto").text("(0)").removeClass("text-danger").addClass("text-success");
+                    $("#cuotasError").remove();
+                    return;
+                }
+
+                let total = 0;
+                $(".monto-cuota").each(function () {
+                    total += parseFloat($(this).val()) || 0;
+                });
+
+                const montoTotal = parseFloat($("#MontoTotal").val()) || 0;
+                const diferencia = total - montoTotal;
+
+                $("#totalCuotas").text(total.toLocaleString('es-CL', { style: 'currency', currency: 'CLP' }));
+                const diferenciaElement = $("#diferenciaMonto");
+                diferenciaElement.text(`(${diferencia.toLocaleString('es-CL', { style: 'currency', currency: 'CLP' })})`)
+                    .toggleClass("text-danger", Math.abs(diferencia) > 0.01)
+                    .toggleClass("text-success", Math.abs(diferencia) <= 0.01);
+
+                const isValid = Math.abs(diferencia) <= 0.01;
+                $("#btnSubmit").prop("disabled", !isValid);
+                $("#cuotasError").remove();
+                if (!isValid) {
+                    diferenciaElement.after('<span class="text-danger" id="cuotasError"> La suma de cuotas no coincide con el monto total</span>');
+                }
+            }
+
+            // Manejar cambio en tipo de pago
             $("#TipoPago").change(function () {
-                if ($(this).val() === "Cuotas") {
-                    $("#cuotasSection").show();
+                const isCuotas = $(this).val() === "Cuotas";
+                $("#cuotasSection, #cuotasContainer").toggle(isCuotas);
+                if (!isCuotas) {
+                    $("#NumeroCuotas").val(0);
+                    $("#cuotasList").empty();
+                    $("#totalCuotas").text("0");
+                    $("#diferenciaMonto").text("(0)").removeClass("text-danger").addClass("text-success");
+                    $("#cuotasError").remove();
+                    $("#btnSubmit").prop("disabled", false);
                 } else {
-                    $("#cuotasSection").hide();
-                    $("#cuotasContainer").empty();
-                    cuotaIndex = 0;
+                    const numCuotas = parseInt($("#NumeroCuotas").val()) || 1;
+                    const montoTotal = parseFloat($("#MontoTotal").val()) || 0;
+                    generateCuotas(numCuotas, montoTotal);
                 }
             });
-        });
 
-        function agregarCuota() {
-            const container = document.getElementById('cuotasContainer');
-            const cuotaHtml = `
-                <div class="cuota form-group">
-                    <div class="row">
-                        <div class="col-md-4">
-                            <label>Fecha:</label>
-                            <input type="datetime-local" name="Cuotas[${cuotaIndex}].FechaInicio" class="form-control" required />
-                        </div>
-                        <div class="col-md-4">
-                            <label>Monto:</label>
-                            <input type="number" step="0.01" name="Cuotas[${cuotaIndex}].Costo" class="form-control" required />
-                        </div>
-                        <div class="col-md-2">
-                            <label>&nbsp;</label>
-                            <button type="button" class="btn btn-danger" onclick="this.parentElement.parentElement.parentElement.remove()">Eliminar</button>
-                        </div>
-                    </div>
-                </div>`;
-            container.insertAdjacentHTML('beforeend', cuotaHtml);
-            cuotaIndex++;
-        }
+            // Manejar cambio en número de cuotas
+            $("#NumeroCuotas").on('input change', function () {
+                if ($("#TipoPago").val() === "Cuotas") {
+                    const numCuotas = parseInt($(this).val()) || 1;
+                    const montoTotal = parseFloat($("#MontoTotal").val()) || 0;
+                    generateCuotas(numCuotas, montoTotal);
+                }
+            });
+
+            // Manejar cambio en monto total
+            $("#MontoTotal").on('input change', function () {
+                if ($("#TipoPago").val() === "Cuotas") {
+                    const numCuotas = parseInt($("#NumeroCuotas").val()) || 1;
+                    const montoTotal = parseFloat($(this).val()) || 0;
+                    generateCuotas(numCuotas, montoTotal);
+                }
+            });
+
+            // Validación antes de enviar el formulario
+            $("#pagoForm").submit(function (e) {
+                if ($("#TipoPago").val() !== "Cuotas") return;
+
+                let totalCuotas = 0;
+                $(".monto-cuota").each(function () {
+                    totalCuotas += parseFloat($(this).val()) || 0;
+                });
+
+                const montoTotal = parseFloat($("#MontoTotal").val()) || 0;
+                if (Math.abs(totalCuotas - montoTotal) > 0.01) {
+                    alert("La suma de las cuotas debe coincidir exactamente con el monto total");
+                    e.preventDefault();
+                    return;
+                }
+
+                let fechasValidas = true;
+                $(".flatpickr-input").each(function () {
+                    const fechaStr = $(this).val();
+                    const isValid = moment(fechaStr, ["YYYY-MM-DD HH:mm:ss"], true).isValid();
+                    $(this).toggleClass("input-validation-error", !isValid);
+                    $(this).next(".field-validation-valid").text(isValid ? "" : "Formato de fecha inválido (aaaa-mm-dd hh:mm:ss)");
+                    fechasValidas = fechasValidas && isValid;
+                });
+
+                if (!fechasValidas) {
+                    alert("Por favor corrija las fechas con formato inválido");
+                    e.preventDefault();
+                    return;
+                }
+
+                $(".flatpickr-input").each(function () {
+                    const fechaStr = $(this).val();
+                    if (fechaStr) {
+                        const momentDate = moment(fechaStr, ["YYYY-MM-DD HH:mm:ss"], true);
+                        if (momentDate.isValid()) {
+                            $(this).val(momentDate.format("YYYY-MM-DD HH:mm:ss"));
+                        }
+                    }
+                });
+            });
+
+            // Inicializar estado
+            if ($("#TipoPago").val() === "Cuotas") {
+                const numCuotas = parseInt($("#NumeroCuotas").val()) || 1;
+                const montoTotal = parseFloat($("#MontoTotal").val()) || 0;
+                generateCuotas(numCuotas, montoTotal);
+            } else {
+                $("#btnSubmit").prop("disabled", false);
+            }
+
+            // Enfoque automático
+            $("#IdConsulta").focus();
+        });
     </script>
 }
