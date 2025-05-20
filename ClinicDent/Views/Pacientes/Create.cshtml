@@ -269,8 +269,11 @@
             // Configuración de flatpickr para la fecha de nacimiento
             $("#fecha_nacimiento").flatpickr({
                 locale: "es",
-                dateFormat: "d/m/Y",
+                dateFormat: "Y-m-d",
+                altInput: true,
+                altFormat: "d/m/Y",
                 maxDate: "today",
+                allowInput: false,
                 onChange: function (selectedDates, dateStr, instance) {
                     validarEdad(selectedDates[0]);
                 }
@@ -281,30 +284,25 @@
 
             // Validación y formato de nombres y apellidos
             $('#nombres, #apellidos').on('input', function () {
-                // Eliminar caracteres no permitidos
+                // Eliminar caracteres no permitidos (solo letras, ñ, acentos, espacios)
                 this.value = this.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '');
 
-                // Convertir a minúsculas primero
-                let valor = this.value.toLowerCase();
-
-                // Capitalizar cada palabra
-                this.value = valor.replace(/\b\w/g, function (l) {
-                    return l.toUpperCase();
-                });
+                // Capitalizar palabras
+                this.value = capitalizeWords(this.value);
             });
 
             // Validación del formulario
             $('#pacienteForm').on('submit', function (e) {
-                // Asegurar que los nombres y apellidos estén capitalizados antes de enviar
+                // Capitalizar nombres y apellidos antes de enviar
                 $('#nombres').val(capitalizeWords($('#nombres').val()));
                 $('#apellidos').val(capitalizeWords($('#apellidos').val()));
 
                 // Validar edad antes de enviar
                 const fechaNacimiento = $('#fecha_nacimiento').val();
                 if (fechaNacimiento) {
-                    const fechaParts = fechaNacimiento.split('/');
+                    const fechaParts = fechaNacimiento.split('-'); // Formato yyyy-MM-dd
                     if (fechaParts.length === 3) {
-                        const fechaNac = new Date(fechaParts[2], fechaParts[1] - 1, fechaParts[0]);
+                        const fechaNac = new Date(fechaParts[0], fechaParts[1] - 1, fechaParts[2]);
                         if (!validarEdad(fechaNac)) {
                             e.preventDefault();
                             return false;
@@ -342,12 +340,15 @@
             }
         }
 
-        // Función para capitalizar palabras
+        // Función para capitalizar palabras respetando ñ y acentos
         function capitalizeWords(str) {
             if (!str) return str;
-            return str.toLowerCase().replace(/\b\w/g, function (l) {
-                return l.toUpperCase();
-            });
+
+            return str
+                .toLowerCase() // Convertir todo a minúsculas primero
+                .replace(/(^|\s)([a-zA-Záéíóúñ])/g, function (match, p1, p2) {
+                    return p1 + p2.toUpperCase(); // Capitalizar solo la primera letra de cada palabra
+                });
         }
     </script>
 }
