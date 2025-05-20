@@ -15,9 +15,67 @@ namespace ClinicDent.Controllers
         private ClinicaDentalLocal0 db = new ClinicaDentalLocal0();
 
         // GET: Materiales
-        public ActionResult Index()
+        public ActionResult Index(string sortOrder, string filterBy, string searchString, string estadoFilter)
         {
-            return View(db.Materiales.ToList());
+            // Store current filter and sort parameters in ViewBag for the view
+            ViewBag.CurrentSort = sortOrder;
+            ViewBag.CurrentFilter = searchString;
+            ViewBag.FilterBy = filterBy;
+            ViewBag.EstadoFilter = estadoFilter;
+
+            // Get the materials query
+            var materiales = from m in db.Materiales select m;
+
+            // Apply text search filter
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                searchString = searchString.ToLower();
+                switch (filterBy)
+                {
+                    case "proveedor":
+                        materiales = materiales.Where(m => m.proveedor != null && m.proveedor.ToLower().Contains(searchString));
+                        break;
+                    case "descripcion":
+                        materiales = materiales.Where(m => m.descripcion != null && m.descripcion.ToLower().Contains(searchString));
+                        break;
+                    case "nombre":
+                    default:
+                        materiales = materiales.Where(m => m.nombre != null && m.nombre.ToLower().Contains(searchString));
+                        break;
+                }
+            }
+
+            // Apply estado filter
+            if (!string.IsNullOrEmpty(estadoFilter))
+            {
+                materiales = materiales.Where(m => m.estado == estadoFilter);
+            }
+
+            // Apply sorting
+            switch (sortOrder)
+            {
+                case "nombre_desc":
+                    materiales = materiales.OrderByDescending(m => m.nombre);
+                    break;
+                case "cantidad_asc":
+                    materiales = materiales.OrderBy(m => m.cantidad);
+                    break;
+                case "cantidad_desc":
+                    materiales = materiales.OrderByDescending(m => m.cantidad);
+                    break;
+                case "caducidad_asc":
+                    materiales = materiales.OrderBy(m => m.fecha_caducidad);
+                    break;
+                case "caducidad_desc":
+                    materiales = materiales.OrderByDescending(m => m.fecha_caducidad);
+                    break;
+                case "nombre_asc":
+                default:
+                    materiales = materiales.OrderBy(m => m.nombre);
+                    break;
+            }
+
+            return View(materiales.ToList());
         }
 
         // GET: Materiales/Details/5
@@ -42,12 +100,33 @@ namespace ClinicDent.Controllers
         }
 
         // POST: Materiales/Create
-        // Para protegerse de ataques de publicación excesiva, habilite las propiedades específicas a las que quiere enlazarse. Para obtener 
-        // más detalles, vea https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Create([Bind(Include = "id_material,nombre,cantidad,proveedor,fecha_caducidad,minimo_stock,descripcion,estado")] Materiales materiales)
         {
+            if (Request.IsAjaxRequest())
+            {
+                try
+                {
+                    if (ModelState.IsValid)
+                    {
+                        db.Materiales.Add(materiales);
+                        db.SaveChanges();
+                        return Json(new { success = true, message = "Material creado correctamente." });
+                    }
+
+                    var errors = ModelState.Values
+                        .SelectMany(v => v.Errors)
+                        .Select(e => e.ErrorMessage)
+                        .ToList();
+                    return Json(new { success = false, message = "Errores de validación: " + string.Join("; ", errors) });
+                }
+                catch (Exception ex)
+                {
+                    return Json(new { success = false, message = "Error al crear el material: " + ex.Message });
+                }
+            }
+
             if (ModelState.IsValid)
             {
                 db.Materiales.Add(materiales);
@@ -74,8 +153,6 @@ namespace ClinicDent.Controllers
         }
 
         // POST: Materiales/Edit/5
-        // Para protegerse de ataques de publicación excesiva, habilite las propiedades específicas a las que quiere enlazarse. Para obtener 
-        // más detalles, vea https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Edit([Bind(Include = "id_material,nombre,cantidad,proveedor,fecha_caducidad,minimo_stock,descripcion,estado")] Materiales materiales)

@@ -21,6 +21,12 @@
             overflow: hidden;
         }
 
+        .sidebar-header span {
+            display: none;
+            font-family: 'Open Sans', sans-serif;
+            font-size: 20px;
+        }
+
             .sidebar.expanded {
                 width: 250px;
             }
@@ -36,7 +42,8 @@
             }
 
                 .sidebar .nav-link:hover {
-                    background-color: #0d7bcc;
+                    background-color: #1157c3;
+                    
                 }
 
                 .sidebar .nav-link.active {
@@ -75,9 +82,9 @@
                 margin: 0 auto;
             }
 
-            .sidebar-header span {
-                display: none;
-            }
+       
+
+
 
         .sidebar.expanded .sidebar-header span {
             display: inline;
@@ -99,14 +106,14 @@
 
             #citasDropdown + .dropdown-menu .dropdown-item {
                 color: white;
-                background-color: #116AEF;
+                background-color: #1157c3;
                 display: flex;
                 align-items: center;
                 padding: 10px 15px;
             }
 
                 #citasDropdown + .dropdown-menu .dropdown-item:hover {
-                    background-color: #0d7bcc;
+                    background-color: #084775;
                     color: white;
                     border-radius: 5px;
                 }
@@ -195,6 +202,20 @@
                     <a href="@Url.Action("Index", "Pagos")" class="nav-link">
                         <i class="fa-solid fa-credit-card icon"></i>
                         <span class="nav-text">Pagos e Historial</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="@Url.Action("Index", "Materiales")" class="nav-link" title="Gestionar Materiales">
+                        <i class="fa-solid fa-boxes-stacked icon"></i>
+                        <span class="nav-text">Materiales</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="@Url.Action("Index", "Inventarios")" class="nav-link" title="Gestionar Inventario">
+                        <i class="fa-solid fa-warehouse icon"></i>
+                        <span class="nav-text">Inventario</span>
                     </a>
                 </li>
 
