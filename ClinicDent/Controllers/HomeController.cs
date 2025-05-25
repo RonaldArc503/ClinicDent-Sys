@@ -6,6 +6,7 @@ using System.Data.Entity;
 
 namespace ClinicDent.Controllers
 {
+    [Authorize]
     public class HomeController : Controller
     {
         private ClinicaDentalLocal0 db = new ClinicaDentalLocal0();

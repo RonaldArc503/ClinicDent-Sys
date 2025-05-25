@@ -266,255 +266,238 @@
     </div>
 </div>
 
-@@section Scripts {
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/3.2.12/jquery.validate.unobtrusive.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/3.2.12/jquery.validate.unobtrusive.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
 
-<script>
-        $(document).ready(function () {
-            // Configurar cultura para validaciones
-            if ($.validator) {
-                $.validator.methods.date = function (value, element) {
-                    return this.optional(element) || moment(value, ["YYYY-MM-DD HH:mm:ss", "DD/MM/YYYY HH:mm"], true).isValid();
-                };
+    <script>
+    $(document).ready(function () {
+        // Configurar cultura para validaciones
+        if ($.validator) {
+            $.validator.methods.date = function (value, element) {
+                return this.optional(element) || moment(value, ["YYYY-MM-DD HH:mm:ss", "DD/MM/YYYY HH:mm"], true).isValid();
+            };
+        }
+
+        // Inicializar flatpickr para fechas de cuotas con hora
+        function initializeFlatpickr() {
+            $(".flatpickr-input").flatpickr({
+                locale: "es",
+                dateFormat: "Y-m-d H:i:S",
+                enableTime: true,
+                time_24hr: true,
+                defaultHour: 8,
+                defaultMinute: 0,
+                allowInput: true,
+                minDate: "today",
+                onChange: function (selectedDates, dateStr, instance) {
+                    $(instance.element).val(dateStr).trigger('change').valid();
+                },
+                onClose: function (selectedDates, dateStr, instance) {
+                    $(instance.element).valid();
+                }
+            });
+        }
+
+        // Generar cuotas dinámicamente
+        function generateCuotas(numCuotas, montoTotal) {
+            numCuotas = Math.max(1, parseInt(numCuotas) || 1);
+            montoTotal = parseFloat(montoTotal) || 0;
+
+            // Obtener cuotas existentes del modelo (si las hay)
+            const existingCuotas = @Html.Raw(Json.Encode(Model.Cuotas)) || [];
+
+            // Calcular monto por cuota con dos decimales
+            const baseMontoPorCuota = (montoTotal / numCuotas).toFixed(2);
+            const montosCuotas = new Array(numCuotas).fill(parseFloat(baseMontoPorCuota));
+
+            // Ajustar la última cuota para que la suma coincida con montoTotal
+            let sumaCuotas = parseFloat((baseMontoPorCuota * numCuotas).toFixed(2));
+            if (sumaCuotas !== montoTotal) {
+                const diferencia = (montoTotal - sumaCuotas).toFixed(2);
+                montosCuotas[numCuotas - 1] = (parseFloat(baseMontoPorCuota) + parseFloat(diferencia)).toFixed(2);
             }
 
-            // Inicializar flatpickr para fechas de cuotas con hora
-            function initializeFlatpickr() {
-                $(".flatpickr-input").flatpickr({
-                    locale: "es",
-                    dateFormat: "Y-m-d H:i:S",
-                    enableTime: true,
-                    time_24hr: true,
-                    defaultHour: 8,
-                    defaultMinute: 0,
-                    allowInput: true,
-                    minDate: "today",
-                    onChange: function (selectedDates, dateStr, instance) {
-                        $(instance.element).val(dateStr).trigger('change').valid();
-                    },
-                    onClose: function (selectedDates, dateStr, instance) {
-                        $(instance.element).valid();
-                    }
-                });
+            let cuotasHtml = '';
+            const today = new Date();
+
+            for (let i = 0; i < numCuotas; i++) {
+                const fechaCuota = new Date(today);
+                fechaCuota.setMonth(today.getMonth() + i);
+                fechaCuota.setHours(8, 0, 0, 0);
+                const fechaFormateada = moment(fechaCuota).format("YYYY-MM-DD HH:mm:ss");
+
+                // Usar datos existentes si están disponibles, priorizando el nuevo cálculo de montos
+                const cuotaExistente = existingCuotas[i] || {};
+                const fechaExistente = cuotaExistente.FechaPago ? moment(cuotaExistente.FechaPago).format("YYYY-MM-DD HH:mm:ss") : fechaFormateada;
+                const estadoExistente = cuotaExistente.Estado || "Pendiente";
+
+                cuotasHtml += `
+                    <div class="form-group cuota-item">
+                        <div class="col-md-2">Cuota ${i + 1}</div>
+                        <div class="col-md-3">
+                            <input class="form-control flatpickr-input" autocomplete="off"
+                                data-val="true" data-val-required="El campo Fecha de Pago es obligatorio."
+                                id="Cuotas_${i}__FechaPago" name="Cuotas[${i}].FechaPago"
+                                type="text" value="${fechaExistente}" required>
+                            <span class="field-validation-valid text-danger" data-valmsg-for="Cuotas[${i}].FechaPago" data-valmsg-replace="true"></span>
+                        </div>
+                        <div class="col-md-3">
+                            <input class="form-control monto-cuota" data-val="true"
+                                data-val-number="El campo Monto debe ser un número."
+                                data-val-required="El campo Monto es obligatorio."
+                                id="Cuotas_${i}__Monto" name="Cuotas[${i}].Monto"
+                                readonly type="number" step="0.01" value="${montosCuotas[i]}">
+                            <span class="field-validation-valid text-danger" data-valmsg-for="Cuotas[${i}].Monto" data-valmsg-replace="true"></span>
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-control estado-cuota" data-val="true"
+                                data-val-required="El campo Estado es obligatorio."
+                                id="Cuotas_${i}__Estado" name="Cuotas[${i}].Estado" required>
+                                <option value="Pendiente" ${estadoExistente === "Pendiente" ? "selected" : ""}>Pendiente</option>
+                                <option value="Completado" ${estadoExistente === "Completado" ? "selected" : ""}>Completado</option>
+                            </select>
+                            <span class="field-validation-valid text-danger" data-valmsg-for="Cuotas[${i}].Estado" data-valmsg-replace="true"></span>
+                        </div>
+                    </div>`;
             }
 
-            // Generar cuotas dinámicamente
-            function generateCuotas(numCuotas, montoTotal) {
-                numCuotas = Math.max(1, parseInt(numCuotas) || 1);
-                montoTotal = parseFloat(montoTotal) || 0;
+            $("#cuotasList").html(cuotasHtml);
+            initializeFlatpickr();
+            $("#pagoForm").validate().resetForm();
+            $(".flatpickr-input, .monto-cuota, .estado-cuota").each(function () {
+                if ($.validator) $(this).valid();
+            });
+            calcularTotalCuotas();
+        }
 
-                // Obtener cuotas existentes del modelo (si las hay)
-                const existingCuotas = @Html.Raw(Json.Encode(Model.Cuotas)) || [];
-
-                // Calcular monto base por cuota, redondeando al entero más cercano
-                const baseMontoPorCuota = Math.round(montoTotal / numCuotas);
-                // Array para almacenar montos de cuotas
-                const montosCuotas = new Array(numCuotas).fill(baseMontoPorCuota);
-                // Calcular suma inicial
-                let sumaCuotas = baseMontoPorCuota * numCuotas;
-                // Ajustar cuotas para que la suma sea igual a montoTotal
-                if (sumaCuotas !== montoTotal) {
-                    const diferencia = montoTotal - sumaCuotas;
-                    // Distribuir la diferencia sumando o restando 1 a las cuotas necesarias
-                    const step = diferencia > 0 ? 1 : -1;
-                    const cuotasToAdjust = Math.abs(diferencia);
-                    for (let i = 0; i < cuotasToAdjust; i++) {
-                        montosCuotas[numCuotas - 1 - i] += step;
-                    }
-                }
-
-                // Si el redondeo entero falla, usar decimales mínimos
-                sumaCuotas = montosCuotas.reduce((sum, val) => sum + val, 0);
-                if (Math.abs(sumaCuotas - montoTotal) > 0.01) {
-                    const decimalBaseMonto = (montoTotal / numCuotas).toFixed(2);
-                    montosCuotas.fill(parseFloat(decimalBaseMonto));
-                    sumaCuotas = parseFloat(decimalBaseMonto) * numCuotas;
-                    if (sumaCuotas !== montoTotal) {
-                        const diff = (montoTotal - sumaCuotas).toFixed(2);
-                        montosCuotas[numCuotas - 1] = (parseFloat(decimalBaseMonto) + parseFloat(diff)).toFixed(2);
-                    }
-                }
-
-                let cuotasHtml = '';
-                const today = new Date();
-
-                for (let i = 0; i < numCuotas; i++) {
-                    const fechaCuota = new Date(today);
-                    fechaCuota.setMonth(today.getMonth() + i);
-                    fechaCuota.setHours(8, 0, 0, 0);
-                    const fechaFormateada = moment(fechaCuota).format("YYYY-MM-DD HH:mm:ss");
-
-                    // Obtener datos de la cuota existente si está disponible
-                    const cuotaExistente = existingCuotas[i] || {};
-                    const fechaExistente = cuotaExistente.FechaPago ? moment(cuotaExistente.FechaPago).format("YYYY-MM-DD HH:mm:ss") : fechaFormateada;
-                    const montoExistente = cuotaExistente.Monto || montosCuotas[i];
-                    const estadoExistente = cuotaExistente.Estado || "Pendiente";
-
-                    cuotasHtml += `
-                            <div class="form-group cuota-item">
-                                <div class="col-md-2">Cuota ${i + 1}</div>
-                                <div class="col-md-3">
-                                    <input class="form-control flatpickr-input" autocomplete="off"
-                                        data-val="true" data-val-required="El campo Fecha de Pago es obligatorio."
-                                        id="Cuotas_${i}__FechaPago" name="Cuotas[${i}].FechaPago"
-                                        type="text" value="${fechaExistente}" required>
-                                    <span class="field-validation-valid text-danger" data-valmsg-for="Cuotas[${i}].FechaPago" data-valmsg-replace="true"></span>
-                                </div>
-                                <div class="col-md-3">
-                                    <input class="form-control monto-cuota" data-val="true"
-                                        data-val-number="El campo Monto debe ser un número."
-                                        data-val-required="El campo Monto es obligatorio."
-                                        id="Cuotas_${i}__Monto" name="Cuotas[${i}].Monto"
-                                        readonly type="number" step="0.01" value="${montoExistente}">
-                                    <span class="field-validation-valid text-danger" data-valmsg-for="Cuotas[${i}].Monto" data-valmsg-replace="true"></span>
-                                </div>
-                                <div class="col-md-3">
-                                    <select class="form-control estado-cuota" data-val="true"
-                                        data-val-required="El campo Estado es obligatorio."
-                                        id="Cuotas_${i}__Estado" name="Cuotas[${i}].Estado" required>
-                                        <option value="Pendiente" ${estadoExistente === "Pendiente" ? "selected" : ""}>Pendiente</option>
-                                        <option value="Completado" ${estadoExistente === "Completado" ? "selected" : ""}>Completado</option>
-                                    </select>
-                                    <span class="field-validation-valid text-danger" data-valmsg-for="Cuotas[${i}].Estado" data-valmsg-replace="true"></span>
-                                </div>
-                            </div>`;
-                }
-
-                $("#cuotasList").html(cuotasHtml);
-                initializeFlatpickr();
-                $("#pagoForm").validate().resetForm();
-                $(".flatpickr-input, .monto-cuota, .estado-cuota").each(function () {
-                    if ($.validator) $(this).validate();
-                });
-                calcularTotalCuotas();
-            }
-
-            // Calcular total de cuotas y validar
-            function calcularTotalCuotas() {
-                if ($("#TipoPago").val() !== "Cuotas") {
-                    $("#btnSubmit").prop("disabled", false);
-                    $("#totalCuotas").text("0");
-                    $("#diferenciaMonto").text("(0)").removeClass("text-danger").addClass("text-success");
-                    $("#cuotasError").remove();
-                    return;
-                }
-
-                let total = 0;
-                $(".monto-cuota").each(function () {
-                    total += parseFloat($(this).val()) || 0;
-                });
-
-                const montoTotal = parseFloat($("#MontoTotal").val()) || 0;
-                const diferencia = total - montoTotal;
-
-                $("#totalCuotas").text(total.toLocaleString('es-CL', { style: 'currency', currency: 'CLP' }));
-                const diferenciaElement = $("#diferenciaMonto");
-                diferenciaElement.text(`(${diferencia.toLocaleString('es-CL', { style: 'currency', currency: 'CLP' })})`)
-                    .toggleClass("text-danger", Math.abs(diferencia) > 0.01)
-                    .toggleClass("text-success", Math.abs(diferencia) <= 0.01);
-
-                const isValid = Math.abs(diferencia) <= 0.01;
-                $("#btnSubmit").prop("disabled", !isValid);
+        // Calcular total de cuotas y validar
+        function calcularTotalCuotas() {
+            if ($("#TipoPago").val() !== "Cuotas") {
+                $("#btnSubmit").prop("disabled", false);
+                $("#totalCuotas").text("0");
+                $("#diferenciaMonto").text("(0)").removeClass("text-danger").addClass("text-success");
                 $("#cuotasError").remove();
-                if (!isValid) {
-                    diferenciaElement.after('<span class="text-danger" id="cuotasError"> La suma de cuotas no coincide con el monto total</span>');
-                }
+                return;
             }
 
-            // Manejar cambio en tipo de pago
-            $("#TipoPago").change(function () {
-                const isCuotas = $(this).val() === "Cuotas";
-                $("#cuotasSection, #cuotasContainer").toggle(isCuotas);
-                if (!isCuotas) {
-                    $("#NumeroCuotas").val(0);
-                    $("#cuotasList").empty();
-                    $("#totalCuotas").text("0");
-                    $("#diferenciaMonto").text("(0)").removeClass("text-danger").addClass("text-success");
-                    $("#cuotasError").remove();
-                    $("#btnSubmit").prop("disabled", false);
-                } else {
-                    const numCuotas = parseInt($("#NumeroCuotas").val()) || 1;
-                    const montoTotal = parseFloat($("#MontoTotal").val()) || 0;
-                    generateCuotas(numCuotas, montoTotal);
-                }
+            let total = 0;
+            $(".monto-cuota").each(function () {
+                total += parseFloat($(this).val()) || 0;
             });
+            total = parseFloat(total.toFixed(2));
 
-            // Manejar cambio en número de cuotas
-            $("#NumeroCuotas").on('input change', function () {
-                if ($("#TipoPago").val() === "Cuotas") {
-                    const numCuotas = parseInt($(this).val()) || 1;
-                    const montoTotal = parseFloat($("#MontoTotal").val()) || 0;
-                    generateCuotas(numCuotas, montoTotal);
-                }
-            });
+            const montoTotal = parseFloat($("#MontoTotal").val()) || 0;
+            const diferencia = total - montoTotal;
 
-            // Manejar cambio en monto total
-            $("#MontoTotal").on('input change', function () {
-                if ($("#TipoPago").val() === "Cuotas") {
-                    const numCuotas = parseInt($("#NumeroCuotas").val()) || 1;
-                    const montoTotal = parseFloat($(this).val()) || 0;
-                    generateCuotas(numCuotas, montoTotal);
-                }
-            });
+            $("#totalCuotas").text(total.toLocaleString('es-CL', { style: 'currency', currency: 'CLP' }));
+            const diferenciaElement = $("#diferenciaMonto");
+            diferenciaElement.text(`(${diferencia.toLocaleString('es-CL', { style: 'currency', currency: 'CLP' })})`)
+                .toggleClass("text-danger", Math.abs(diferencia) > 0.01)
+                .toggleClass("text-success", Math.abs(diferencia) <= 0.01);
 
-            // Validación antes de enviar el formulario
-            $("#pagoForm").submit(function (e) {
-                if ($("#TipoPago").val() !== "Cuotas") return;
+            const isValid = Math.abs(diferencia) <= 0.01;
+            $("#btnSubmit").prop("disabled", !isValid);
+            $("#cuotasError").remove();
+            if (!isValid) {
+                diferenciaElement.after('<span class="text-danger" id="cuotasError"> La suma de cuotas no coincide con el monto total</span>');
+            }
+        }
 
-                let totalCuotas = 0;
-                $(".monto-cuota").each(function () {
-                    totalCuotas += parseFloat($(this).val()) || 0;
-                });
-
-                const montoTotal = parseFloat($("#MontoTotal").val()) || 0;
-                if (Math.abs(totalCuotas - montoTotal) > 0.01) {
-                    alert("La suma de las cuotas debe coincidir exactamente con el monto total");
-                    e.preventDefault();
-                    return;
-                }
-
-                let fechasValidas = true;
-                $(".flatpickr-input").each(function () {
-                    const fechaStr = $(this).val();
-                    const isValid = moment(fechaStr, ["YYYY-MM-DD HH:mm:ss"], true).isValid();
-                    $(this).toggleClass("input-validation-error", !isValid);
-                    $(this).next(".field-validation-valid").text(isValid ? "" : "Formato de fecha inválido (aaaa-mm-dd hh:mm:ss)");
-                    fechasValidas = fechasValidas && isValid;
-                });
-
-                if (!fechasValidas) {
-                    alert("Por favor corrija las fechas con formato inválido");
-                    e.preventDefault();
-                    return;
-                }
-
-                $(".flatpickr-input").each(function () {
-                    const fechaStr = $(this).val();
-                    if (fechaStr) {
-                        const momentDate = moment(fechaStr, ["YYYY-MM-DD HH:mm:ss"], true);
-                        if (momentDate.isValid()) {
-                            $(this).val(momentDate.format("YYYY-MM-DD HH:mm:ss"));
-                        }
-                    }
-                });
-            });
-
-            // Inicializar estado
-            if ($("#TipoPago").val() === "Cuotas") {
+        // Manejar cambio en tipo de pago
+        $("#TipoPago").change(function () {
+            const isCuotas = $(this).val() === "Cuotas";
+            $("#cuotasSection, #cuotasContainer").toggle(isCuotas);
+            if (!isCuotas) {
+                $("#NumeroCuotas").val(0);
+                $("#cuotasList").empty();
+                $("#totalCuotas").text("0");
+                $("#diferenciaMonto").text("(0)").removeClass("text-danger").addClass("text-success");
+                $("#cuotasError").remove();
+                $("#btnSubmit").prop("disabled", false);
+            } else {
                 const numCuotas = parseInt($("#NumeroCuotas").val()) || 1;
                 const montoTotal = parseFloat($("#MontoTotal").val()) || 0;
                 generateCuotas(numCuotas, montoTotal);
-            } else {
-                $("#btnSubmit").prop("disabled", false);
+            }
+        });
+
+        // Manejar cambio en número de cuotas
+        $("#NumeroCuotas").on('input change', function () {
+            if ($("#TipoPago").val() === "Cuotas") {
+                const numCuotas = parseInt($(this).val()) || 1;
+                const montoTotal = parseFloat($("#MontoTotal").val()) || 0;
+                generateCuotas(numCuotas, montoTotal);
+            }
+        });
+
+        // Manejar cambio en monto total
+        $("#MontoTotal").on('input change', function () {
+            if ($("#TipoPago").val() === "Cuotas") {
+                const numCuotas = parseInt($("#NumeroCuotas").val()) || 1;
+                const montoTotal = parseFloat($(this).val()) || 0;
+                generateCuotas(numCuotas, montoTotal);
+            }
+        });
+
+        // Validación antes de enviar el formulario
+        $("#pagoForm").submit(function (e) {
+            if ($("#TipoPago").val() !== "Cuotas") return;
+
+            let totalCuotas = 0;
+            $(".monto-cuota").each(function () {
+                totalCuotas += parseFloat($(this).val()) || 0;
+            });
+            totalCuotas = parseFloat(totalCuotas.toFixed(2));
+
+            const montoTotal = parseFloat($("#MontoTotal").val()) || 0;
+            if (Math.abs(totalCuotas - montoTotal) > 0.01) {
+                alert("La suma de las cuotas debe coincidir exactamente con el monto total");
+                e.preventDefault();
+                return;
             }
 
-            // Enfoque automático
-            $("#IdConsulta").focus();
+            let fechasValidas = true;
+            $(".flatpickr-input").each(function () {
+                const fechaStr = $(this).val();
+                const isValid = moment(fechaStr, ["YYYY-MM-DD HH:mm:ss"], true).isValid();
+                $(this).toggleClass("input-validation-error", !isValid);
+                $(this).next(".field-validation-valid").text(isValid ? "" : "Formato de fecha inválido (aaaa-mm-dd hh:mm:ss)");
+                fechasValidas = fechasValidas && isValid;
+            });
+
+            if (!fechasValidas) {
+                alert("Por favor corrija las fechas con formato inválido");
+                e.preventDefault();
+                return;
+            }
+
+            $(".flatpickr-input").each(function () {
+                const fechaStr = $(this).val();
+                if (fechaStr) {
+                    const momentDate = moment(fechaStr, ["YYYY-MM-DD HH:mm:ss"], true);
+                    if (momentDate.isValid()) {
+                        $(this).val(momentDate.format("YYYY-MM-DD HH:mm:ss"));
+                    }
+                }
+            });
         });
-</script>
+
+        // Inicializar estado
+        if ($("#TipoPago").val() === "Cuotas") {
+            const numCuotas = parseInt($("#NumeroCuotas").val()) || 1;
+            const montoTotal = parseFloat($("#MontoTotal").val()) || 0;
+            generateCuotas(numCuotas, montoTotal);
+        } else {
+            $("#btnSubmit").prop("disabled", false);
+        }
+
+        // Enfoque automático
+        $("#IdConsulta").focus();
+    });
+    </script>
 }

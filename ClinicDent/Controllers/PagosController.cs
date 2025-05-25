@@ -373,6 +373,10 @@ namespace ClinicDent.Controllers
             return View(model);
         }
 
+
+
+
+
         // GET: Pagos/Delete/5
         public ActionResult Delete(int? id)
         {
@@ -527,6 +531,57 @@ namespace ClinicDent.Controllers
                 db.Dispose();
             }
             base.Dispose(disposing);
+        }
+
+        // GET: Pagos/Details/5
+        public ActionResult Details(int? id)
+        {
+            if (id == null)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
+
+            var pago = db.Pagos
+                .Include(p => p.Pagos_Cuotas)
+                .Include(p => p.Consulta)
+                .Include(p => p.Consulta.Pacientes)
+                .Include(p => p.Consulta.Dentistas)
+                .FirstOrDefault(p => p.id_pago == id);
+
+            if (pago == null)
+            {
+                return HttpNotFound();
+            }
+
+            var model = new PagoDetailsViewModel
+            {
+                IdPago = pago.id_pago,
+                IdConsulta = pago.id_consulta,
+                FechaPago = pago.fecha_pago,
+                MontoTotal = pago.monto_total,
+                MetodoPago = pago.metodo_pago,
+                TipoPago = pago.tipo_pago,
+                PacienteNombre = pago.Consulta?.Pacientes != null
+                    ? $"{pago.Consulta.Pacientes.nombres} {pago.Consulta.Pacientes.apellidos}"
+                    : "Sin paciente",
+                PacienteTelefono = pago.Consulta?.Pacientes?.telefono,
+                PacienteFechaNacimiento = pago.Consulta?.Pacientes?.fecha_nacimiento,
+                DentistaNombre = pago.Consulta?.Dentistas != null
+                    ? $"{pago.Consulta.Dentistas.nombre} {pago.Consulta.Dentistas.apellido}"
+                    : "Sin dentista",
+                FechaConsulta = pago.Consulta?.fecha_consulta,
+                IdPaciente = pago.Consulta?.Pacientes?.id_paciente, // Populate patient ID
+                Cuotas = pago.Pagos_Cuotas.Select(c => new PagoCuotaViewModel
+                {
+                    IdCuota = c.id_cuota,
+                    IdPago = c.id_pago,
+                    FechaPago = c.fecha_pago,
+                    Monto = c.monto,
+                    Estado = c.estado
+                }).ToList()
+            };
+
+            return View(model);
         }
     }
 }

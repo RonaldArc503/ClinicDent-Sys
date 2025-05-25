@@ -6,6 +6,8 @@
     <title>@ViewBag.Title - Clínica</title>
     @Styles.Render("~/Content/css")
     @Scripts.Render("~/bundles/modernizr")
+    <!-- Agregamos la fuente Roboto Slab de Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.11.6/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
@@ -21,38 +23,56 @@
             overflow: hidden;
         }
 
-        .sidebar-header span {
-            display: none;
-            font-family: 'Open Sans', sans-serif;
-            font-size: 20px;
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            padding: 15px 10px;
+            white-space: nowrap;
+            justify-content: center;
+            height: 70px; /* Altura fija para el header */
         }
 
-            .sidebar.expanded {
-                width: 250px;
+        .sidebar-header-content {
+            display: flex;
+            align-items: center;
+            width: 100%;
+        }
+
+        .sidebar-header span {
+            display: none;
+            font-family: 'Roboto Slab', serif; /* Aplicamos Roboto Slab */
+            font-size: 18px;
+            font-weight: 700;
+            margin-left: 12px;
+            letter-spacing: 0.5px;
+        }
+
+        .sidebar.expanded {
+            width: 250px;
+        }
+
+        .sidebar .nav-link {
+            color: white;
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            margin: 2px 5px;
+            border-radius: 5px;
+            white-space: nowrap;
+        }
+
+            .sidebar .nav-link:hover {
+                background-color: #1157c3;
             }
 
-            .sidebar .nav-link {
-                color: white;
-                display: flex;
-                align-items: center;
-                padding: 12px 15px;
-                margin: 2px 5px;
-                border-radius: 5px;
-                white-space: nowrap;
+            .sidebar .nav-link.active {
+                background-color: #0d5bcc;
             }
-
-                .sidebar .nav-link:hover {
-                    background-color: #1157c3;
-                    
-                }
-
-                .sidebar .nav-link.active {
-                    background-color: #0d5bcc;
-                }
 
         .nav-text {
             margin-left: 10px;
             display: none;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         .sidebar.expanded .nav-text {
@@ -65,30 +85,21 @@
             text-align: center;
         }
 
-        .sidebar-header {
+        .sidebar-header i.fa-tooth {
+            font-size: 28px;
+            transition: all 0.3s ease;
+            min-width: 30px;
             text-align: center;
-            padding: 20px 0;
-            white-space: nowrap;
         }
 
-            .sidebar-header i.fa-tooth {
-                display: block;
-                margin: 0 auto;
-                font-size: 2.3rem; 
-            }
-
-            .sidebar-header i {
-                display: block;
-                margin: 0 auto;
-            }
-
-       
-
-
-
-        .sidebar.expanded .sidebar-header span {
-            display: inline;
+        .sidebar.expanded .sidebar-header {
+            justify-content: flex-start;
+            padding-left: 15px;
         }
+
+            .sidebar.expanded .sidebar-header span {
+                display: inline;
+            }
 
         .content {
             flex-grow: 1;
@@ -96,7 +107,6 @@
             transition: margin-left 0.3s ease;
         }
 
-        /* Dropdown menu styles */
         #citasDropdown + .dropdown-menu {
             min-width: 250px;
             background-color: #116AEF;
@@ -122,7 +132,6 @@
             margin-right: 10px;
         }
 
-        /* Toggle button */
         .toggle-btn {
             position: absolute;
             top: 10px;
@@ -137,103 +146,124 @@
     </style>
 </head>
 <body>
-    <div class="d-flex">
-        <!-- Sidebar -->
-        <nav class="sidebar d-flex flex-column">
-            <button class="toggle-btn" onclick="toggleSidebar()">
-                <i class="fas fa-bars"></i>
-            </button>
-            <div class="sidebar-header">
-                <i class="fa-solid fa-tooth mt-3"></i>
-                <span>CLINICA DENTAL</span>
+    @if (User.Identity.IsAuthenticated)
+    {
+        <div class="d-flex">
+            <!-- Sidebar -->
+            <nav class="sidebar d-flex flex-column">
+                <button class="toggle-btn" onclick="toggleSidebar()">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="sidebar-header">
+                    <div class="sidebar-header-content">
+                        <i class="fa-solid fa-tooth"></i>
+                        <span>CLINICA DENTAL</span>
+                    </div>
+                </div>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a href="@Url.Action("Index", "Home")" class="nav-link">
+                            <i class="fa-solid fa-house icon"></i>
+                            <span class="nav-text">Inicio</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="@Url.Action("Index", "Pacientes")" class="nav-link">
+                            <i class="fa-solid fa-user icon"></i>
+                            <span class="nav-text">Pacientes</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="@Url.Action("Index", "Dentistas")" class="nav-link">
+                            <i class="fa-solid fa-tooth icon"></i>
+                            <span class="nav-text">Dentistas</span>
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="citasDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fa-solid fa-calendar-day icon"></i>
+                            <span class="nav-text">Citas</span>
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="citasDropdown">
+                            <li>
+                                <a class="dropdown-item" href="@Url.Action("Index", "Citas")">
+                                    <i class="fa-solid fa-calendar-check icon"></i>
+                                    <span>Citas</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="@Url.Action("Calendario", "Citas")">
+                                    <i class="fa-solid fa-calendar-alt icon"></i>
+                                    <span>Calendario</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a href="@Url.Action("Index", "Consultas")" class="nav-link">
+                            <i class="fa-solid fa-stethoscope icon"></i>
+                            <span class="nav-text">Consultas</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="@Url.Action("Index", "Tratamientos")" class="nav-link">
+                            <i class="fa-solid fa-syringe icon"></i>
+                            <span class="nav-text">Tratamientos</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="@Url.Action("Index", "Pagos")" class="nav-link">
+                            <i class="fa-solid fa-credit-card icon"></i>
+                            <span class="nav-text">Pagos e Historial</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="@Url.Action("Index", "Materiales")" class="nav-link" title="Gestionar Materiales">
+                            <i class="fa-solid fa-boxes-stacked icon"></i>
+                            <span class="nav-text">Materiales</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="@Url.Action("Index", "Inventarios")" class="nav-link" title="Gestionar Inventario">
+                            <i class="fa-solid fa-warehouse icon"></i>
+                            <span class="nav-text">Inventario</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="@Url.Action("Index", "Configuraciones")" class="nav-link" title="Configuraciones">
+                            <i class="fa-solid fa-cog icon"></i>
+                            <span class="nav-text">Configuraciones</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="@Url.Action("Logout", "Account")" class="nav-link" title="Cerrar Sesión">
+                            <i class="fa-solid fa-sign-out-alt icon"></i>
+                            <span class="nav-text">Cerrar Sesión</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <!-- Main content -->
+            <div class="content">
+                <div class="container">
+                    @RenderBody()
+                    <hr>
+                    <footer>
+                        <p>© @DateTime.Now.Year - Clínica Dental</p>
+                    </footer>
+                </div>
             </div>
-            <ul class="nav flex-column mt-3">
-                <li class="nav-item">
-                    <a href="@Url.Action("Index", "Home")" class="nav-link">
-                        <i class="fa-solid fa-house icon"></i>
-                        <span class="nav-text">Inicio</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="@Url.Action("Index", "Pacientes")" class="nav-link">
-                        <i class="fa-solid fa-user icon"></i>
-                        <span class="nav-text">Pacientes</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="@Url.Action("Index", "Dentistas")" class="nav-link">
-                        <i class="fa-solid fa-tooth icon"></i>
-                        <span class="nav-text">Dentistas</span>
-                    </a>
-                </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="citasDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="fa-solid fa-calendar-day icon"></i>
-                        <span class="nav-text">Citas</span>
-                    </a>
-                    <ul class="dropdown-menu" aria-labelledby="citasDropdown">
-                        <li>
-                            <a class="dropdown-item" href="@Url.Action("Index", "Citas")">
-                                <i class="fa-solid fa-calendar-check icon"></i>
-                                <span>Citas</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="@Url.Action("Calendario", "Citas")">
-                                <i class="fa-solid fa-calendar-alt icon"></i>
-                                <span>Calendario</span>
-                            </a>
-                        </li>
-                    </ul>
-                </li>
-                <li class="nav-item">
-                    <a href="@Url.Action("Index", "Consultas")" class="nav-link">
-                        <i class="fa-solid fa-tooth icon"></i>
-                        <span class="nav-text">Consultas</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="@Url.Action("Index", "Tratamientos")" class="nav-link">
-                        <i class="fa-solid fa-syringe icon"></i>
-                        <span class="nav-text">Tratamientos</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="@Url.Action("Index", "Pagos")" class="nav-link">
-                        <i class="fa-solid fa-credit-card icon"></i>
-                        <span class="nav-text">Pagos e Historial</span>
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    <a href="@Url.Action("Index", "Materiales")" class="nav-link" title="Gestionar Materiales">
-                        <i class="fa-solid fa-boxes-stacked icon"></i>
-                        <span class="nav-text">Materiales</span>
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    <a href="@Url.Action("Index", "Inventarios")" class="nav-link" title="Gestionar Inventario">
-                        <i class="fa-solid fa-warehouse icon"></i>
-                        <span class="nav-text">Inventario</span>
-                    </a>
-                </li>
-
-
-            </ul>
-        </nav>
-
-        <!-- Main content -->
+        </div>
+    }
+    else
+    {
         <div class="content">
             <div class="container">
                 @RenderBody()
-                <hr>
-                <footer>
-                    <p>© @DateTime.Now.Year - Clínica Dental</p>
-                </footer>
             </div>
         </div>
-    </div>
+    }
 
     @Scripts.Render("~/bundles/jquery")
     @Scripts.Render("~/bundles/bootstrap")
@@ -244,7 +274,6 @@
             document.querySelector('.sidebar').classList.toggle('expanded');
         }
 
-        // Optional: Expand on hover
         const sidebar = document.querySelector('.sidebar');
         sidebar.addEventListener('mouseenter', () => {
             sidebar.classList.add('expanded');

@@ -129,6 +129,7 @@
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
+    <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\CitasController.cs" />
     <Compile Include="Controllers\ConsultasController.cs" />
     <Compile Include="Controllers\Consultas_TratamientosController.cs" />
@@ -170,6 +171,7 @@
     <Compile Include="Models\Inventario.cs">
       <DependentUpon>ModelLocal1.tt</DependentUpon>
     </Compile>
+    <Compile Include="Models\LoginViewModel.cs" />
     <Compile Include="Models\Materiales.cs">
       <DependentUpon>ModelLocal1.tt</DependentUpon>
     </Compile>
@@ -193,6 +195,9 @@
       <DependentUpon>ModelLocal1.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\PagoCreateViewModel.cs" />
+    <Compile Include="Models\PagoDetailsViewModel.cs">
+      <Generator>ResXFileCodeGenerator</Generator>
+    </Compile>
     <Compile Include="Models\Pagos.cs">
       <DependentUpon>ModelLocal1.tt</DependentUpon>
     </Compile>
@@ -268,6 +273,7 @@
     <Content Include="Scripts\jquery.validate.unobtrusive.js" />
     <Content Include="Scripts\jquery.validate.unobtrusive.min.js" />
     <Content Include="Scripts\modernizr-2.8.3.js" />
+    <Content Include="Views\Home\AdminDashboard.aspx" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
@@ -361,6 +367,9 @@
     <Content Include="Views\Consultas\Consulta_sin_cita.cshtml" />
     <Content Include="Views\Shared\_OdontogramaPartial.cshtml" />
     <Content Include="Views\Shared\_OdontogramaViewOnlyPartial.cshtml" />
+    <Content Include="Views\Account\Login.cshtml">
+      <Generator>ResXFileCodeGenerator</Generator>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
