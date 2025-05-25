@@ -1,319 +1,281 @@
-﻿@model ClinicDent.Models.PagoCreateViewModel
+﻿@model ClinicDent.Models.PagoDetailsViewModel
 
 @{
-    ViewBag.Title = "Editar Pago";
+    ViewBag.Title = "Detalles del Pago";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h2>Editar Pago</h2>
-
-@using (Html.BeginForm())
-{
-    @Html.AntiForgeryToken()
-
-    <div class="form-horizontal">
-        <hr />
-        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
-        @Html.HiddenFor(model => model.IdConsulta)
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.IdConsulta, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.DropDownListFor(model => model.IdConsulta, Model.Consultas, "Seleccione una consulta", new { @class = "form-control" })
-                @Html.ValidationMessageFor(model => model.IdConsulta, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.MontoTotal, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.MontoTotal, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
-                @Html.ValidationMessageFor(model => model.MontoTotal, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.MetodoPago, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.DropDownListFor(model => model.MetodoPago, Model.MetodosPago, new { @class = "form-control" })
-                @Html.ValidationMessageFor(model => model.MetodoPago, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.TipoPago, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.DropDownListFor(model => model.TipoPago, Model.TiposPago, new { @class = "form-control", id = "TipoPago" })
-                @Html.ValidationMessageFor(model => model.TipoPago, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group" id="cuotasSection" style="@(Model.TipoPago == "Cuotas" ? "" : "display: none;")">
-            @Html.LabelFor(model => model.NumeroCuotas, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.NumeroCuotas, new
-                {
-                    htmlAttributes = new
+<div class="container-fluid px-0">
+    <!-- Hero Section -->
+    <div class="pagos-hero bg-gradient-primary">
+        <div class="container py-4">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="text-white mb-3"><i class="fas fa-money-bill-wave me-2"></i>Detalles del Pago</h1>
+                    <p class="text-white-50 mb-0">Información completa del pago #@Model.IdPago</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    @Html.ActionLink("Editar", "Edit", new { id = Model.IdPago }, new { @class = "btn btn-light me-2" })
+                    @if (Model.IdPaciente.HasValue)
                     {
-                        @class = "form-control",
-                        id = "NumeroCuotas",
-                        min = "1",
-                        type = "number"
+                        @Html.ActionLink("Volver al Expediente", "Details", "Pacientes", new { id = Model.IdPaciente }, new { @class = "btn btn-outline-light", title = "Expediente" })
                     }
-                })
-                @Html.ValidationMessageFor(model => model.NumeroCuotas, "", new { @class = "text-danger" })
-                <small class="text-muted">Cambie el número y presione fuera del campo para actualizar las cuotas</small>
-            </div>
-        </div>
-
-        <div id="cuotasContainer" style="@(Model.TipoPago == "Cuotas" ? "" : "display: none;")">
-            <h4>Detalle de Cuotas</h4>
-            <div class="row">
-                <div class="col-md-2"><strong>N° Cuota</strong></div>
-                <div class="col-md-3"><strong>Fecha de Pago</strong></div>
-                <div class="col-md-3"><strong>Monto</strong></div>
-                <div class="col-md-3"><strong>Estado</strong></div>
-            </div>
-
-            <div id="cuotasList">
-                @for (int i = 0; i < Model.Cuotas.Count; i++)
-                {
-                    <div class="form-group cuota-item">
-                        <div class="col-md-2">Cuota @(i + 1)</div>
-                        <div class="col-md-3">
-                            @Html.TextBoxFor(model => model.Cuotas[i].FechaPago, "{0:dd/MM/yyyy}", new
-                            {
-                                @class = "form-control datepicker",
-                                autocomplete = "off"
-                            })
-                            @Html.ValidationMessageFor(model => model.Cuotas[i].FechaPago, "", new { @class = "text-danger" })
-                        </div>
-                        <div class="col-md-3">
-                            @Html.EditorFor(model => model.Cuotas[i].Monto, new
-                            {
-                                htmlAttributes = new
-                                {
-                                    @class = "form-control monto-cuota",
-                                    @readonly = "readonly"
-                                }
-                            })
-                            @Html.ValidationMessageFor(model => model.Cuotas[i].Monto, "", new { @class = "text-danger" })
-                        </div>
-                        <div class="col-md-3">
-                            @{
-                                var estados = new List<SelectListItem>
-                                            {
-                                    new SelectListItem { Value = "Pendiente", Text = "Pendiente", Selected = Model.Cuotas[i].Estado == "Pendiente" },
-                                    new SelectListItem { Value = "Completado", Text = "Completado", Selected = Model.Cuotas[i].Estado == "Completado" }
-                                };
-                            }
-                            @Html.DropDownListFor(model => model.Cuotas[i].Estado, estados, new { @class = "form-control estado-cuota" })
-                            @Html.ValidationMessageFor(model => model.Cuotas[i].Estado, "", new { @class = "text-danger" })
-                        </div>
-                    </div>
-                }
-            </div>
-
-            <div class="form-group">
-                <div class="col-md-offset-2 col-md-10">
-                    <div class="alert alert-info">
-                        <strong>Total Cuotas:</strong> <span id="totalCuotas">@Model.Cuotas.Sum(c => c.Monto).ToString("C")</span>
-                        <span id="diferenciaMonto" class="@((Model.Cuotas.Sum(c => c.Monto) != Model.MontoTotal) ? "text-danger" : "text-success")">
-                            (@((Model.Cuotas.Sum(c => c.Monto) - Model.MontoTotal).ToString("C")))
-                        </span>
-                    </div>
+                    else
+                    {
+                        @Html.ActionLink("Volver a la Lista", "Index", null, new { @class = "btn btn-outline-light" })
+                    }
                 </div>
             </div>
         </div>
+    </div>
 
-        <div class="form-group">
-            <div class="col-md-offset-2 col-md-10">
-                <input type="submit" value="Guardar Cambios" class="btn btn-primary" id="btnSubmit" />
-                @Html.ActionLink("Cancelar", "Index", null, new { @class = "btn btn-default" })
+    <!-- Main Content -->
+    <div class="container py-4">
+        <div class="card shadow-sm border-0">
+            <div class="card-body">
+                <h5 class="card-title mb-4"><i class="fas fa-info-circle me-2"></i>Detalles del Pago</h5>
+                <div class="row">
+                    <div class="col-md-6">
+                        <dl class="dl-horizontal">
+                            <dt>@Html.DisplayNameFor(model => model.IdConsulta)</dt>
+                            <dd>@Model.IdConsulta</dd>
+
+                            <dt>@Html.DisplayNameFor(model => model.FechaPago)</dt>
+                            <dd>
+                                <div class="d-flex align-items-center">
+                                    <div class="date-badge me-3">
+                                        <span class="day">@Model.FechaPago.ToString("dd")</span>
+                                        <span class="month">@Model.FechaPago.ToString("MMM", new System.Globalization.CultureInfo("es-CL"))</span>
+                                    </div>
+                                    <div>
+                                        @System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(
+                                            Model.FechaPago.ToString("h:mm tt", new System.Globalization.CultureInfo("es-CL")).ToLower()
+                                        )
+                                    </div>
+                                </div>
+                            </dd>
+
+                            <dt>@Html.DisplayNameFor(model => model.MontoTotal)</dt>
+                            <dd>@Model.MontoTotal.ToString("C", new System.Globalization.CultureInfo("es-CL"))</dd>
+
+                            <dt>@Html.DisplayNameFor(model => model.MetodoPago)</dt>
+                            <dd>
+                                <span class="badge @(Model.MetodoPago == "Efectivo" ? "bg-success" : Model.MetodoPago == "Tarjeta" ? "bg-info" : "bg-warning")">
+                                    @Model.MetodoPago
+                                </span>
+                            </dd>
+
+                            <dt>@Html.DisplayNameFor(model => model.TipoPago)</dt>
+                            <dd>
+                                <span class="badge @(Model.TipoPago == "Unico" ? "bg-primary" : "bg-secondary")">
+                                    @Model.TipoPago
+                                </span>
+                            </dd>
+                        </dl>
+                    </div>
+                    <div class="col-md-6">
+                        <dl class="dl-horizontal">
+                            <dt>@Html.DisplayNameFor(model => model.PacienteNombre)</dt>
+                            <dd>@Model.PacienteNombre</dd>
+
+                            <dt>@Html.DisplayNameFor(model => model.PacienteTelefono)</dt>
+                            <dd>@(Model.PacienteTelefono ?? "N/A")</dd>
+
+                            <dt>@Html.DisplayNameFor(model => model.PacienteFechaNacimiento)</dt>
+                            <dd>@(Model.PacienteFechaNacimiento?.ToString("dd/MM/yyyy") ?? "N/A")</dd>
+
+                            <dt>@Html.DisplayNameFor(model => model.DentistaNombre)</dt>
+                            <dd>@(Model.DentistaNombre ?? "N/A")</dd>
+
+                            <dt>@Html.DisplayNameFor(model => model.FechaConsulta)</dt>
+                            <dd>@(Model.FechaConsulta?.ToString("dd/MM/yyyy") ?? "N/A")</dd>
+                        </dl>
+                    </div>
+                </div>
+
+                @if (Model.Cuotas != null && Model.Cuotas.Any())
+                {
+                    <h5 class="card-title mt-4"><i class="fas fa-list-ul me-2"></i>Cuotas</h5>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>@Html.DisplayNameFor(model => model.Cuotas[0].IdCuota)</th>
+                                    <th>@Html.DisplayNameFor(model => model.Cuotas[0].FechaPago)</th>
+                                    <th>@Html.DisplayNameFor(model => model.Cuotas[0].Monto)</th>
+                                    <th>@Html.DisplayNameFor(model => model.Cuotas[0].Estado)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var cuota in Model.Cuotas)
+                                {
+                                    <tr>
+                                        <td>@cuota.IdCuota</td>
+                                        <td>@cuota.FechaPago.ToString("dd/MM/yyyy")</td>
+                                        <td>@cuota.Monto.ToString("C", new System.Globalization.CultureInfo("es-CL"))</td>
+                                        <td>
+                                            <span class="badge @(cuota.Estado == "Pendiente" ? "bg-warning" : "bg-success")">
+                                                @cuota.Estado
+                                            </span>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-muted mt-4">Sin cuotas asociadas</div>
+                }
             </div>
         </div>
     </div>
-}
+</div>
+
+<style>
+    /* Hero Section */
+    .pagos-hero {
+        background: linear-gradient(135deg, #3a7bd5 0%, #00d2ff 100%);
+        border-radius: 0 0 20px 20px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+    }
+
+    /* Card Styling */
+    .card {
+        margin-bottom: 1rem;
+    }
+
+    .card-title {
+        margin-bottom: 0.75rem !important;
+    }
+
+    /* Definition List Styling */
+    .dl-horizontal dt {
+        font-weight: 600;
+        color: #6c757d;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .dl-horizontal dd {
+        margin-bottom: 1rem;
+        font-size: 0.9rem;
+    }
+
+    /* Date Badge */
+    .date-badge {
+        width: 45px;
+        height: 45px;
+        border-radius: 8px;
+        background: #f8f9fa;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+    }
+
+        .date-badge .day {
+            font-weight: 700;
+            font-size: 1.1rem;
+            line-height: 1;
+        }
+
+        .date-badge .month {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            color: #6c757d;
+            line-height: 1;
+            margin-top: 3px;
+        }
+
+    /* Badges */
+    .badge {
+        font-size: 0.75rem;
+        padding: 0.5em 0.75em;
+        font-weight: 500;
+        border-radius: 4px;
+    }
+
+    /* Table Styling */
+    .table {
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+        .table th {
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            color: #6c757d;
+            border-top: none;
+            background-color: #f8f9fa;
+            padding: 12px 15px;
+        }
+
+        .table td {
+            vertical-align: middle;
+            padding: 15px;
+            border-top: 1px solid #f0f0f0;
+        }
+
+    /* Responsive Adjustments */
+    @@media (max-width: 768px) {
+        .pagos-hero .btn {
+            margin-bottom: 10px;
+            width: 100%;
+        }
+
+        .date-badge {
+            width: 40px;
+            height: 40px;
+            margin-right: 10px;
+        }
+
+        .dl-horizontal dt {
+            font-size: 0.7rem;
+        }
+
+        .dl-horizontal dd {
+            font-size: 0.85rem;
+        }
+
+        .table th, .table td {
+            font-size: 0.8rem;
+            padding: 10px;
+        }
+
+        .badge {
+            font-size: 0.65rem;
+        }
+    }
+</style>
 
 @section Scripts {
-    @Scripts.Render("~/bundles/jqueryval")
-    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
-    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
-
     <script>
         $(document).ready(function () {
-            // Inicializar datepicker con formato de fecha válido
-            $(".datepicker").datepicker({
-                dateFormat: "dd/mm/yy",
-                changeMonth: true,
-                changeYear: true,
-                onSelect: function(dateText, inst) {
-                    $(this).valid(); // Forzar validación inmediata
-                }
-            });
+            try {
+                // Inicializar tooltips para elementos con atributo title
+                $('[title]').tooltip();
 
-            // Mostrar/ocultar sección de cuotas según tipo de pago
-            $("#TipoPago").change(function () {
-                var showCuotas = $(this).val() === "Cuotas";
-                $("#cuotasSection").toggle(showCuotas);
-                $("#cuotasContainer").toggle(showCuotas);
-            });
+                // Animar los elementos con un efecto de fade-in
+                $('.card').css('opacity', 0).animate({ opacity: 1 }, 300);
 
-            // Manejar cambio en número de cuotas
-            $("#NumeroCuotas").change(function() {
-                var numCuotas = parseInt($(this).val());
-                if (numCuotas < 1) {
-                    $(this).val(1);
-                    numCuotas = 1;
-                }
-
-                var montoTotal = parseFloat($("#MontoTotal").val());
-                var montoPorCuota = montoTotal / numCuotas;
-
-                // Generar HTML para las cuotas
-                var cuotasHtml = '';
-                var today = new Date();
-
-                for (var i = 0; i < numCuotas; i++) {
-                    var fechaCuota = new Date();
-                    fechaCuota.setMonth(today.getMonth() + i);
-
-                    var dia = fechaCuota.getDate().toString().padStart(2, '0');
-                    var mes = (fechaCuota.getMonth() + 1).toString().padStart(2, '0');
-                    var año = fechaCuota.getFullYear();
-                    var fechaFormateada = dia + '/' + mes + '/' + año;
-
-                    cuotasHtml += `
-                        <div class="form-group cuota-item">
-                            <div class="col-md-2">Cuota ${i + 1}</div>
-                            <div class="col-md-3">
-                                <input class="form-control datepicker" autocomplete="off"
-                                    data-val="true" data-val-required="El campo Fecha de Pago es obligatorio."
-                                    id="Cuotas_${i}__FechaPago" name="Cuotas[${i}].FechaPago"
-                                    type="text" value="${fechaFormateada}">
-                                <span class="field-validation-valid text-danger" data-valmsg-for="Cuotas[${i}].FechaPago" data-valmsg-replace="true"></span>
-                            </div>
-                            <div class="col-md-3">
-                                <input class="form-control monto-cuota" data-val="true"
-                                    data-val-number="El campo Monto debe ser un número."
-                                    data-val-required="El campo Monto es obligatorio."
-                                    id="Cuotas_${i}__Monto" name="Cuotas[${i}].Monto"
-                                    readonly="readonly" type="number" value="${montoPorCuota.toFixed(2)}">
-                                <span class="field-validation-valid text-danger" data-valmsg-for="Cuotas[${i}].Monto" data-valmsg-replace="true"></span>
-                            </div>
-                            <div class="col-md-3">
-                                <select class="form-control estado-cuota" data-val="true"
-                                    data-val-required="El campo Estado es obligatorio."
-                                    id="Cuotas_${i}__Estado" name="Cuotas[${i}].Estado">
-                                    <option value="Pendiente">Pendiente</option>
-                                    <option value="Completado">Completado</option>
-                                </select>
-                                <span class="field-validation-valid text-danger" data-valmsg-for="Cuotas[${i}].Estado" data-valmsg-replace="true"></span>
-                            </div>
-                        </div>`;
-                }
-
-                $("#cuotasList").html(cuotasHtml);
-
-                // Re-inicializar datepickers
-                $(".datepicker").datepicker({
-                    dateFormat: "dd/mm/yy",
-                    changeMonth: true,
-                    changeYear: true,
-                    onSelect: function(dateText, inst) {
-                        $(this).valid();
+                // Aplicar estilos en hover a las filas de la tabla
+                $('tbody tr').hover(
+                    function () {
+                        $(this).addClass('bg-light');
+                    },
+                    function () {
+                        $(this).removeClass('bg-light');
                     }
-                });
-
-                calcularTotalCuotas();
-            });
-
-            // Validar que la suma de cuotas coincida con el monto total
-            function calcularTotalCuotas() {
-                var total = 0;
-                $(".monto-cuota").each(function() {
-                    var monto = parseFloat($(this).val()) || 0;
-                    total += monto;
-                });
-
-                var montoTotal = parseFloat($("#MontoTotal").val());
-                var diferencia = total - montoTotal;
-
-                $("#totalCuotas").text(total.toLocaleString('es-CL', {style: 'currency', currency: 'CLP'}));
-
-                var diferenciaElement = $("#diferenciaMonto");
-                diferenciaElement.text("(" + diferencia.toLocaleString('es-CL', {style: 'currency', currency: 'CLP'}) + ")");
-
-                if (Math.abs(diferencia) > 0.01) {
-                    diferenciaElement.removeClass("text-success").addClass("text-danger");
-                    $("#btnSubmit").prop("disabled", true);
-                    diferenciaElement.after('<span class="text-danger"> La suma de cuotas no coincide con el monto total</span>');
-                } else {
-                    diferenciaElement.removeClass("text-danger").addClass("text-success");
-                    $("#btnSubmit").prop("disabled", false);
-                    $(".text-danger:contains('no coincide')").remove();
-                }
+                );
+            } catch (e) {
+                console.error('Error en el script: ', e);
             }
-
-            // Validación antes de enviar el formulario
-            $("form").submit(function(e) {
-                if ($("#TipoPago").val() === "Cuotas") {
-                    var totalCuotas = 0;
-                    $(".monto-cuota").each(function() {
-                        totalCuotas += parseFloat($(this).val()) || 0;
-                    });
-
-                    var montoTotal = parseFloat($("#MontoTotal").val());
-
-                    if (Math.abs(totalCuotas - montoTotal) > 0.01) {
-                        alert("La suma de las cuotas debe coincidir exactamente con el monto total");
-                        return false;
-                    }
-                }
-
-                // Validar fechas
-                var fechasValidas = true;
-                $(".datepicker").each(function() {
-                    var fechaStr = $(this).val();
-                    if (!isValidDate(fechaStr)) {
-                        fechasValidas = false;
-                        $(this).addClass("input-validation-error");
-                        $(this).next(".field-validation-valid").text("Formato de fecha inválido (dd/mm/aaaa)");
-                    }
-                });
-
-                if (!fechasValidas) {
-                    alert("Por favor corrija las fechas con formato inválido");
-                    return false;
-                }
-
-                return true;
-            });
-
-            // Función para validar formato de fecha
-            function isValidDate(dateString) {
-                var regex = /^(0?[1-9]|[12][0-9]|3[01])\/(0?[1-9]|1[0-2])\/(19|20)\d{2}$/;
-                if (!regex.test(dateString)) return false;
-
-                var parts = dateString.split("/");
-                var day = parseInt(parts[0], 10);
-                var month = parseInt(parts[1], 10);
-                var year = parseInt(parts[2], 10);
-
-                // Validar mes y año
-                if (month < 1 || month > 12) return false;
-
-                // Validar día
-                var monthLength = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-
-                // Ajustar para años bisiestos
-                if (year % 400 == 0 || (year % 100 != 0 && year % 4 == 0))
-                    monthLength[1] = 29;
-
-                return day > 0 && day <= monthLength[month - 1];
-            }
-
-            // Inicializar el cálculo total
-            calcularTotalCuotas();
         });
     </script>
 }
