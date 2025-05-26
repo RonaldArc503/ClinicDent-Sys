@@ -72,12 +72,11 @@
         <div class="card-body">
             <div class="list-group">
                 <a href="@Url.Action("ExportDatabase", "Configuraciones")" class="list-group-item list-group-item-action">
-                    <i class="fas fa-database me-2"></i>Crear Nuevo Backup
+                    <i class="fas fa-database me-2"></i>Crear Backup (.bak)
                 </a>
-                <a href="@Url.Action("ListarBackups", "Configuraciones")" class="list-group-item list-group-item-action">
-                    <i class="fas fa-list me-2"></i>Ver Backups Existentes
+                <a href="@Url.Action("ExportDatabaseAsSQL", "Configuraciones")" class="list-group-item list-group-item-action">
+                    <i class="fas fa-file-code me-2"></i>Exportar Datos como SQL
                 </a>
-                <small class="form-text text-muted">Los backups se guardan en ~/App_Data/Backups/</small>
             </div>
         </div>
     </div>

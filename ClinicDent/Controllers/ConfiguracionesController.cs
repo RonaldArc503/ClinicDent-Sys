@@ -1,175 +1,247 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Configuration;
+using System.Data;
 using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
 using System.Web.Mvc;
 
-public class ConfiguracionesController : Controller
+namespace ClinicDent.Controllers
 {
-    // GET: Configuraciones
-    public ActionResult Index()
+    public class ConfiguracionesController : Controller
     {
-        return View();
-    }
-
-  
-    public ActionResult ExportDatabase()
-    {
-        try
+        public ActionResult Index()
         {
-            // Verificar conexión a la base de datos primero
-            string connectionString = ConfigurationManager.ConnectionStrings["ClinicaDentalLocal0Sql"].ConnectionString;
+            return View();
+        }
 
-            // Verificar si la cadena de conexión existe
-            if (string.IsNullOrEmpty(connectionString))
-            {
-                TempData["ErrorMessage"] = "No se encontró la cadena de conexión en web.config";
-                return RedirectToAction("Index");
-            }
-
-            // Verificar permisos de escritura
-            string backupDir = Server.MapPath("~/App_Data/Backups");
+        public ActionResult ExportDatabase()
+        {
             try
             {
-                Directory.CreateDirectory(backupDir);
-                // Probar si podemos escribir en el directorio
-                string testFile = Path.Combine(backupDir, "test.txt");
-                System.IO.File.WriteAllText(testFile, "test");
-                System.IO.File.Delete(testFile);
-            }
-            catch (UnauthorizedAccessException)
-            {
-                TempData["ErrorMessage"] = "La aplicación no tiene permisos para escribir en el directorio de backups";
-                return RedirectToAction("Index");
-            }
+                string connectionString = ConfigurationManager.ConnectionStrings["ClinicaDentalLocal0Sql"]?.ConnectionString;
 
-            string backupFileName = $"ClinicaDental_Backup_{DateTime.Now:yyyyMMddHHmmss}.bak";
-            string backupPath = Path.Combine(backupDir, backupFileName);
-
-            // Usar parámetros SQL para mayor seguridad
-            string backupQuery = @"BACKUP DATABASE [ClinicaDental1] 
-                              TO DISK = @backupPath 
-                              WITH COMPRESSION, FORMAT, 
-                              MEDIANAME = 'SQLServerBackups', 
-                              NAME = 'Full Backup of ClinicaDental1';";
-
-            using (SqlConnection connection = new SqlConnection(connectionString))
-            {
-                using (SqlCommand command = new SqlCommand(backupQuery, connection))
+                if (string.IsNullOrEmpty(connectionString))
                 {
-                    command.Parameters.AddWithValue("@backupPath", backupPath);
+                    TempData["ErrorMessage"] = "No se encontró la configuración de conexión a la base de datos";
+                    return RedirectToAction("Index");
+                }
 
-                    try
+                string backupDir = Server.MapPath("~/App_Data/Backups");
+                Directory.CreateDirectory(backupDir);
+
+                // Nombre fijo para el archivo de backup
+                string backupFileName = "ClinicaDental_Backup.bak";
+                string backupPath = Path.Combine(backupDir, backupFileName);
+
+                // Eliminar el archivo anterior si existe
+                if (System.IO.File.Exists(backupPath))
+                {
+                    System.IO.File.Delete(backupPath);
+                }
+
+                // Verificar permisos de escritura
+                try
+                {
+                    string testFile = Path.Combine(backupDir, "test.txt");
+                    System.IO.File.WriteAllText(testFile, "test");
+                    System.IO.File.Delete(testFile);
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    TempData["ErrorMessage"] = "La aplicación no tiene permisos para escribir en el directorio de backups";
+                    return RedirectToAction("Index");
+                }
+
+                // Crear el backup
+                string backupQuery = @"BACKUP DATABASE [ClinicaDental1] 
+                                    TO DISK = @backupPath
+                                    WITH COMPRESSION, FORMAT,
+                                    MEDIANAME = 'ClinicaDentalBackups',
+                                    NAME = 'Backup Completo de ClinicaDental';";
+
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    using (SqlCommand command = new SqlCommand(backupQuery, connection))
                     {
+                        command.Parameters.AddWithValue("@backupPath", backupPath);
                         connection.Open();
-                        int result = command.ExecuteNonQuery();
-
-                        // Verificar si el backup se creó
-                        if (!System.IO.File.Exists(backupPath))
-                        {
-                            TempData["ErrorMessage"] = "El comando se ejecutó pero no se creó el archivo de backup";
-                            return RedirectToAction("Index");
-                        }
-                    }
-                    catch (SqlException sqlEx)
-                    {
-                        TempData["ErrorMessage"] = $"Error de SQL: {sqlEx.Message}";
-                        return RedirectToAction("Index");
+                        command.ExecuteNonQuery();
                     }
                 }
-            }
 
-            // Verificar tamaño del archivo
-            FileInfo backupFile = new FileInfo(backupPath);
-            if (backupFile.Length == 0)
+                // Verificar que el backup se creó correctamente
+                if (!System.IO.File.Exists(backupPath) || new FileInfo(backupPath).Length == 0)
+                {
+                    TempData["ErrorMessage"] = "El backup no se creó correctamente";
+                    return RedirectToAction("Index");
+                }
+
+                // Preparar la descarga del archivo
+                byte[] fileBytes = System.IO.File.ReadAllBytes(backupPath);
+                string contentType = "application/octet-stream";
+
+                TempData["SuccessMessage"] = $"Backup actualizado exitosamente ({new FileInfo(backupPath).Length / 1024 / 1024} MB)";
+
+                // Devolver el archivo para descarga
+                return File(fileBytes, contentType, backupFileName);
+            }
+            catch (SqlException sqlEx)
             {
-                TempData["ErrorMessage"] = "El archivo de backup se creó pero está vacío";
-                System.IO.File.Delete(backupPath);
+                TempData["ErrorMessage"] = $"Error de SQL Server: {sqlEx.Message}";
                 return RedirectToAction("Index");
             }
-
-            // Descargar el archivo
-            byte[] fileBytes = System.IO.File.ReadAllBytes(backupPath);
-            TempData["SuccessMessage"] = $"Backup creado exitosamente. Tamaño: {backupFile.Length / 1024 / 1024} MB";
-
-            return File(fileBytes, "application/octet-stream", backupFileName);
-        }
-        catch (Exception ex)
-        {
-            System.Diagnostics.Trace.TraceError($"Error completo: {ex.ToString()}");
-            TempData["ErrorMessage"] = $"Error completo al exportar: {ex.Message}";
-            return RedirectToAction("Index");
-        }
-    }
-    [Authorize(Roles = "Administrador")]
-    public ActionResult ListarBackups()
-    {
-        try
-        {
-            string backupDir = Server.MapPath("~/App_Data/Backups");
-            Directory.CreateDirectory(backupDir); // Asegura que el directorio exista
-
-            var backups = Directory.GetFiles(backupDir, "*.bak")
-                                 .Select(f => new FileInfo(f))
-                                 .OrderByDescending(f => f.CreationTime)
-                                 .ToList();
-
-            return View(backups);
-        }
-        catch (Exception ex)
-        {
-            System.Diagnostics.Trace.TraceError($"Error al listar backups: {ex}");
-            TempData["ErrorMessage"] = "Error al listar los backups existentes";
-            return RedirectToAction("Index");
-        }
-    }
-
-    [Authorize(Roles = "Administrador")]
-    public ActionResult DescargarBackup(string fileName)
-    {
-        try
-        {
-            string backupPath = Path.Combine(Server.MapPath("~/App_Data/Backups"), fileName);
-
-            if (!System.IO.File.Exists(backupPath))
+            catch (Exception ex)
             {
-                TempData["ErrorMessage"] = "El archivo de backup solicitado no existe";
-                return RedirectToAction("ListarBackups");
+                TempData["ErrorMessage"] = $"Error inesperado: {ex.Message}";
+                return RedirectToAction("Index");
             }
-
-            byte[] fileBytes = System.IO.File.ReadAllBytes(backupPath);
-            return File(fileBytes, "application/octet-stream", fileName);
         }
-        catch (Exception ex)
-        {
-            System.Diagnostics.Trace.TraceError($"Error al descargar backup: {ex}");
-            TempData["ErrorMessage"] = "Error al descargar el backup";
-            return RedirectToAction("ListarBackups");
-        }
-    }
 
-    [Authorize(Roles = "Administrador")]
-    [HttpPost]
-    public ActionResult EliminarBackup(string fileName)
-    {
-        try
-        {
-            string backupPath = Path.Combine(Server.MapPath("~/App_Data/Backups"), fileName);
 
-            if (System.IO.File.Exists(backupPath))
+        public ActionResult ExportDatabaseAsSQL()
+        {
+            try
             {
-                System.IO.File.Delete(backupPath);
-                TempData["SuccessMessage"] = "Backup eliminado correctamente";
-            }
+                string connectionString = ConfigurationManager.ConnectionStrings["ClinicaDentalLocal0Sql"]?.ConnectionString;
 
-            return RedirectToAction("ListarBackups");
-        }
-        catch (Exception ex)
-        {
-            System.Diagnostics.Trace.TraceError($"Error al eliminar backup: {ex}");
-            TempData["ErrorMessage"] = "Error al eliminar el backup";
-            return RedirectToAction("ListarBackups");
+                if (string.IsNullOrEmpty(connectionString))
+                {
+                    TempData["ErrorMessage"] = "No se encontró la configuración de conexión a la base de datos";
+                    return RedirectToAction("Index");
+                }
+
+                string exportDir = Server.MapPath("~/App_Data/Exports");
+                Directory.CreateDirectory(exportDir);
+
+                string exportFileName = $"ClinicaDental_Export_{DateTime.Now:yyyyMMddHHmmss}.sql";
+                string exportPath = Path.Combine(exportDir, exportFileName);
+
+                // Verificar permisos de escritura
+                try
+                {
+                    string testFile = Path.Combine(exportDir, "test.txt");
+                    System.IO.File.WriteAllText(testFile, "test");
+                    System.IO.File.Delete(testFile);
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    TempData["ErrorMessage"] = "La aplicación no tiene permisos para escribir en el directorio de exports";
+                    return RedirectToAction("Index");
+                }
+
+                // Obtener todas las tablas
+                var tables = new List<string>();
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+                    DataTable schema = connection.GetSchema("Tables");
+                    foreach (DataRow row in schema.Rows)
+                    {
+                        tables.Add(row["TABLE_NAME"].ToString());
+                    }
+                }
+
+                // Generar script SQL
+                using (var writer = new StreamWriter(exportPath))
+                {
+                    writer.WriteLine("-- Exportación SQL de ClinicaDental");
+                    writer.WriteLine("-- Fecha: " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+                    writer.WriteLine("SET IDENTITY_INSERT ON;");
+                    writer.WriteLine("BEGIN TRANSACTION;");
+                    writer.WriteLine();
+
+                    using (SqlConnection connection = new SqlConnection(connectionString))
+                    {
+                        connection.Open();
+
+                        foreach (var table in tables)
+                        {
+                            writer.WriteLine($"-- Datos de la tabla {table}");
+                            writer.WriteLine($"DELETE FROM [{table}]; -- Elimina datos existentes para reemplazar");
+                            writer.WriteLine();
+
+                            // Obtener estructura de la tabla (columnas)
+                            var columns = new List<string>();
+                            using (var command = new SqlCommand($"SELECT TOP 0 * FROM [{table}]", connection))
+                            using (var reader = command.ExecuteReader())
+                            {
+                                var schemaTable = reader.GetSchemaTable();
+                                foreach (DataRow row in schemaTable.Rows)
+                                {
+                                    columns.Add(row["ColumnName"].ToString());
+                                }
+                            }
+
+                            // Obtener datos de la tabla
+                            using (var command = new SqlCommand($"SELECT * FROM [{table}]", connection))
+                            using (var reader = command.ExecuteReader())
+                            {
+                                while (reader.Read())
+                                {
+                                    var columnNames = string.Join(", ", columns.Select(c => $"[{c}]"));
+                                    var values = new List<string>();
+
+                                    for (int i = 0; i < reader.FieldCount; i++)
+                                    {
+                                        if (reader.IsDBNull(i))
+                                        {
+                                            values.Add("NULL");
+                                        }
+                                        else
+                                        {
+                                            var value = reader.GetValue(i);
+                                            if (value is string || value is DateTime || value is Guid)
+                                            {
+                                                values.Add($"'{value.ToString().Replace("'", "''")}'");
+                                            }
+                                            else if (value is bool)
+                                            {
+                                                values.Add((bool)value ? "1" : "0");
+                                            }
+                                            else
+                                            {
+                                                values.Add(value.ToString());
+                                            }
+                                        }
+                                    }
+
+                                    var valueList = string.Join(", ", values);
+                                    writer.WriteLine($"INSERT INTO [{table}] ({columnNames}) VALUES ({valueList});");
+                                }
+                            }
+                            writer.WriteLine();
+                        }
+                    }
+
+                    writer.WriteLine("COMMIT TRANSACTION;");
+                    writer.WriteLine("SET IDENTITY_INSERT OFF;");
+                }
+
+                if (!System.IO.File.Exists(exportPath) || new FileInfo(exportPath).Length == 0)
+                {
+                    TempData["ErrorMessage"] = "La exportación no se creó correctamente";
+                    return RedirectToAction("Index");
+                }
+
+                byte[] fileBytes = System.IO.File.ReadAllBytes(exportPath);
+                string contentType = "application/sql";
+
+                TempData["SuccessMessage"] = $"Exportación SQL creada exitosamente ({new FileInfo(exportPath).Length / 1024} KB)";
+
+                return File(fileBytes, contentType, exportFileName);
+            }
+            catch (SqlException sqlEx)
+            {
+                TempData["ErrorMessage"] = $"Error de SQL Server: {sqlEx.Message}";
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = $"Error inesperado: {ex.Message}";
+                return RedirectToAction("Index");
+            }
         }
     }
 }

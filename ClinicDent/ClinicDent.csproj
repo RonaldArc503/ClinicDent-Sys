@@ -571,7 +571,6 @@
       <Generator>ResXFileCodeGenerator</Generator>
     </Content>
     <Content Include="Views\Configuraciones\Index.cshtml" />
-    <Content Include="Views\Configuraciones\ListarBackups.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
