@@ -1,0 +1,112 @@
+﻿@{
+    ViewBag.Title = "Configuraciones - Clínica Dental";
+}
+
+<div class="container">
+    <h2 class="mb-4">Configuraciones del Sistema</h2>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">
+            @TempData["ErrorMessage"]
+        </div>
+    }
+
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5>Preferencias de Interfaz</h5>
+        </div>
+        <div class="card-body">
+            <div class="form-group form-check form-switch">
+                <input type="checkbox" class="form-check-input" id="sidebarMode" onchange="updateSidebarMode(this)">
+                <label class="form-check-label" for="sidebarMode">Menu lateral Fijo</label>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5>Administración de Usuarios</h5>
+        </div>
+        <div class="card-body">
+            <div class="list-group">
+                @Html.ActionLink("Usuarios Registrados", "Index", "Usuarios", null, new { @class = "list-group-item list-group-item-action" })
+                @Html.ActionLink("Crear Nuevo Usuario", "Create", "Usuarios", null, new { @class = "list-group-item list-group-item-action" })
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5>Configuración de Roles</h5>
+        </div>
+        <div class="card-body">
+            <div class="list-group">
+                @Html.ActionLink("Crear Nuevo Rol", "Create", "Roles", null, new { @class = "list-group-item list-group-item-action" })
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5>Configuración de Tratamientos</h5>
+        </div>
+        <div class="card-body">
+            <div class="list-group">
+                @Html.ActionLink("Crear Tipo de Tratamiento", "Create", "Tipo_Cobro", null, new { @class = "list-group-item list-group-item-action" })
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5>Copia de Seguridad de la Base de Datos</h5>
+        </div>
+        <div class="card-body">
+            <div class="list-group">
+                <a href="@Url.Action("ExportDatabase", "Configuraciones")" class="list-group-item list-group-item-action">
+                    <i class="fas fa-database me-2"></i>Crear Nuevo Backup
+                </a>
+                <a href="@Url.Action("ListarBackups", "Configuraciones")" class="list-group-item list-group-item-action">
+                    <i class="fas fa-list me-2"></i>Ver Backups Existentes
+                </a>
+                <small class="form-text text-muted">Los backups se guardan en ~/App_Data/Backups/</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        // Load saved sidebar mode on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            const sidebarMode = localStorage.getItem('sidebarMode') || 'hover';
+            const checkbox = document.getElementById('sidebarMode');
+            checkbox.checked = sidebarMode === 'fixed';
+            updateSidebarMode(checkbox);
+        });
+
+        function updateSidebarMode(checkbox) {
+            const mode = checkbox.checked ? 'fixed' : 'hover';
+            localStorage.setItem('sidebarMode', mode);
+
+            if (window.updateSidebarBehavior) {
+                window.updateSidebarBehavior();
+            }
+        }
+
+        // Auto-ocultar mensajes después de 5 segundos
+        $(document).ready(function () {
+            setTimeout(function () {
+                $('.alert').fadeOut('slow');
+            }, 5000);
+        });
+    </script>
+}

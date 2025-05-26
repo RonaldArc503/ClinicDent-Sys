@@ -107,6 +107,14 @@
             transition: margin-left 0.3s ease;
         }
 
+        .sidebar.expanded ~ .content {
+            margin-left: 250px; /* Matches expanded sidebar width */
+        }
+
+        .sidebar:not(.expanded) ~ .content {
+            margin-left: 60px; /* Matches collapsed sidebar width */
+        }
+
         #citasDropdown + .dropdown-menu {
             min-width: 250px;
             background-color: #116AEF;
@@ -274,12 +282,37 @@
             document.querySelector('.sidebar').classList.toggle('expanded');
         }
 
-        const sidebar = document.querySelector('.sidebar');
-        sidebar.addEventListener('mouseenter', () => {
-            sidebar.classList.add('expanded');
-        });
-        sidebar.addEventListener('mouseleave', () => {
-            sidebar.classList.remove('expanded');
+        function updateSidebarBehavior() {
+            const sidebar = document.querySelector('.sidebar');
+            const mode = localStorage.getItem('sidebarMode') || 'hover';
+
+            // Remove existing event listeners to avoid duplicates
+            sidebar.removeEventListener('mouseenter', expandSidebar);
+            sidebar.removeEventListener('mouseleave', collapseSidebar);
+
+            if (mode === 'hover') {
+                // Enable hover behavior
+                sidebar.addEventListener('mouseenter', expandSidebar);
+                sidebar.addEventListener('mouseleave', collapseSidebar);
+                // Ensure sidebar is collapsed initially unless toggled
+                sidebar.classList.remove('expanded');
+            } else {
+                // Fixed mode: keep sidebar collapsed and disable hover
+                sidebar.classList.remove('expanded');
+            }
+        }
+
+        function expandSidebar() {
+            document.querySelector('.sidebar').classList.add('expanded');
+        }
+
+        function collapseSidebar() {
+            document.querySelector('.sidebar').classList.remove('expanded');
+        }
+
+        // Initialize sidebar behavior on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            updateSidebarBehavior();
         });
     </script>
 </body>
