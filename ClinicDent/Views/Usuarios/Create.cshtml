@@ -1,80 +1,252 @@
 ﻿@model ClinicDent.Models.Usuarios
 
 @{
-    ViewBag.Title = "Create";
+    ViewBag.Title = "Nuevo Usuario";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h2>Create</h2>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 
+<style>
+    .form-container {
+        max-width: 700px;
+        margin: 0 0 0 10px;
+        padding: 25px 25px 25px 15px;
+        background-color: #e5e7e9;
+        border-radius: 15px;
+        box-shadow: 0 0 75px rgba(0, 0, 0, 0.1);
+        border-left: 5px solid #007bff;
+    }
 
-@using (Html.BeginForm()) 
-{
-    @Html.AntiForgeryToken()
-    
-    <div class="form-horizontal">
-        <h4>Usuarios</h4>
-        <hr />
-        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
-        <div class="form-group">
-            @Html.LabelFor(model => model.nombre, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.nombre, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.nombre, "", new { @class = "text-danger" })
+    .form-title {
+        color: #2c3e50;
+        margin-bottom: 25px;
+        text-align: left;
+        font-size: 24px;
+        padding-left: 5px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+        display: flex;
+        flex-direction: column;
+        padding-left: 5px;
+    }
+
+    .control-label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 8px;
+        text-align: left;
+    }
+
+    .form-control {
+        border-radius: 20px;
+        padding: 10px 12px;
+        border: 1px solid #ced4da;
+        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        width: 100%;
+        margin-left: 0;
+        box-shadow: inset 0 1px 45px rgba(0, 0, 0, 0.1);
+    }
+
+        .form-control:focus {
+            border-color: #80bdff;
+            outline: 0;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25), inset 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+    .btn-submit {
+        background-color: #28a745;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        margin: 10px 0 0 0;
+        align-self: flex-start;
+    }
+
+        .btn-submit:hover {
+            background-color: #218838;
+        }
+
+    .btn-back {
+        display: inline-block;
+        margin: 20px 0 0 5px;
+        color: #6c757d;
+        text-decoration: none;
+        transition: color 0.3s;
+    }
+
+        .btn-back:hover {
+            color: #0056b3;
+            text-decoration: underline;
+        }
+
+    .input-icon {
+        position: relative;
+    }
+
+        .input-icon i {
+            position: absolute;
+            left: 10px;
+            top: 10px;
+            color: #6c757d;
+        }
+
+        .input-icon input {
+            padding-left: 35px;
+        }
+
+    .field-required::after {
+        content: " *";
+        color: #dc3545;
+    }
+
+    .error-message {
+        color: #dc3545;
+        font-size: 0.875em;
+        margin-top: 0.25rem;
+    }
+</style>
+
+<div class="form-container">
+    <h2 class="form-title">Registro de Usuario</h2>
+
+    @using (Html.BeginForm(null, null, FormMethod.Post, new { autocomplete = "off", id = "usuarioForm" }))
+    {
+        @Html.AntiForgeryToken()
+        <input type="text" style="display:none;" autocomplete="street-address" />
+
+        <div class="form-horizontal">
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+            <div class="form-group">
+                <label class="control-label field-required">
+                    <i class="fas fa-user"></i> Nombre
+                </label>
+                <div class="input-icon">
+                    @Html.EditorFor(model => model.nombre, new { htmlAttributes = new { @class = "form-control", placeholder = "Nombre del usuario", required = "required", autocomplete = "given-name", id = "nombre" } })
+                    @Html.ValidationMessageFor(model => model.nombre, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label field-required">
+                    <i class="fas fa-user"></i> Apellido
+                </label>
+                <div class="input-icon">
+                    @Html.EditorFor(model => model.apellido, new { htmlAttributes = new { @class = "form-control", placeholder = "Apellido del usuario", required = "required", autocomplete = "family-name", id = "apellido" } })
+                    @Html.ValidationMessageFor(model => model.apellido, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label field-required">
+                    <i class="fas fa-envelope"></i> Correo
+                </label>
+                <div class="input-icon">
+                    @Html.EditorFor(model => model.correo, new { htmlAttributes = new { @class = "form-control", placeholder = "Correo electrónico", required = "required", type = "email", autocomplete = "email", id = "correo" } })
+                    @Html.ValidationMessageFor(model => model.correo, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label field-required">
+                    <i class="fas fa-user-circle"></i> Usuario
+                </label>
+                <div class="input-icon">
+                    @Html.EditorFor(model => model.usuario, new { htmlAttributes = new { @class = "form-control", placeholder = "Nombre de usuario", required = "required", autocomplete = "username", id = "usuario" } })
+                    @Html.ValidationMessageFor(model => model.usuario, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label field-required">
+                    <i class="fas fa-lock"></i> Contraseña
+                </label>
+                <div class="input-icon">
+                    @Html.EditorFor(model => model.clave, new { htmlAttributes = new { @class = "form-control", placeholder = "Contraseña", required = "required", type = "password", autocomplete = "new-password", id = "clave" } })
+                    @Html.ValidationMessageFor(model => model.clave, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label field-required">
+                    <i class="fas fa-user-shield"></i> Rol
+                </label>
+                <div>
+                    @Html.DropDownListFor(model => model.id_rol, (SelectList)ViewBag.id_rol, "Seleccione un rol", new { @class = "form-control", required = "required" })
+                    @Html.ValidationMessageFor(model => model.id_rol, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="form-group">
+                <button type="submit" class="btn-submit" id="btnSubmit">
+                    <i class="fas fa-save"></i> Guardar Usuario
+                </button>
             </div>
         </div>
+    }
 
-        <div class="form-group">
-            @Html.LabelFor(model => model.apellido, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.apellido, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.apellido, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.correo, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.correo, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.correo, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.usuario, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.usuario, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.usuario, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.clave, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.clave, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.clave, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.id_rol, "id_rol", htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.DropDownList("id_rol", null, htmlAttributes: new { @class = "form-control" })
-                @Html.ValidationMessageFor(model => model.id_rol, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            <div class="col-md-offset-2 col-md-10">
-                <input type="submit" value="Create" class="btn btn-default" />
-            </div>
-        </div>
+    <div>
+        <a href="@Url.Action("Index")" class="btn-back">
+            <i class="fas fa-arrow-left"></i> Volver al Listado
+        </a>
     </div>
-}
-
-<div>
-    @Html.ActionLink("Back to List", "Index")
 </div>
 
 @section Scripts {
     @Scripts.Render("~/bundles/jqueryval")
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bcryptjs@2.4.3/dist/bcrypt.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            // Validación y formato de nombre, apellido y usuario
+            $('#nombre, #apellido').on('input', function () {
+                // Eliminar caracteres no permitidos (solo letras, ñ, acentos, espacios)
+                this.value = this.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '');
+                // Capitalizar palabras
+                this.value = capitalizeWords(this.value);
+            });
+
+            $('#usuario').on('input', function () {
+                // Eliminar caracteres no permitidos (solo letras, números, guiones bajos)
+                this.value = this.value.replace(/[^a-zA-Z0-9_]/g, '');
+            });
+
+            // Validación del formulario
+            $('#usuarioForm').on('submit', function (e) {
+                // Capitalizar nombre y apellido antes de enviar
+                $('#nombre').val(capitalizeWords($('#nombre').val()));
+                $('#apellido').val(capitalizeWords($('#apellido').val()));
+
+                // Hashear la contraseña antes de enviar
+                const password = $('#clave').val();
+                if (password) {
+                    const hash = bcrypt.hashSync(password, 10);
+                    $('#clave').val(hash);
+                }
+                return true; // Esto permite que el formulario se envíe
+            });
+
+            // Enfoque automático en el primer campo
+            $('#nombre').focus();
+        });
+
+        // Función para capitalizar palabras respetando ñ y acentos
+        function capitalizeWords(str) {
+            if (!str) return str;
+            return str
+                .toLowerCase()
+                .replace(/(^|\s)([a-zA-Záéíóúñ])/g, function (match, p1, p2) {
+                    return p1 + p2.toUpperCase();
+                });
+        }
+    </script>
 }

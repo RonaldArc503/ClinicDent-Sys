@@ -28,31 +28,37 @@ namespace ClinicDent.Controllers
             {
                 try
                 {
-                    // Convertir a lista en memoria primero para evitar el problema de tipos
+                    // Buscar usuario por nombre de usuario
                     var usuario = db.Usuarios
                         .Include("Roles")
-                        .AsEnumerable() // Esto trae los datos a memoria
-                        .FirstOrDefault(u => u.usuario == model.usuario && u.clave == model.clave);
+                        .AsEnumerable() // Traer a memoria para usar bcrypt
+                        .FirstOrDefault(u => u.usuario == model.usuario);
 
                     if (usuario != null)
                     {
-                        // Crear ticket de autenticación con el rol
-                        string userData = usuario.Roles?.nombre;
+                        // Verificar la contraseña hasheada
+                        bool passwordMatch = BCrypt.Net.BCrypt.Verify(model.clave, usuario.clave);
 
-                        FormsAuthenticationTicket authTicket = new FormsAuthenticationTicket(
-                            1,
-                            usuario.usuario,
-                            DateTime.Now,
-                            DateTime.Now.AddMinutes(30),
-                            false,
-                            userData,
-                            FormsAuthentication.FormsCookiePath);
+                        if (passwordMatch)
+                        {
+                            // Crear ticket de autenticación con el rol
+                            string userData = usuario.Roles?.nombre;
 
-                        string encryptedTicket = FormsAuthentication.Encrypt(authTicket);
-                        HttpCookie authCookie = new HttpCookie(FormsAuthentication.FormsCookieName, encryptedTicket);
-                        Response.Cookies.Add(authCookie);
+                            FormsAuthenticationTicket authTicket = new FormsAuthenticationTicket(
+                                1,
+                                usuario.usuario,
+                                DateTime.Now,
+                                DateTime.Now.AddMinutes(30),
+                                false,
+                                userData,
+                                FormsAuthentication.FormsCookiePath);
 
-                        return RedirectToLocal(returnUrl);
+                            string encryptedTicket = FormsAuthentication.Encrypt(authTicket);
+                            HttpCookie authCookie = new HttpCookie(FormsAuthentication.FormsCookieName, encryptedTicket);
+                            Response.Cookies.Add(authCookie);
+
+                            return RedirectToLocal(returnUrl);
+                        }
                     }
 
                     ModelState.AddModelError("", "Usuario o contraseña incorrectos.");

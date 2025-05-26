@@ -6,7 +6,6 @@
     <title>@ViewBag.Title - Clínica</title>
     @Styles.Render("~/Content/css")
     @Scripts.Render("~/bundles/modernizr")
-    <!-- Agregamos la fuente Roboto Slab de Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.11.6/umd/popper.min.js"></script>
@@ -19,8 +18,11 @@
             background-color: #116AEF;
             color: white;
             transition: width 0.3s ease;
-            position: relative;
+            position: fixed; /* Changed to fixed to prevent scrolling */
+            z-index: 1000;
             overflow: hidden;
+            top: 0; /* Ensure sidebar starts at the top of the viewport */
+            left: 0; /* Align to the left edge */
         }
 
         .sidebar-header {
@@ -29,7 +31,7 @@
             padding: 15px 10px;
             white-space: nowrap;
             justify-content: center;
-            height: 70px; /* Altura fija para el header */
+            height: 70px;
         }
 
         .sidebar-header-content {
@@ -40,7 +42,7 @@
 
         .sidebar-header span {
             display: none;
-            font-family: 'Roboto Slab', serif; /* Aplicamos Roboto Slab */
+            font-family: 'Roboto Slab', serif;
             font-size: 18px;
             font-weight: 700;
             margin-left: 12px;
@@ -102,17 +104,14 @@
             }
 
         .content {
+            margin-left: 60px; /* Base margin for collapsed sidebar */
             flex-grow: 1;
             padding: 20px;
-            transition: margin-left 0.3s ease;
+            transition: margin-left 0.3s ease; /* Smooth transition for margin */
         }
 
         .sidebar.expanded ~ .content {
-            margin-left: 250px; /* Matches expanded sidebar width */
-        }
-
-        .sidebar:not(.expanded) ~ .content {
-            margin-left: 60px; /* Matches collapsed sidebar width */
+            margin-left: 80px; /* Slight shift to the right when sidebar is expanded */
         }
 
         #citasDropdown + .dropdown-menu {
@@ -154,6 +153,7 @@
     </style>
 </head>
 <body>
+    <!-- The rest of your HTML remains unchanged -->
     @if (User.Identity.IsAuthenticated)
     {
         <div class="d-flex">

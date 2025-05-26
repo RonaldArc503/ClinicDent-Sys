@@ -48,10 +48,17 @@ namespace ClinicDent.Controllers
         // más detalles, vea https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "id_usuario,nombre,apellido,correo,usuario,clave,id_rol")] Usuarios usuarios)
+        public ActionResult Create([Bind(Include = "nombre,apellido,correo,usuario,clave,id_rol")] Usuarios usuarios)
         {
             if (ModelState.IsValid)
             {
+                // Verificar que la contraseña ya está hasheada (comienza con $2a$)
+                if (!usuarios.clave.StartsWith("$2a$"))
+                {
+                    // Si no está hasheada, hashearla (esto no debería ocurrir si el JavaScript funciona)
+                    usuarios.clave = BCrypt.Net.BCrypt.HashPassword(usuarios.clave);
+                }
+
                 db.Usuarios.Add(usuarios);
                 db.SaveChanges();
                 return RedirectToAction("Index");
