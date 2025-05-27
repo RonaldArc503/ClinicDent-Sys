@@ -41,6 +41,15 @@ namespace ClinicDent.Controllers
             return View(citas);
         }
 
+
+        public class ConfiguracionesController : Controller
+        {
+            public ActionResult Index()
+            {
+                return View();
+            }
+        }
+
         protected override void Dispose(bool disposing)
         {
             if (disposing)
