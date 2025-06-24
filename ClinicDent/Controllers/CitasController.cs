@@ -112,16 +112,19 @@ namespace ClinicDent.Controllers
             return View();
         }
 
+        // POST: Citas/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         public JsonResult Create([Bind(Include = "id_cita,id_paciente,id_dentista,estado")] Citas citas, string fecha_hora)
         {
             try
             {
-                // Parse fecha_hora
-                if (!DateTime.TryParse(fecha_hora, out DateTime parsedFechaHora))
+                // Parse fecha_hora using the exact format from Flatpickr
+                if (!DateTime.TryParseExact(fecha_hora, "d/M/yyyy h:mm tt",
+                    System.Globalization.CultureInfo.InvariantCulture,
+                    System.Globalization.DateTimeStyles.None, out DateTime parsedFechaHora))
                 {
-                    return Json(new { success = false, message = "Formato de fecha_hora inválido." });
+                    return Json(new { success = false, message = "Formato de fecha_hora inválido. Use el formato dd/mm/aaaa hh:mm AM/PM." });
                 }
                 citas.fecha_hora = parsedFechaHora;
 
@@ -207,8 +210,10 @@ namespace ClinicDent.Controllers
         {
             try
             {
-                // Parse ISO date strings
-                if (!DateTime.TryParse(fecha_hora, out DateTime fechaHora))
+                // Parse fecha_hora using the Flatpickr format
+                if (!DateTime.TryParseExact(fecha_hora, "d/M/yyyy h:mm tt",
+                    System.Globalization.CultureInfo.InvariantCulture,
+                    System.Globalization.DateTimeStyles.None, out DateTime fechaHora))
                 {
                     return Json(new
                     {
@@ -217,7 +222,8 @@ namespace ClinicDent.Controllers
                     }, JsonRequestBehavior.AllowGet);
                 }
 
-                if (!DateTime.TryParse(hora_inicio, out DateTime horaInicio))
+                // Parse ISO date strings for hora_inicio and hora_fin
+                if (!DateTime.TryParseExact(hora_inicio, "o", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.RoundtripKind, out DateTime horaInicio))
                 {
                     return Json(new
                     {
@@ -226,7 +232,7 @@ namespace ClinicDent.Controllers
                     }, JsonRequestBehavior.AllowGet);
                 }
 
-                if (!DateTime.TryParse(hora_fin, out DateTime horaFin))
+                if (!DateTime.TryParseExact(hora_fin, "o", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.RoundtripKind, out DateTime horaFin))
                 {
                     return Json(new
                     {
@@ -237,6 +243,7 @@ namespace ClinicDent.Controllers
 
                 // Log parameters for debugging
                 System.Diagnostics.Debug.WriteLine($"ValidarDisponibilidad: id_dentista={id_dentista}, id_paciente={id_paciente}, fecha_hora={fecha_hora}, hora_inicio={hora_inicio}, hora_fin={hora_fin}");
+                System.Diagnostics.Debug.WriteLine($"Parsed fecha_hora={fechaHora}, hora_inicio={horaInicio}, hora_fin={horaFin}");
 
                 // Validate exact same dentist appointment
                 var citaExistenteMismoDentista = db.Citas.Any(c =>
@@ -284,6 +291,8 @@ namespace ClinicDent.Controllers
                 }, JsonRequestBehavior.AllowGet);
             }
         }
+
+       
 
         // GET: Citas/Edit/5
         public ActionResult Edit(int? id)
@@ -452,6 +461,8 @@ namespace ClinicDent.Controllers
                 nombrePaciente = cita.Pacientes?.nombres
             });
         }
+
+
 
         protected override void Dispose(bool disposing)
         {
