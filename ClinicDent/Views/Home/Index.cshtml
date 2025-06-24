@@ -5,6 +5,22 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
+@functions {
+    public string GetWhatsAppButtonClass(DateTime fechaCita)
+    {
+        var diasRestantes = (fechaCita.Date - DateTime.Today).TotalDays;
+
+        if (diasRestantes <= 1)
+            return "btn-whatsapp-success"; // Verde - 1 día o menos
+        else if (diasRestantes <= 3)
+            return "btn-whatsapp-warning"; // Amarillo - 2-3 días
+        else if (diasRestantes <= 5)
+            return "btn-whatsapp-info"; // Azul - 4-5 días
+        else
+            return "btn-whatsapp-secondary"; // Gris - más de 5 días
+    }
+}
+
 <div class="container-fluid px-0">
     <!-- Hero Section with Stats -->
     <div class="reception-hero bg-gradient-primary">
@@ -117,7 +133,6 @@
                 @using (Html.BeginForm("Index", "Citas", FormMethod.Get))
                 {
                     <div class="row g-3 align-items-end">
-                        <!-- Búsqueda por texto -->
                         <div class="col-md-5">
                             <label class="form-label mb-1">Buscar citas</label>
                             <div class="input-group">
@@ -131,7 +146,6 @@
                             </div>
                         </div>
 
-                        <!-- Filtro por estado -->
                         <div class="col-md-2">
                             <label class="form-label mb-1">Estado</label>
                             <select name="estadoFilter" class="form-select">
@@ -143,7 +157,6 @@
                             </select>
                         </div>
 
-                        <!-- Filtro por fecha -->
                         <div class="col-md-2">
                             <label class="form-label mb-1">Fecha</label>
                             <select name="fechaFilter" class="form-select">
@@ -156,7 +169,6 @@
                             </select>
                         </div>
 
-                        <!-- Botones -->
                         <div class="col-md-3 d-flex align-items-end">
                             <div class="d-flex gap-2" style="height: 38px;">
                                 <button type="submit" class="btn btn-primary" style="height: 100%;">
@@ -210,7 +222,7 @@
                                 {
                                     <tr>
                                         <td>
-                                            <div class="d-flex align-items-center">
+                                            <div class="d-flex align瘦 align-items-center">
                                                 <div class="date-badge me-3">
                                                     <span class="day">@cita.fecha_hora.ToString("dd")</span>
                                                     <span class="month">@cita.fecha_hora.ToString("MMM", new System.Globalization.CultureInfo("es-MX"))</span>
@@ -220,7 +232,6 @@
                                                         cita.fecha_hora.ToString("dddd h:mm tt", new System.Globalization.CultureInfo("es-MX")).ToLower()
                                                     )
                                                 </div>
-                                            </div>
                                         </td>
                                         <td>@(cita.Pacientes != null ? cita.Pacientes.nombres : "Sin paciente")</td>
                                         <td>@(cita.Dentistas != null ? cita.Dentistas.nombre : "Sin dentista")</td>
@@ -231,6 +242,18 @@
                                         </td>
                                         <td class="text-end">
                                             <div class="btn-group" role="group">
+                                                <!-- Botón de WhatsApp -->
+                                                <a href="javascript:void(0)" class="btn btn-sm btn-whatsapp @GetWhatsAppButtonClass(cita.fecha_hora)"
+                                                   title="Notificar por WhatsApp"
+                                                   data-id="@cita.id_cita"
+                                                   data-phone="@(cita.Pacientes?.telefono ?? "")"
+                                                   data-date="@cita.fecha_hora.ToString("dd/MM/yyyy")"
+                                                   data-time="@cita.fecha_hora.ToString("hh:mm tt")"
+                                                   data-name="@(cita.Pacientes?.nombres ?? "Paciente")">
+                                                    <i class="fab fa-whatsapp"></i>
+                                                </a>
+
+                                                <!-- Botones existentes -->
                                                 <a href="@Url.Action("Edit", "Citas", new { id = cita.id_cita })" class="btn btn-sm btn-outline-primary" title="Editar">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
@@ -291,6 +314,7 @@
         padding: 15px;
         display: flex;
         align-items: center;
+        color MintCondition: keep-all;
         color: white;
         transition: transform 0.3s ease;
     }
@@ -318,8 +342,8 @@
 
     .stat-info p {
         margin: 0;
-        opacity: 0.8;
         font-size: 0.85rem;
+        opacity: 0.8;
     }
 
     /* Quick Actions */
@@ -436,6 +460,61 @@
             margin-bottom: 15px;
         }
 
+    /* WhatsApp Button Styles */
+    .btn-whatsapp {
+        color: white !important;
+        border: none;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+    .btn-whatsapp-success {
+        background-color: #25D366 !important; /* Verde WhatsApp - Prioridad Alta */
+        box-shadow: 0 0 10px rgba(37, 211, 102, 0.5);
+    }
+
+    .btn-whatsapp-warning {
+        background-color: #FFA500 !important; /* Naranja - Prioridad Media */
+        color: white !important;
+    }
+
+    .btn-whatsapp-info {
+        background-color: #17a2b8 !important; /* Azul - Prioridad Baja */
+    }
+
+    .btn-whatsapp-secondary {
+        background-color: #6c757d !important; /* Gris - Sin prisa */
+        opacity: 0.7;
+    }
+
+    /* Efecto hover para todos los botones */
+    .btn-whatsapp:hover {
+        transform: scale(1.1);
+        opacity: 1;
+    }
+
+    /* Loading state */
+    .btn-whatsapp.loading .fa-whatsapp {
+        display: none;
+    }
+
+    .btn-whatsapp.loading::after {
+        content: '';
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        border: 2px solid #fff;
+        border-radius: 50%;
+        border-top-color: transparent;
+        animation: spin 1s linear infinite;
+    }
+
+    @@keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
     /* Responsive Adjustments */
     @@media (max-width: 768px) {
         .stats-grid {
@@ -458,6 +537,61 @@
 
             // Initialize tooltips
             $('[title]').tooltip();
+
+            // Handle WhatsApp button click
+            $('.btn-whatsapp').on('click', function (e) {
+                e.preventDefault();
+
+                var $button = $(this);
+                var idCita = $button.data('id');
+                var telefono = $button.data('phone').replace(/\D/g, ''); // Remove non-numeric characters
+                var fecha = $button.data('date');
+                var hora = $button.data('time');
+                var nombre = $button.data('name');
+
+                // Validate data
+                if (!idCita || !telefono || !fecha || !hora || !nombre) {
+                    console.error('Incomplete data:', { idCita, telefono, fecha, hora, nombre });
+                    alert('Faltan datos para enviar el recordatorio. Verifique la información del paciente.');
+                    return;
+                }
+
+                // Validate phone number (8 digits for El Salvador, plus country code)
+                if (telefono.length < 8 || telefono.length > 15) {
+                    console.error('Invalid phone number:', telefono);
+                    alert('El número de teléfono no es válido (debe tener entre 8 y 15 dígitos).');
+                    return;
+                }
+
+                // Ensure international format (e.g., +503 for El Salvador)
+                if (!telefono.startsWith('+')) {
+                    telefono = '+503' + telefono; // Use El Salvador country code
+                }
+
+                // Show loading state
+                $button.addClass('loading').prop('disabled', true);
+
+                // Format the message
+                var mensaje = encodeURIComponent(
+                    `Hola ${nombre}, le recordamos su cita en Clínica Dental programada para el ${fecha} a las ${hora}. ` +
+                    `Por favor, confirme su asistencia respondiendo este mensaje. ¡Gracias!`
+                );
+
+                // Construct WhatsApp URL
+                var whatsappUrl = `https://api.whatsapp.com/send?phone=${telefono}&text=${mensaje}`;
+
+                try {
+                    // Open WhatsApp
+                    window.open(whatsappUrl, '_blank');
+                    alert('Recordatorio enviado correctamente.');
+                } catch (error) {
+                    console.error('Error opening WhatsApp:', error);
+                    alert('No se pudo abrir WhatsApp. Intente de nuevo.');
+                } finally {
+                    // Reset button state
+                    $button.removeClass('loading').prop('disabled', false);
+                }
+            });
         });
     </script>
 }

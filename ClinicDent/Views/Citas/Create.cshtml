@@ -11,7 +11,6 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
 
 <style>
-    /* Estilos modernizados (adaptados de Nueva Consulta) */
     .edit-container {
         max-width: 800px;
         margin: 2rem auto;
@@ -117,24 +116,21 @@
             text-decoration: none;
         }
 
-    /* Estilos para el selector de fecha/hora */
     .datetime-container {
         position: relative;
     }
 
-    /* Ajuste para alinear el calendario de Flatpickr */
     .flatpickr-calendar {
-        transform: translateY(140px) !important; /* Alinea el centro del calendario con el centro del input */
-        margin-top: -20px; /* Ajuste fino */
+        transform: translateY(140px) !important;
+        margin-top: -20px;
     }
 
     @@media (max-width: 768px) {
         .flatpickr-calendar {
-            transform: translateY(-100px) !important; /* Ajuste para pantallas pequeñas */
+            transform: translateY(-100px) !important;
         }
     }
 
-    /* Diseño responsive */
     .form-columns {
         display: flex;
         gap: 2rem;
@@ -155,7 +151,6 @@
         }
     }
 
-    /* Estilos para select2 */
     .select2-container--bootstrap-5 .select2-selection {
         height: auto;
         min-height: 42px;
@@ -167,7 +162,6 @@
         background-color: #fff8e1;
     }
 
-    /* Estilo para horas no disponibles */
     .flatpickr-time .flatpickr-time-separator,
     .flatpickr-time .flatpickr-am-pm,
     .flatpickr-time input.disabled,
@@ -177,7 +171,6 @@
         pointer-events: none;
     }
 
-    /* Estilo para mensaje de hora pasada */
     .time-validation-message {
         color: #dc3545;
         font-size: 0.85rem;
@@ -185,34 +178,17 @@
         display: none;
     }
 
-    /* Estilo para AM/PM seleccionable */
     .flatpickr-am-pm {
         cursor: pointer;
         transition: all 0.2s;
+        pointer-events: auto !important;
+        color: #000 !important;
+        opacity: 1 !important;
     }
 
         .flatpickr-am-pm:hover {
             background-color: #f0f0f0;
         }
-
-        .flatpickr-am-pm.selected {
-            font-weight: bold;
-            color: #17a2b8;
-        }
-
-
-    /* Estilo para mensaje de hora pasada y dentista ocupado */
-    .time-validation-message {
-        color: #dc3545;
-        font-size: 0.85rem;
-        margin-top: 0.5rem;
-        display: none;
-    }
-
-    /* Estilo específico para mensaje de dentista ocupado */
-    #dentistaOcupadoMessage {
-        color: #dc3545;
-    }
 </style>
 
 <div class="edit-container">
@@ -242,10 +218,12 @@
                             <i class="fas fa-clock label-icon"></i>Fecha y Hora
                         </label>
                         <div class="datetime-container">
-                            <input type="text" id="fecha_hora" class="form-control" placeholder="Seleccione fecha y hora" readonly autocomplete="off" />
-                            @Html.HiddenFor(model => model.fecha_hora, new { @id = "fecha_horaHidden", autocomplete = "off" })
+                            <input type="text" id="fecha_hora" name="fecha_hora" class="form-control" placeholder="Seleccione fecha y hora" readonly autocomplete="off" />
                             <div id="timeValidationMessage" class="time-validation-message">
                                 <i class="fas fa-exclamation-circle"></i> La hora seleccionada ya ha pasado
+                            </div>
+                            <div id="dentistaOcupadoMessage" class="time-validation-message">
+                                <i class="fas fa-exclamation-circle"></i> El dentista no está disponible en este horario
                             </div>
                         </div>
                         @Html.ValidationMessageFor(model => model.fecha_hora, "", new { @class = "text-danger" })
@@ -268,7 +246,7 @@
                             <i class="fas fa-info-circle label-icon"></i>Estado
                         </label>
                         @Html.DropDownListFor(model => model.estado, new List<SelectListItem>
-                        {
+                                        {
                             new SelectListItem { Text = "Pendiente", Value = "Pendiente", Selected = true },
                             new SelectListItem { Text = "Confirmada", Value = "Confirmada" },
                             new SelectListItem { Text = "Cancelada", Value = "Cancelada" }
@@ -307,28 +285,26 @@
                 allowClear: true
             });
 
-            // Función para calcular la hora de inicio predeterminada (próxima hora completa o media hora)
+            // Hora predeterminada
             function getDefaultTime() {
                 const now = new Date();
                 const currentMinutes = now.getMinutes();
                 const currentHour = now.getHours();
-
-                // Si estamos en la primera media hora, empezar a la hora en punto
                 if (currentMinutes < 30) {
                     return { hour: currentHour, minute: 30 };
-                }
-                // Si estamos en la segunda media hora, empezar a la siguiente hora en punto
-                else {
+                } else {
                     return { hour: currentHour + 1, minute: 0 };
                 }
             }
 
-            // Configuración del selector de fecha/hora con Flatpickr
+            // Flatpickr
             const defaultTime = getDefaultTime();
             const fp = flatpickr("#fecha_hora", {
                 locale: "es",
                 enableTime: true,
-                dateFormat: "d/m/Y h:i K",
+                dateFormat: "d/m/Y h:i K", // Formato de visualización
+                altFormat: "d/m/Y h:i K", // Formato alternativo
+                altInput: true,
                 minDate: "today",
                 defaultHour: defaultTime.hour,
                 defaultMinute: defaultTime.minute,
@@ -337,218 +313,88 @@
                 position: "above",
                 allowInput: false,
                 clickOpens: true,
-                disable: [
-                    function(date) {
-                        // Deshabilitar horas pasadas para el día actual
-                        return (date.getDate() === new Date().getDate() &&
-                                date.getMonth() === new Date().getMonth() &&
-                                date.getFullYear() === new Date().getFullYear() &&
-                                date < new Date());
-                    }
-                ],
-                onChange: function (selectedDates, dateStr, instance) {
+                disable: [],
+                onChange: function(selectedDates, dateStr, instance) {
+                    // Guardar el valor ISO en un campo hidden
                     const isoDate = selectedDates[0] ? selectedDates[0].toISOString() : '';
                     $('#fecha_horaHidden').val(isoDate);
-                    console.log('Fecha seleccionada:', isoDate); // Debug
 
-                    // Validar si la hora seleccionada es pasada
                     if (selectedDates[0] && selectedDates[0] < new Date()) {
                         $('#timeValidationMessage').show();
+                        $('#dentistaOcupadoMessage').hide();
+                        $('#fecha_hora').val('');
+                        $('#fecha_horaHidden').val('');
                     } else {
                         $('#timeValidationMessage').hide();
+                        validateAvailability();
                     }
-                },
-                onReady: function(selectedDates, dateStr, instance) {
-                    // Deshabilitar horas pasadas en el selector de tiempo
-                    const now = new Date();
-                    if (instance.currentYear === now.getFullYear() &&
-                        instance.currentMonth === now.getMonth() &&
-                        instance.currentDay === now.getDate()) {
-
-                        const currentHour = now.getHours();
-                        const currentMinutes = now.getMinutes();
-
-                        // Deshabilitar horas anteriores a la actual
-                        instance.hourElement.querySelectorAll('.flatpickr-hour').forEach(hour => {
-                            if (parseInt(hour.textContent) < currentHour) {
-                                hour.classList.add('disabled');
-                            }
-                        });
-
-                        // Para la hora actual, deshabilitar minutos pasados
-                        if (instance.hourElement.querySelector('.flatpickr-hour.selected') &&
-                            parseInt(instance.hourElement.querySelector('.flatpickr-hour.selected').textContent) === currentHour) {
-
-                            instance.minuteElement.querySelectorAll('.flatpickr-minute').forEach(minute => {
-                                if (parseInt(minute.textContent) < currentMinutes) {
-                                    minute.classList.add('disabled');
-                                }
-                            });
-                        }
-                    }
-
-                    // Hacer AM/PM seleccionable con clic
-                    const amPmElement = instance.amPM;
-                    if (amPmElement) {
-                        amPmElement.addEventListener('click', function() {
-                            instance.amPM = instance.amPM === 'AM' ? 'PM' : 'AM';
-                            amPmElement.textContent = instance.amPM;
-
-                            // Actualizar la visualización
-                            instance.updateValue();
-
-                            // Agregar clase selected
-                            document.querySelectorAll('.flatpickr-am-pm').forEach(el => el.classList.remove('selected'));
-                            this.classList.add('selected');
-                        });
-
-                        // Establecer clase selected inicial
-                        const currentAmPm = instance.amPM;
-                        document.querySelectorAll('.flatpickr-am-pm').forEach(el => {
-                            if (el.textContent === currentAmPm) {
-                                el.classList.add('selected');
-                            }
-                        });
-                    }
-                },
-                onHourChange: function(selectedDates, dateStr, instance) {
-                    // Cuando cambia la hora, actualizar los minutos disponibles
-                    const now = new Date();
-                    if (instance.currentYear === now.getFullYear() &&
-                        instance.currentMonth === now.getMonth() &&
-                        instance.currentDay === now.getDate() &&
-                        parseInt(instance.hourElement.querySelector('.flatpickr-hour.selected').textContent) === now.getHours()) {
-
-                        const currentMinutes = now.getMinutes();
-                        instance.minuteElement.querySelectorAll('.flatpickr-minute').forEach(minute => {
-                            if (parseInt(minute.textContent) < currentMinutes) {
-                                minute.classList.add('disabled');
-                            } else {
-                                minute.classList.remove('disabled');
-                            }
-                        });
-                    } else {
-                        // Habilitar todos los minutos si no es la hora actual
-                        instance.minuteElement.querySelectorAll('.flatpickr-minute').forEach(minute => {
-                            minute.classList.remove('disabled');
-                        });
-                    }
-
-                    // Actualizar AM/PM según la hora seleccionada
-                    const hour = parseInt(instance.hourElement.querySelector('.flatpickr-hour.selected').textContent);
-                    const newAmPm = hour < 12 ? 'AM' : 'PM';
-                    if (instance.amPM !== newAmPm) {
-                        instance.amPM = newAmPm;
-                        instance.amPMElement.textContent = newAmPm;
-
-                        // Actualizar clases selected
-                        document.querySelectorAll('.flatpickr-am-pm').forEach(el => {
-                            el.classList.remove('selected');
-                            if (el.textContent === newAmPm) {
-                                el.classList.add('selected');
-                            }
-                        });
-                    }
-                },
-                onOpen: function(selectedDates, dateStr, instance) {
-                    // Asegurarse de que AM/PM sea seleccionable
-                    setTimeout(() => {
-                        const amPmElements = document.querySelectorAll('.flatpickr-am-pm');
-                        if (amPmElements.length > 0 && !amPmElements[0].hasEventListener) {
-                            amPmElements.forEach(el => {
-                                el.hasEventListener = true;
-                                el.addEventListener('click', function() {
-                                    instance.amPM = instance.amPM === 'AM' ? 'PM' : 'AM';
-                                    instance.amPMElement.textContent = instance.amPM;
-                                    instance.updateValue();
-
-                                    // Actualizar clases selected
-                                    document.querySelectorAll('.flatpickr-am-pm').forEach(el => el.classList.remove('selected'));
-                                    this.classList.add('selected');
-                                });
-                            });
-                        }
-                    }, 100);
                 }
             });
 
-// Validación de disponibilidad en tiempo real
-$('#fecha_hora').change(function () {
-    var fechaHora = $('#fecha_horaHidden').val();
-    var idDentista = $('#id_dentista').val();
-    var idPaciente = $('#id_paciente').val();
+            // Validación de disponibilidad en tiempo real
+            function validateAvailability() {
+                var fechaHoraISO = $('#fecha_horaHidden').val();
+                var fechaHoraVisible = $('#fecha_hora').val();
+                var idDentista = $('#id_dentista').val();
+                var idPaciente = $('#id_paciente').val();
 
-    if (!fechaHora || !idDentista || !idPaciente) return;
+                if (!fechaHoraISO || !fechaHoraVisible || !idDentista || !idPaciente) return;
 
-    var fechaSeleccionada = new Date(fechaHora);
-    var horaInicio = new Date(fechaSeleccionada);
-    var horaFin = new Date(fechaSeleccionada);
-    horaInicio.setMinutes(horaInicio.getMinutes() - 40); // Intervalo de 40 minutos antes
-    horaFin.setMinutes(horaFin.getMinutes() + 40); // Intervalo de 40 minutos después
+                // Convertir a objeto Date para los intervalos
+                var fechaSeleccionada = new Date(fechaHoraISO);
+                var horaInicio = new Date(fechaSeleccionada);
+                var horaFin = new Date(fechaSeleccionada);
+                horaInicio.setMinutes(horaInicio.getMinutes() - 40);
+                horaFin.setMinutes(horaFin.getMinutes() + 40);
 
-    // Ocultar todos los mensajes primero
-    $('#timeValidationMessage').hide();
-    $('#dentistaOcupadoMessage').hide();
+                $.ajax({
+                    url: '@Url.Action("ValidarDisponibilidad", "Citas")',
+                    type: 'GET',
+                    data: {
+                        id_dentista: idDentista,
+                        id_paciente: idPaciente,
+                        fecha_hora: fechaHoraVisible, // Enviamos el formato legible
+                        hora_inicio: horaInicio.toISOString(),
+                        hora_fin: horaFin.toISOString()
+                    },
+                    beforeSend: function() {
+                        $('#fecha_hora').addClass('is-validating');
+                    },
+                    success: function(response) {
+                        $('#dentistaOcupadoMessage').hide();
+                        $('#timeValidationMessage').hide();
 
-    $.ajax({
-        url: '@Url.Action("ValidarDisponibilidad", "Citas")',
-        type: 'GET',
-        data: {
-            id_dentista: idDentista,
-            id_paciente: idPaciente,
-            fecha_hora: fechaHora,
-            hora_inicio: horaInicio.toISOString(),
-            hora_fin: horaFin.toISOString()
-        },
-        beforeSend: function () {
-            $('#fecha_hora').addClass('is-validating');
-            console.log('Validando disponibilidad:', {
-                id_dentista: idDentista,
-                id_paciente: idPaciente,
-                fecha_hora: fechaHora,
-                hora_inicio: horaInicio.toISOString(),
-                hora_fin: horaFin.toISOString()
-            });
-        },
-        success: function (response) {
-            console.log('ValidarDisponibilidad response:', response);
-            if (!response.disponible) {
-                if (response.motivo === 'dentista_ocupado_exacto' || response.motivo === 'dentista_ocupado_intervalo') {
-                    $('#dentistaOcupadoMessage').show();
-                } else if (response.motivo === 'paciente_con_dentista') {
-                    // Mensaje para paciente con cita en intervalo de 1 hora
-                    $('#timeValidationMessage').text(response.mensaje).show();
-                }
-
-                $('#fecha_hora').val('');
-                $('#fecha_horaHidden').val('');
+                        if (!response.disponible) {
+                            if (response.motivo === 'dentista_ocupado') {
+                                $('#dentistaOcupadoMessage').show();
+                            } else if (response.motivo === 'paciente_con_dentista') {
+                                $('#timeValidationMessage').text(response.mensaje).show();
+                            }
+                            $('#fecha_hora').val('');
+                            $('#fecha_horaHidden').val('');
+                        }
+                    },
+                    complete: function() {
+                        $('#fecha_hora').removeClass('is-validating');
+                    },
+                    error: function() {
+                        $('#fecha_hora').val('');
+                        $('#fecha_horaHidden').val('');
+                        $('#dentistaOcupadoMessage').hide();
+                        $('#timeValidationMessage').text('Error al validar disponibilidad').show();
+                    }
+                });
             }
-        },
-        complete: function () {
-            $('#fecha_hora').removeClass('is-validating');
-        },
-        error: function (xhr, status, error) {
-            console.error('Error en ValidarDisponibilidad:', {
-                status: xhr.status,
-                statusText: xhr.statusText,
-                responseText: xhr.responseText,
-                dataSent: {
-                    id_dentista: idDentista,
-                    id_paciente: idPaciente,
-                    fecha_hora: fechaHora,
-                    hora_inicio: horaInicio.toISOString(),
-                    hora_fin: horaFin.toISOString()
-                }
-            });
-            $('#fecha_hora').val('');
-            $('#fecha_horaHidden').val('');
-        }
-    });
-});
 
-            // Validación del formulario con AJAX
-            $('#citaForm').on('submit', function (e) {
+            // Modificar el envío del formulario para asegurar el formato correcto
+            $('#citaForm').on('submit', function(e) {
                 e.preventDefault();
+
+                // Asegurarnos de que el campo hidden tenga el valor correcto
+                const selectedDate = fp.selectedDates[0];
+                if (selectedDate) {
+                    $('#fecha_horaHidden').val(selectedDate.toISOString());
+                }
 
                 const submitBtn = $('#guardarCita');
                 submitBtn.html('<i class="fas fa-spinner fa-spin"></i> Procesando...');
@@ -556,13 +402,11 @@ $('#fecha_hora').change(function () {
 
                 if ($(this).valid()) {
                     var formData = $(this).serialize();
-                    console.log('Form data being sent:', formData);
                     $.ajax({
                         url: '@Url.Action("Create", "Citas")',
                         type: 'POST',
                         data: formData,
-                        success: function (response) {
-                            console.log('Create response:', response);
+                        success: function(response) {
                             if (response.success) {
                                 Swal.fire({
                                     icon: 'success',
@@ -583,17 +427,15 @@ $('#fecha_hora').change(function () {
                                 submitBtn.prop('disabled', false);
                             }
                         },
-                        error: function (xhr, status, error) {
-                            console.error('Error en Crear Cita:', {
-                                status: xhr.status,
-                                statusText: xhr.statusText,
-                                responseText: xhr.responseText,
-                                formData: formData
-                            });
+                        error: function(xhr) {
+                            let errorMsg = 'Ocurrió un error al procesar la solicitud.';
+                            if (xhr.responseJSON && xhr.responseJSON.message) {
+                                errorMsg = xhr.responseJSON.message;
+                            }
                             Swal.fire({
                                 icon: 'error',
                                 title: 'Error',
-                                text: 'Ocurrió un error al procesar la solicitud. Por favor, intenta de nuevo.',
+                                text: errorMsg,
                                 confirmButtonColor: '#17a2b8'
                             });
                             submitBtn.html('<i class="fas fa-save"></i> Guardar Cita');
@@ -611,6 +453,8 @@ $('#fecha_hora').change(function () {
                     submitBtn.prop('disabled', false);
                 }
             });
+
+            $('#fecha_hora, #id_dentista, #id_paciente').change(validateAvailability);
         });
     </script>
 }
